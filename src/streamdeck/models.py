@@ -40,5 +40,6 @@ class StreamdeckModel(models.Model):
 class Streamdeck(models.Model):
     name = models.CharField(max_length=100, blank=True)
     serial_number = models.CharField(max_length=50)
+    brightness = models.IntegerField(default=30)
     streamdeck_model = models.ForeignKey(
         'StreamdeckModel', on_delete=models.CASCADE)
