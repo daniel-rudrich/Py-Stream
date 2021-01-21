@@ -14,8 +14,22 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
+from rest_framework import routers
+from streamdeck import views
+
+router = routers.DefaultRouter()
+router.register(r'streamdeck', views.StreamdeckViewSet)
+router.register(r'streamdeckmodel', views.StreamdeckModelViewSet)
+router.register(r'command', views.CommandViewSet)
+router.register(r'streamdeckkeys', views.StreamdeckKeyViewSet)
+router.register(r'folders', views.FolderViewSet)
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-]
+    path('', include(router.urls)),
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

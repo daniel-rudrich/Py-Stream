@@ -12,19 +12,20 @@ class StreamdeckKey(models.Model):
     image_source = models.ImageField(
         upload_to=get_image_path, blank=True, null=True)
     folder = models.ForeignKey(
-        'Folder', related_name='folder', on_delete=models.CASCADE)
+        'Folder', related_name='keys', on_delete=models.CASCADE)
     streamdeck = models.ForeignKey('Streamdeck', on_delete=models.CASCADE)
-    command = models.ForeignKey('Command', on_delete=models.CASCADE)
+    command = models.ForeignKey(
+        'Command', blank=True, null=True, on_delete=models.CASCADE)
     change_to_folder = models.ForeignKey(
-        'Folder', related_name='folder_to_change', on_delete=models.CASCADE)
+        'Folder', blank=True, null=True, related_name='change_keys', on_delete=models.CASCADE)
 
 
 class Command(models.Model):
     name = models.CharField(max_length=100, default='Command')
     command_string = models.TextField()
-    value = models.IntegerField(blank=True)
+    value = models.IntegerField(blank=True, null=True)
     following_command = models.ForeignKey(
-        'self', null=True, on_delete=models.SET_NULL)
+        'self', blank=True, null=True, on_delete=models.SET_NULL)
 
 
 class Folder(models.Model):
