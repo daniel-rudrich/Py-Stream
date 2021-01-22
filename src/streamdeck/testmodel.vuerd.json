@@ -2,8 +2,8 @@
   "canvas": {
     "width": 4000,
     "height": 4000,
-    "scrollTop": 4,
-    "scrollLeft": 341,
+    "scrollTop": 0,
+    "scrollLeft": 173,
     "show": {
       "tableComment": true,
       "columnComment": true,
@@ -17,7 +17,7 @@
     },
     "database": "SQLite",
     "databaseName": "",
-    "canvasType": "SQL",
+    "canvasType": "ERD",
     "language": "C#",
     "tableCase": "pascalCase",
     "columnCase": "camelCase",
