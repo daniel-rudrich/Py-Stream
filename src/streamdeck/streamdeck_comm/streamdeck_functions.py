@@ -1,6 +1,4 @@
 import os
-import subprocess
-import threading
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
@@ -17,13 +15,50 @@ active_streamdeck = None
 active_folder = "default"
 
 
-def run_key_command(streamdeckKey):
+"""
+returns everything needed to add a streamkey_model as actual
+key to the streamdeck
+"""
 
-    key_command = streamdeckKey.command
-    if key_command:
-        process = subprocess.Popen(
-            key_command.command_string.split(), stdout=subprocess.PIPE)
-        print(process.communicate()[0])
+
+def get_key_style(model_streamdeckKey):
+
+    if not model_streamdeckKey.image_source:
+        icon = os.path.join(MEDIA_PATH, "blank.png")
+    else:
+        icon = os.path.join(MEDIA_PATH, model_streamdeckKey.image_source.name)
+    return {
+        "name": model_streamdeckKey.number,
+        "icon": icon,
+        "font": os.path.join(ASSETS_PATH, "Roboto-Regular.ttf"),
+        "label": model_streamdeckKey.text
+    }
+
+
+"""
+ Creates a new key image based on the key index, style and current key state
+ and updates the image on the StreamDeck.
+"""
+
+
+def update_key_image(deck, model_streamdeckkey, state):
+    # Determine what icon and label to use on the generated key.
+    key_style = get_key_style(model_streamdeckkey)
+    # Generate the custom key with the requested image and label.
+    image = render_key_image(
+        deck, key_style["icon"], key_style["font"], key_style["label"])
+    # Use a scoped-with on the deck to ensure we're the only thread using it
+    # right now.
+    with deck:
+        # Update requested key with the generated image.
+        deck.set_key_image(model_streamdeckkey.number, image)
+
+
+"""
+Updates the behavior of all streamdeck keys.
+This method should be used after a command to
+streamdeck key was updated in the database
+"""
 
 
 def update_key_change_callback(model_streamdeck_id, folder_id):
@@ -32,34 +67,14 @@ def update_key_change_callback(model_streamdeck_id, folder_id):
     active_streamdeck = Streamdeck.objects.get(id=model_streamdeck_id)
     global active_folder
     active_folder = Folder.objects.get(id=folder_id).name
-
-    # get the streamdeck coresponding to the streamdeck model
-    decks = get_streamdecks()
-    for deck in decks:
-        if deck.get_serial_number() == active_streamdeck.serial_number:
-            # set key_callback function with newly set acive streamdeck and
-            # folder
-            deck.set_key_callback(key_change_callback)
-
-# returns everything needed to add a streamkey_model as actual
-# key to the streamdeck
+    deck = get_active_streamdeck(active_streamdeck)
+    deck.set_key_callback(key_change_callback)
 
 
-def get_key_style(streamdeckKey):
-
-    if not streamdeckKey.image_source:
-        icon = os.path.join(MEDIA_PATH, "blank.png")
-    else:
-        icon = os.path.join(MEDIA_PATH, streamdeckKey.image_source)
-    return {
-        "name": streamdeckKey.number,
-        "icon": icon,
-        "font": os.path.join(ASSETS_PATH, "Roboto-Regular.ttf"),
-        "label": streamdeckKey.text
-    }
-
-# Generates a custom tile with run-time generated text and custom image via the
-# PIL module.
+"""
+Generates a custom tile with run-time generated text and custom image via the
+PIL module.
+"""
 
 
 def render_key_image(deck, icon_filename, font_filename, label_text):
@@ -77,23 +92,10 @@ def render_key_image(deck, icon_filename, font_filename, label_text):
 
     return PILHelper.to_native_format(deck, image)
 
-# Creates a new key image based on the key index, style and current key state
-# and updates the image on the StreamDeck.
 
-
-def update_key_image(deck, key, state):
-    # Determine what icon and label to use on the generated key.
-    key_style = get_key_style(key)
-    # Generate the custom key with the requested image and label.
-    image = render_key_image(
-        deck, key_style["icon"], key_style["font"], key_style["label"])
-    # Use a scoped-with on the deck to ensure we're the only thread using it
-    # right now.
-    with deck:
-        # Update requested key with the generated image.
-        deck.set_key_image(key.number, image)
-
-# method which is called when pressing a key
+"""
+This method is called when a physical key is pressed
+"""
 
 
 def key_change_callback(deck, key, state):
@@ -103,9 +105,20 @@ def key_change_callback(deck, key, state):
         run_key_command(list_key[key])
 
 
+"""
+Retrieves all connected streamdecks
+"""
+
+
 def get_streamdecks():
     streamdecks = DeviceManager().enumerate()
     return streamdecks
+
+
+"""
+Get default folder id and all the corresponding keys
+(seems to complicated maybe add streamdeck as foreignkey to folder)
+"""
 
 
 def get_active_keys(model_deck, foldername):
@@ -120,23 +133,35 @@ def get_active_keys(model_deck, foldername):
     return list_key
 
 
-def init_streamdeck(deck):
-    deck.open()
-    deck.reset()
+"""
+Get the active streamdeck fitting the streamdeck model
+"""
 
-    print("Opened '{}' device (serial number: '{}')".format(
-        deck.deck_type(), deck.get_serial_number()))
 
+def get_active_streamdeck(model_streamdeck):
+    decks = get_streamdecks()
+    return decks[0]
     """
-    Check for Streamdeck in database.
-    Create a new one with corresponding StreamdeckModel if it doesn't exist yet
-    """
+    funktioniert erstmal nicht, aber da wir erstmal nur 1 deck gleichzeitig haben ists egal :D
+    for deck in decks:
+        print(deck.get_serial_number())
+        if deck.get_serial_number() == model_streamdeck.serial_number:
+            return deck"""
 
+
+"""
+Check for Streamdeck in database.
+Create a new one with corresponding StreamdeckModel if it doesn't exist
+yet
+"""
+
+
+def streamdeck_database_init(deck):
     if not Streamdeck.objects.filter(serial_number=deck.get_serial_number()):
-        """
-        Check for StreamdeckModel in database.
-        Create a new one if it doesn't exist yet
-        """
+        print(deck.get_serial_number())
+        # Check for StreamdeckModel in database.
+        # Create a new one if it doesn't exist yet
+
         if not StreamdeckModel.objects.filter(
                 name=deck.deck_type()):
 
@@ -149,27 +174,41 @@ def init_streamdeck(deck):
 
         streamdeckmodel = StreamdeckModel.objects.filter(
             name=deck.deck_type())[0]
-        deck.set_brightness(30)
+
         Streamdeck.objects.create(name=deck.deck_type(),
                                   serial_number=deck.get_serial_number(),
                                   brightness=30,
                                   streamdeck_model=streamdeckmodel
                                   )
 
+
+"""
+Initializes a streamdeck connection and all its keys
+"""
+
+
+def init_streamdeck(deck):
+    deck.open()
+    deck.reset()
+
+    print("Opened '{}' device (serial number: '{}')".format(
+        deck.deck_type(), deck.get_serial_number()))
+
+    streamdeck_database_init(deck)
+
     global active_streamdeck
     active_streamdeck = Streamdeck.objects.filter(
         serial_number=deck.get_serial_number())[0]
 
-    """
-    Get all keys from the default folder of the streamdeck.
-    Create the keys and the folder if necessary
-    """
+    deck.set_brightness(active_streamdeck.brightness)
+
+    # Get all keys from the default folder of the streamdeck.
+    # Create the keys and the folder if necessary
+
     list_key = []
     keys = StreamdeckKey.objects.filter(streamdeck=active_streamdeck.id)
     if not keys:
-        """
-        Initialize folder and keys
-        """
+        # Initialize folder and keys
         new_folder = Folder.objects.create(name='default')
 
         for i in range(deck.key_count()):
@@ -181,41 +220,12 @@ def init_streamdeck(deck):
             )
             list_key.append(new_key)
     else:
-        """
-        Get default folder id and all the corresponding keys
-        (seems to complicated maybe add streamdeck as foreignkey to folder)
-        """
+        # Get default folder id and all the corresponding keys
+        # (seems to complicated maybe add streamdeck as foreignkey to folder)
         list_key = get_active_keys(active_streamdeck, 'default')
 
-    """
-    Load all keys onto the streamdeck
-    """
+    # Load all keys onto the streamdeck
     for key in list_key:
         update_key_image(deck, key, False)
 
-    """test_key = StreamdeckKey.objects.filter(id=list_key[0].id)
-    test_command = Command.objects.create(
-        name="Test", command_string="echo test")
-    test_key.update(command=test_command)"""
     deck.set_key_callback(key_change_callback)
-    """
-    the streamdeck only closes here for testing purposes.
-    in reality it should close when the application is stopped
-    """
-    # deck.close()
-
-    for t in threading.enumerate():
-        if t is threading.currentThread():
-            continue
-        if t.is_alive():
-            t.join()
-
-
-def streamdeck_init():
-    streamdecks = get_streamdecks()
-    for deck in streamdecks:
-        init_streamdeck(deck)
-
-
-if __name__ == "__main__":
-    streamdeck_init()

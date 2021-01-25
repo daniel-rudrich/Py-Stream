@@ -2,7 +2,7 @@
 from rest_framework import viewsets, permissions
 from .serializers import StreamdeckKeySerializer, FolderSerializer, StreamdeckSerializer, CommandSerializer, StreamdeckModelSerializer
 from .models import Streamdeck, StreamdeckKey, Folder, Command, StreamdeckModel
-from .streamdeck_comm.streamdeck_functions import streamdeck_init
+from .streamdeck_comm.streamdeck_interface import streamdecks_init, update_key_behavior
 
 # Create your views here.
 
@@ -11,7 +11,8 @@ class StreamdeckKeyViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows StreamdeckKeys to be viewed or edited
     """
-    streamdeck_init()  # This method is used here for testing purposes
+    streamdecks_init()  # This method is used here for testing purposes
+    update_key_behavior(7, 2)
     queryset = StreamdeckKey.objects.all().order_by('id')
     serializer_class = StreamdeckKeySerializer
     permissions_classes = [permissions.IsAuthenticated]
