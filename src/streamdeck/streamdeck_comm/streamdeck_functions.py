@@ -1,4 +1,5 @@
 import os
+import subprocess
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
@@ -16,6 +17,21 @@ active_folder = "default"
 
 
 """
+Runs the command of a streamdeck key in a shell
+and prints the outcome
+"""
+
+
+def run_key_command(model_streamdeckKey):
+
+    key_command = model_streamdeckKey.command
+    if key_command:
+        process = subprocess.Popen(
+            key_command.command_string.split(), stdout=subprocess.PIPE)
+        print(process.communicate()[0])
+
+
+"""
 returns everything needed to add a streamkey_model as actual
 key to the streamdeck
 """
@@ -24,7 +40,7 @@ key to the streamdeck
 def get_key_style(model_streamdeckKey):
 
     if not model_streamdeckKey.image_source:
-        icon = os.path.join(MEDIA_PATH, "blank.png")
+        icon = None
     else:
         icon = os.path.join(MEDIA_PATH, model_streamdeckKey.image_source.name)
     return {
@@ -45,8 +61,11 @@ def update_key_image(deck, model_streamdeckkey, state):
     # Determine what icon and label to use on the generated key.
     key_style = get_key_style(model_streamdeckkey)
     # Generate the custom key with the requested image and label.
-    image = render_key_image(
-        deck, key_style["icon"], key_style["font"], key_style["label"])
+    if(not key_style["icon"]):
+        image = None
+    else:
+        image = render_key_image(
+            deck, key_style["icon"], key_style["font"], key_style["label"])
     # Use a scoped-with on the deck to ensure we're the only thread using it
     # right now.
     with deck:

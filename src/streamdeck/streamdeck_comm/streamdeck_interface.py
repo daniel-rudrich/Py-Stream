@@ -1,9 +1,9 @@
-import subprocess
 
 from .streamdeck_functions import (
     get_streamdecks, init_streamdeck,
     update_key_image, get_active_streamdeck,
-    update_key_change_callback)
+    update_key_change_callback, run_key_command)
+from streamdeck.models import Streamdeck
 """
 Initializes all connected streamdecks
 """
@@ -21,13 +21,9 @@ and prints the outcome
 """
 
 
-def run_key_command(model_streamdeckKey):
+def execute_key_command(model_streamdeckKey):
 
-    key_command = model_streamdeckKey.command
-    if key_command:
-        process = subprocess.Popen(
-            key_command.command_string.split(), stdout=subprocess.PIPE)
-        print(process.communicate()[0])
+    run_key_command(model_streamdeckKey)
 
 
 """
@@ -35,9 +31,13 @@ Updates the display of a key after e.g. updating
 the key in the database
 """
 
+# NOT WORKING -> throws error
+
 
 def update_key_display(streamdeckkey):
-    deck = get_active_streamdeck()
+    streamdeck_model = Streamdeck.objects.filter(
+        id=streamdeckkey.streamdeck.id)[0]
+    deck = get_active_streamdeck(streamdeck_model)
     update_key_image(deck, streamdeckkey, False)
 
 
