@@ -14,7 +14,7 @@ MEDIA_PATH = os.path.join(BASE_DIR, "media")
 
 active_streamdeck = None
 active_folder = "default"
-
+decks = {}
 
 """
 Runs the command of a streamdeck key in a shell
@@ -59,6 +59,9 @@ def get_key_style(model_streamdeckKey):
 
 def update_key_image(deck, model_streamdeckkey, state):
     # Determine what icon and label to use on the generated key.
+    if not deck:
+        deck = decks[model_streamdeckkey.streamdeck.serial_number]
+
     key_style = get_key_style(model_streamdeckkey)
     # Generate the custom key with the requested image and label.
     if(not key_style["icon"]):
@@ -86,7 +89,7 @@ def update_key_change_callback(model_streamdeck_id, folder_id):
     active_streamdeck = Streamdeck.objects.get(id=model_streamdeck_id)
     global active_folder
     active_folder = Folder.objects.get(id=folder_id).name
-    deck = get_active_streamdeck(active_streamdeck)
+    deck = decks[active_streamdeck.serial_number]
     deck.set_key_callback(key_change_callback)
 
 
@@ -157,17 +160,6 @@ Get the active streamdeck fitting the streamdeck model
 """
 
 
-def get_active_streamdeck(model_streamdeck):
-    decks = get_streamdecks()
-    return decks[0]
-    """
-    funktioniert erstmal nicht, aber da wir erstmal nur 1 deck gleichzeitig haben ists egal :D
-    for deck in decks:
-        print(deck.get_serial_number())
-        if deck.get_serial_number() == model_streamdeck.serial_number:
-            return deck"""
-
-
 """
 Check for Streamdeck in database.
 Create a new one with corresponding StreamdeckModel if it doesn't exist
@@ -177,7 +169,6 @@ yet
 
 def streamdeck_database_init(deck):
     if not Streamdeck.objects.filter(serial_number=deck.get_serial_number()):
-        print(deck.get_serial_number())
         # Check for StreamdeckModel in database.
         # Create a new one if it doesn't exist yet
 
@@ -210,6 +201,7 @@ def init_streamdeck(deck):
     deck.open()
     deck.reset()
 
+    decks[deck.get_serial_number()] = deck
     print("Opened '{}' device (serial number: '{}')".format(
         deck.deck_type(), deck.get_serial_number()))
 
@@ -247,4 +239,5 @@ def init_streamdeck(deck):
     for key in list_key:
         update_key_image(deck, key, False)
 
+    global active_decks
     deck.set_key_callback(key_change_callback)

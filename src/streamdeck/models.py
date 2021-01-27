@@ -17,7 +17,8 @@ class StreamdeckKey(models.Model):
     command = models.ForeignKey(
         'Command', blank=True, null=True, on_delete=models.CASCADE)
     change_to_folder = models.ForeignKey(
-        'Folder', blank=True, null=True, related_name='change_keys', on_delete=models.CASCADE)
+        'Folder', blank=True, null=True, related_name='change_keys',
+        on_delete=models.CASCADE)
 
 
 class Command(models.Model):

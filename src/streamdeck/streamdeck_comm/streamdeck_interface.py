@@ -1,9 +1,7 @@
 
 from .streamdeck_functions import (
     get_streamdecks, init_streamdeck,
-    update_key_image, get_active_streamdeck,
-    update_key_change_callback, run_key_command)
-from streamdeck.models import Streamdeck
+    update_key_image, update_key_change_callback, run_key_command)
 """
 Initializes all connected streamdecks
 """
@@ -31,14 +29,9 @@ Updates the display of a key after e.g. updating
 the key in the database
 """
 
-# NOT WORKING -> throws error
 
-
-def update_key_display(streamdeckkey):
-    streamdeck_model = Streamdeck.objects.filter(
-        id=streamdeckkey.streamdeck.id)[0]
-    deck = get_active_streamdeck(streamdeck_model)
-    update_key_image(deck, streamdeckkey, False)
+def update_key_display(streamdeckKey):
+    update_key_image(None, streamdeckKey, False)
 
 
 """
@@ -47,6 +40,7 @@ Use after updating commands of streamdeckkeys in the database
 """
 
 
-def update_key_behavior(streamdeck_id, active_folder_id):
+def update_key_behavior(streamdeckKey):
 
-    update_key_change_callback(streamdeck_id, active_folder_id)
+    update_key_change_callback(
+        streamdeckKey.streamdeck.id, streamdeckKey.folder.id)
