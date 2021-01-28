@@ -25,10 +25,24 @@ and prints the outcome
 def run_key_command(model_streamdeckKey):
 
     key_command = model_streamdeckKey.command
-    if key_command:
+
+    while key_command:
         process = subprocess.Popen(
             key_command.command_string.split(), stdout=subprocess.PIPE)
         print(process.communicate()[0])
+        key_command = key_command.following_command
+
+
+def change_to_folder(folder_id):
+    folder = Folder.objects.get(id=folder_id)
+    global active_folder
+    active_folder = folder.name
+    keys = StreamdeckKey.objects.filter(folder=folder)
+
+    for key in keys:
+        update_key_image(None, key, False)
+
+    update_key_change_callback(keys[0].streamdeck.id, folder_id)
 
 
 """
@@ -185,10 +199,12 @@ def streamdeck_database_init(deck):
         streamdeckmodel = StreamdeckModel.objects.filter(
             name=deck.deck_type())[0]
 
+        new_folder = Folder.objects.create(name='default')
         Streamdeck.objects.create(name=deck.deck_type(),
                                   serial_number=deck.get_serial_number(),
                                   brightness=30,
-                                  streamdeck_model=streamdeckmodel
+                                  streamdeck_model=streamdeckmodel,
+                                  default_folder=new_folder
                                   )
 
 
@@ -220,13 +236,13 @@ def init_streamdeck(deck):
     keys = StreamdeckKey.objects.filter(streamdeck=active_streamdeck.id)
     if not keys:
         # Initialize folder and keys
-        new_folder = Folder.objects.create(name='default')
+        default_folder = active_streamdeck.default_folder
 
         for i in range(deck.key_count()):
             new_key = StreamdeckKey.objects.create(
                 number=i,
                 text="",
-                folder=new_folder,
+                folder=default_folder,
                 streamdeck=active_streamdeck
             )
             list_key.append(new_key)

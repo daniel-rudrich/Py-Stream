@@ -15,10 +15,10 @@ class StreamdeckKey(models.Model):
         'Folder', related_name='keys', on_delete=models.CASCADE)
     streamdeck = models.ForeignKey('Streamdeck', on_delete=models.CASCADE)
     command = models.ForeignKey(
-        'Command', blank=True, null=True, on_delete=models.CASCADE)
+        'Command', blank=True, null=True, on_delete=models.SET_NULL)
     change_to_folder = models.ForeignKey(
         'Folder', blank=True, null=True, related_name='change_keys',
-        on_delete=models.CASCADE)
+        on_delete=models.SET_NULL)
 
 
 class Command(models.Model):
@@ -45,3 +45,5 @@ class Streamdeck(models.Model):
     brightness = models.IntegerField(default=30)
     streamdeck_model = models.ForeignKey(
         'StreamdeckModel', on_delete=models.CASCADE)
+    default_folder = models.ForeignKey(
+        'Folder', on_delete=models.CASCADE, null=True)

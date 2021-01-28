@@ -1,7 +1,8 @@
 
 from .streamdeck_functions import (
     get_streamdecks, init_streamdeck,
-    update_key_image, update_key_change_callback, run_key_command)
+    update_key_image, update_key_change_callback, run_key_command,
+    change_to_folder)
 """
 Initializes all connected streamdecks
 """
@@ -44,3 +45,12 @@ def update_key_behavior(streamdeckKey):
 
     update_key_change_callback(
         streamdeckKey.streamdeck.id, streamdeckKey.folder.id)
+
+
+"""
+Updates streamdeck when changing folder
+"""
+
+
+def change_folder(folder_id):
+    change_to_folder(folder_id)
