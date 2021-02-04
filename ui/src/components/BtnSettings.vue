@@ -1,19 +1,20 @@
 <template>
-  <div>
-    <h3><img :src="payload.image_source" style="height: 30px;"> {{ payload.text }}</h3>
-    
-    
+  <div v-if="payload">
+    <h4><img :src="image" style="height: 30px;">Button #{{ payload.id }}</h4>
     <br>
-    <b-form-input v-model="text" placeholder="Enter key text"></b-form-input>
+    <b-form-input v-model="payload.text" placeholder="Enter key text"></b-form-input>
     <br>
     <b-button variant="success" @click="saveChanges">Save</b-button>
     <br>
     <br>
     <h3>Commands</h3>
-    <div v-for="command in $store.getters.selectedCommands" :key="command.id">
+    <div v-for="command in commands" :key="command.id">
         {{ command.name }}: "{{ command.command_string }}"<br>
     </div>
+    <b-button variant="primary" @click="saveChanges">Add command</b-button>
 
+    <br>
+    <br>
     {{ payload }}
   </div>
   
@@ -30,21 +31,33 @@ export default {
   ],
   data() {
     return {
-       text: ''
     }
   },
   mounted() {
-      this.text = this.payload.text
+  },
+  computed: {
+    commands() {
+      const commands = []
+      let next = this.payload.command
+      while(next) {
+        commands.push(next)
+        next = next.following_command
+      }
+      return commands
+    },
+    image() {
+      if(this.payload.image_source === null) return 'https://www.elgato.com/themes/custom/smalcode/key-creator/assets/image_pool/sd31/btn_custom_trigger_hotkey2.svg'
+      return 'http://localhost:8000' + this.payload.image_source
+    }
   },
   methods: {
       async saveChanges() {
-        await axios.put(this.payload.url, {
-            text: this.text,
-            number: this.payload.number,
-            folder: this.payload.folder,
-            streamdeck: this.payload.streamdeck
+        await axios.patch('key/' + this.payload.id, {
+            text: this.payload.text,
+            image_source: null
         })
-        await this.$store.dispatch('refreshKeys')
+        // TODO: Refresh displayed text
+        await this.$store.dispatch('refresh')
       }
   }
 }

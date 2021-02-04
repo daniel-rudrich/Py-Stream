@@ -24,21 +24,18 @@ export default new Vuex.Store({
   actions: {
     async initialize() {
       await Promise.all([
-        this.dispatch('refreshModels'),
         this.dispatch('refreshDecks'),
-        this.dispatch('refreshCommands'),
-        this.dispatch('refreshKeys'),
-        this.dispatch('refreshFolders')
+        //this.dispatch('refreshFolders'),
+
+        //this.dispatch('refreshCommands'),
+        //this.dispatch('refreshKeys'),
+        
       ])
       if(this.state.decks.length > 0)
         this.commit('set', ['activeDeck', this.state.decks[0].id])
     },
-    async refreshModels() {
-      const models = await axios.get('http://localhost:8000/streamdeckmodel/')
-      this.commit('set', ['models', models.data])
-    },
     async refreshDecks() {
-      const decks = await axios.get('http://localhost:8000/streamdeck/')
+      const decks = await axios.get('streamdecks')
       this.commit('set', ['decks', decks.data])
     },
     async refreshCommands() {
@@ -50,7 +47,7 @@ export default new Vuex.Store({
       this.commit('set', ['keys', decks.data])
     },
     async refreshFolders() {
-      const decks = await axios.get('http://localhost:8000/folders/')
+      const decks = await axios.get('folders')
       this.commit('set', ['folders', decks.data])
     }
   },
@@ -58,14 +55,11 @@ export default new Vuex.Store({
   },
   getters: {
     selected: state => state.selected,
-    selectedModel: state => {
-      const active = state.decks.find(deck => deck.id === state.activeDeck)
-      if(!active) return null
-      const model = state.models.find(model => model.url === active.streamdeck_model)
-      return model.length === 0 ? null : model
+    activeDeck: state => {
+      return state.decks.find(deck => deck.id === state.activeDeck)
     },
-    deckRows: (state, getters) => getters.selectedModel.key_count / getters.selectedModel.keys_per_row, 
-    deckColumns: (state, getters) => getters.selectedModel.keys_per_row,
+    deckRows: (state, getters) => getters.activeDeck.streamdeck_model.key_count / getters.activeDeck.streamdeck_model.keys_per_row, 
+    deckColumns: (state, getters) => getters.activeDeck.streamdeck_model.keys_per_row,
     selectedCommands: state => {
       const key = state.keys.find(key => key.id === state.selected)
       let command = state.commands.find(cmd => cmd.url === key.command)
