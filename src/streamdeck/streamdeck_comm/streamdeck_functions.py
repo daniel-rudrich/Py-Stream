@@ -57,6 +57,11 @@ Load all the keys of the new active folder
 """
 
 
+"""
+Load all the keys of the new active folder
+"""
+
+
 def change_to_folder(folder_id):
     folder = Folder.objects.get(id=folder_id)
     global active_folder

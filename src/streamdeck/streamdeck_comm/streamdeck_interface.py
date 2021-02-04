@@ -2,7 +2,11 @@
 from .streamdeck_functions import (
     get_streamdecks, init_streamdeck,
     update_key_image, update_key_change_callback, run_key_command,
+<<<<<<< HEAD
     change_to_folder, update_streamdeck, check_deck_connection)
+=======
+    change_to_folder, update_streamdeck)
+>>>>>>> added method to update streamdeck brightness
 """
 Initializes all connected streamdecks
 """
