@@ -2,7 +2,7 @@
 from .streamdeck_functions import (
     get_streamdecks, init_streamdeck,
     update_key_image, update_key_change_callback, run_key_command,
-    change_to_folder)
+    change_to_folder, update_streamdeck)
 """
 Initializes all connected streamdecks
 """
@@ -54,3 +54,12 @@ Updates streamdeck when changing folder
 
 def change_folder(folder_id):
     change_to_folder(folder_id)
+
+
+"""
+Update streamdeck brightness after change
+"""
+
+
+def update_brightness(streamdeck):
+    update_streamdeck(streamdeck)

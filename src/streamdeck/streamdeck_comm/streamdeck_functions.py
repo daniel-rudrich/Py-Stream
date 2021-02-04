@@ -33,6 +33,11 @@ def run_key_command(model_streamdeckKey):
         key_command = key_command.following_command
 
 
+"""
+Load all the keys of the new active folder
+"""
+
+
 def change_to_folder(folder_id):
     folder = Folder.objects.get(id=folder_id)
     global active_folder
@@ -170,8 +175,14 @@ def get_active_keys(model_deck, foldername):
 
 
 """
-Get the active streamdeck fitting the streamdeck model
+Update brightness of streamdeck
 """
+
+
+def update_streamdeck(model_streamdeck):
+    deck = decks[model_streamdeck.serial_number]
+    brightness = int(model_streamdeck.brightness)
+    deck.set_brightness(brightness)
 
 
 """
