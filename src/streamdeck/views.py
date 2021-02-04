@@ -9,7 +9,8 @@ from .serializers import (
 from .models import Streamdeck, StreamdeckKey, Folder, Command
 from .streamdeck_comm.streamdeck_interface import (change_folder,
                                                    update_key_behavior,
-                                                   update_key_display)
+                                                   update_key_display,
+                                                   update_brightness)
 
 # Create your views here.
 
@@ -46,6 +47,7 @@ def streamdeck_detail(request, id):
         streamdeck.brightness = data.get("brightness", streamdeck.brightness)
 
         streamdeck.save()
+        update_brightness(streamdeck)
         serializer = StreamdeckSerializer(streamdeck)
 
         return JsonResponse(serializer.data, safe=False)
