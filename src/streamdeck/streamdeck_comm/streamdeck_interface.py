@@ -2,7 +2,7 @@
 from .streamdeck_functions import (
     get_streamdecks, init_streamdeck,
     update_key_image, update_key_change_callback, run_key_command,
-    change_to_folder, update_streamdeck)
+    change_to_folder, update_streamdeck, check_deck_connection)
 """
 Initializes all connected streamdecks
 """
@@ -63,3 +63,13 @@ Update streamdeck brightness after change
 
 def update_brightness(streamdeck):
     update_streamdeck(streamdeck)
+
+
+"""
+Check for streamdeck connection
+"""
+
+
+def check_connection(streamdeck):
+
+    return check_deck_connection(streamdeck)

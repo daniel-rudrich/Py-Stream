@@ -17,6 +17,19 @@ active_folder = "default"
 decks = {}
 
 """
+Check if needed streamdeck is connected
+"""
+
+
+def check_deck_connection(model_streamdeck):
+    serial_number = model_streamdeck.serial_number
+
+    if serial_number in decks:
+        deck = decks[serial_number]
+        return deck.connected()
+
+
+"""
 Runs the command of a streamdeck key in a shell
 and prints the outcome
 """
@@ -32,6 +45,10 @@ def run_key_command(model_streamdeckKey):
         print(process.communicate()[0])
         key_command = key_command.following_command
 
+    # changes folder if this key is meant to
+    if model_streamdeckKey.change_to_folder:
+        change_to_folder(model_streamdeckKey.change_to_folder.id)
+
 
 """
 Load all the keys of the new active folder
@@ -43,6 +60,9 @@ def change_to_folder(folder_id):
     global active_folder
     active_folder = folder.name
     keys = StreamdeckKey.objects.filter(folder=folder)
+
+    if not check_deck_connection(keys[0].streamdeck):
+        pass
 
     for key in keys:
         update_key_image(None, key, False)
@@ -84,10 +104,9 @@ def update_key_image(deck, model_streamdeckkey, state):
     key_style = get_key_style(model_streamdeckkey)
     # Generate the custom key with the requested image and label.
     if(not key_style["icon"]):
-        image = None
-    else:
-        image = render_key_image(
-            deck, key_style["icon"], key_style["font"], key_style["label"])
+        key_style["icon"] = PILHelper.create_image(deck)
+    image = render_key_image(
+        deck, key_style["icon"], key_style["font"], key_style["label"])
     # Use a scoped-with on the deck to ensure we're the only thread using it
     # right now.
     with deck:
@@ -122,7 +141,11 @@ def render_key_image(deck, icon_filename, font_filename, label_text):
     # Resize the source image asset to best-fit the dimensions of a single key,
     # leaving a margin at the bottom so that we can draw the key title
     # afterwards.
-    icon = Image.open(icon_filename)
+    try:
+        icon = Image.open(icon_filename)
+    except AttributeError:
+        icon = icon_filename
+
     image = PILHelper.create_scaled_image(deck, icon, margins=[0, 0, 20, 0])
     # Load a custom TrueType font and use it to overlay the key index, draw key
     # label onto the image a few pixels from the bottom of the key.
