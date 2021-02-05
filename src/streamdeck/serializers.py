@@ -3,6 +3,8 @@ from rest_framework import serializers
 
 
 class StreamdeckKeySerializer(serializers.ModelSerializer):
+    streamdeck = serializers.PrimaryKeyRelatedField(read_only=True)
+
     class Meta:
         model = StreamdeckKey
         fields = ['id', 'number', 'text', 'image_source',
