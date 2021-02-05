@@ -13,7 +13,8 @@
     </div>
     <br>
     <b-button variant="primary" @click="saveChanges">Add command</b-button>
-
+    <br>
+    <b-button variant="primary" @click="addFolder" v-show="payload.change_to_folder === null">Add folder</b-button>
     <br>
     <br>
     {{ payload }}
@@ -63,6 +64,10 @@ export default {
             image_source: null
         })
         // TODO: Refresh displayed text
+        await this.$store.dispatch('refresh')
+      },
+      async addFolder() {
+        await axios.put('key/' + this.payload.id + '/folder', {name: 'New folder'})
         await this.$store.dispatch('refresh')
       }
   }
