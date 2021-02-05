@@ -1,7 +1,7 @@
 <template>
   <div id="app" v-if="loaded">
     <div id="nav">
-      <router-link to="/about">StreamDeck</router-link> |
+      <router-link to="/1">StreamDeck</router-link> |
       <router-link to="/settings">Settings</router-link>
       
     </div>

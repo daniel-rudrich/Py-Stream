@@ -9,8 +9,9 @@
     <br>
     <h3>Commands</h3>
     <div v-for="command in commands" :key="command.id">
-        {{ command.name }}: "{{ command.command_string }}"<br>
+      <command :payload="command" :keyid="payload.id"></command>
     </div>
+    <br>
     <b-button variant="primary" @click="saveChanges">Add command</b-button>
 
     <br>
@@ -23,12 +24,17 @@
 
 <script>
 import axios from 'axios'
+import Command from '@/components/Command.vue'
 
 export default {
   name: 'BtnSettings',
   props: [
       'payload'
   ],
+  components: {
+      Command
+    
+  },
   data() {
     return {
     }
