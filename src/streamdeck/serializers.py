@@ -1,5 +1,7 @@
 from .models import StreamdeckKey, Command, Folder, Streamdeck, StreamdeckModel
 from rest_framework import serializers
+from .svgimagefield import SVGAndImageFormField
+from rest_framework.fields import ImageField
 
 
 class StreamdeckKeySerializer(serializers.ModelSerializer):
@@ -10,6 +12,15 @@ class StreamdeckKeySerializer(serializers.ModelSerializer):
         fields = ['id', 'number', 'text', 'image_source',
                   'folder', 'streamdeck', 'command', 'change_to_folder']
         depth = 5
+
+
+class StreamdeckKeyImageSerializer(serializers.ModelSerializer):
+    image_source = ImageField(
+        required=False, _DjangoImageField=SVGAndImageFormField)
+
+    class Meta:
+        model = StreamdeckKey
+        fields = ['image_source']
 
 
 class CommandSerializer(serializers.ModelSerializer):
