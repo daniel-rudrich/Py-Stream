@@ -1,5 +1,9 @@
 from django.db import models
+from django.core.files.base import ContentFile
 import os
+from io import BytesIO
+import cairosvg
+from PIL import Image
 
 
 def get_image_path(instance, filename):
@@ -9,7 +13,7 @@ def get_image_path(instance, filename):
 class StreamdeckKey(models.Model):
     number = models.IntegerField()
     text = models.CharField(blank=True, max_length=50)
-    image_source = models.ImageField(
+    image_source = models.FileField(
         upload_to=get_image_path, blank=True, null=True)
     folder = models.ForeignKey(
         'Folder', related_name='keys', on_delete=models.CASCADE)

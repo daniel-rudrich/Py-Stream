@@ -1,8 +1,10 @@
 import os
 import subprocess
 from pathlib import Path
+from io import BytesIO
+import cairosvg
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
 from StreamDeck.ImageHelpers import PILHelper
 from StreamDeck.DeviceManager import DeviceManager
 from streamdeck.models import (
@@ -145,6 +147,10 @@ def render_key_image(deck, icon_filename, font_filename, label_text):
         icon = Image.open(icon_filename)
     except AttributeError:
         icon = icon_filename
+    except UnidentifiedImageError:
+        out = BytesIO()
+        cairosvg.svg2png(url=icon_filename, write_to=out)
+        icon = Image.open(out)
 
     image = PILHelper.create_scaled_image(deck, icon, margins=[0, 0, 20, 0])
     # Load a custom TrueType font and use it to overlay the key index, draw key
