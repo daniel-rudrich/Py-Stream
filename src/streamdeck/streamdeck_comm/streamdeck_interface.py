@@ -2,22 +2,14 @@
 from .streamdeck_functions import (
     get_streamdecks, init_streamdeck,
     update_key_image, update_key_change_callback, run_key_command,
-<< << << < HEAD
-<< << << < HEAD
     change_to_folder, update_streamdeck, check_deck_connection)
-== == == =
-    change_to_folder, update_streamdeck)
->> >>>> > added method to update streamdeck brightness
-== == == =
-    change_to_folder, update_streamdeck, check_deck_connection)
->> >>>> > several small changes
 """
 Initializes all connected streamdecks
 """
 
 
 def streamdecks_init():
-    streamdecks=get_streamdecks()
+    streamdecks = get_streamdecks()
     for deck in streamdecks:
         init_streamdeck(deck)
 
