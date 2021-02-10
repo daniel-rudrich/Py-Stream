@@ -1,15 +1,19 @@
 # from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.parsers import JSONParser
+from rest_framework.decorators import api_view
+from rest_framework.parsers import JSONParser, MultiPartParser
 
 from .serializers import (
     StreamdeckKeySerializer, FolderSerializer,
-    StreamdeckSerializer, CommandSerializer)
+    StreamdeckSerializer, CommandSerializer,
+    StreamdeckKeyImageSerializer)
 from .models import Streamdeck, StreamdeckKey, Folder, Command
 from .streamdeck_comm.streamdeck_interface import (change_folder,
                                                    update_key_behavior,
-                                                   update_key_display)
+                                                   update_key_display,
+                                                   update_brightness,
+                                                   check_connection)
 
 # Create your views here.
 
@@ -46,6 +50,8 @@ def streamdeck_detail(request, id):
         streamdeck.brightness = data.get("brightness", streamdeck.brightness)
 
         streamdeck.save()
+        if check_connection(streamdeck):
+            update_brightness(streamdeck)
         serializer = StreamdeckSerializer(streamdeck)
 
         return JsonResponse(serializer.data, safe=False)
@@ -105,14 +111,34 @@ def key_detail(request, id):
         data = JSONParser().parse(request)
 
         streamdeckKey.text = data.get("text", streamdeckKey.text)
-        streamdeckKey.image_source = data.get(
-            "image_source", streamdeckKey.image_source)
-
         streamdeckKey.save()
-        update_key_display(streamdeckKey)
+        if check_connection(streamdeckKey.streamdeck):
+            update_key_display(streamdeckKey)
         serializer = StreamdeckKeySerializer(streamdeckKey)
 
         return JsonResponse(serializer.data, safe=False)
+
+
+@csrf_exempt
+@api_view(['PUT'])
+def key_image_upload(request, id):
+
+    try:
+        streamdeckKey = StreamdeckKey.objects.get(id=id)
+    except StreamdeckKey.DoesNotExist:
+        return HttpResponse(status=404)
+
+    if request.method == 'PUT':
+        serializer = StreamdeckKeyImageSerializer(
+            streamdeckKey, data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+
+            update_key_display(streamdeckKey)
+            return HttpResponse(serializer.data)
+
+        return HttpResponse(status=404)
 
 
 @csrf_exempt
@@ -148,7 +174,8 @@ def command_create(request, id):
             last_command.following_command = command
             last_command.save()
 
-        update_key_behavior(streamdeckKey)
+        if check_connection(streamdeckKey.streamdeck):
+            update_key_behavior(streamdeckKey)
         serializer = CommandSerializer(command)
         return JsonResponse(serializer.data, safe=False)
 
@@ -203,6 +230,11 @@ def command_detail(request, key_id, id):
         serializer = CommandSerializer(command)
 
         return JsonResponse(serializer.data, safe=False)
+
+    if request.method == 'DELETE':
+        command.delete()
+        return HttpResponse(status=204)
+
 
 
 @csrf_exempt
