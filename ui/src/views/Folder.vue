@@ -26,11 +26,9 @@
 
     <btn-settings
       :payload="keys.find(key => key.id === $store.state.selected)"
-    
+      v-on:folder-changed="loadFolder"
     />
 
-      
-    
   </div>
 </template>
 

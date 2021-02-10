@@ -8,7 +8,7 @@
     <a href="javascript:void(0)" @click="resetNewImage">Reset</a>
     <br>
     <img v-show="newImage !== null" :src="imagePreview" height="70px" width="70px">
-    <br>
+    <br v-show="newImage !== null">
     <br>
     <b-button variant="success" @click="saveChanges">Save</b-button>
     <br>
@@ -17,15 +17,22 @@
       <command :payload="command" :keyid="payload.id"></command>
     </div>
     <br>
-    <b-button variant="primary" @click="saveChanges">Add command</b-button>
-    <br>
+    <b-button variant="primary" v-b-modal.add-command>Add command</b-button>
+    &nbsp;
     <b-button variant="primary" @click="addFolder" v-show="payload.change_to_folder === null">Add folder</b-button>
     <br>
     <br>
     {{ payload }}
+
+    <b-modal id="add-command" title="Add command" @ok="addCommand()">
+      <b-form-select v-model="newCommandType" :options="[{value: 'sh', text: '(ba)sh'}]"></b-form-select>
+      <br>
+      <br>
+      <b-form-input v-model="newCommandName" placeholder="Enter command name"></b-form-input>
+      <br>
+      <b-form-input v-model="newCommandCommand" placeholder="Enter command"></b-form-input>
+    </b-modal>
   </div>
-  
-  
 </template>
 
 <script>
@@ -43,7 +50,10 @@ export default {
   },
   data() {
     return {
-      newImage: null
+      newImage: null,
+      newCommandType: 'sh',
+      newCommandName: '',
+      newCommandCommand: 'echo New'
     }
   },
   mounted() {
@@ -52,9 +62,12 @@ export default {
     commands() {
       const commands = []
       let next = this.payload.command
+      //let prev
       while(next) {
         commands.push(next)
+        //prev = next
         next = next.following_command
+        //delete prev.following_command
       }
       return commands
     },
@@ -77,7 +90,7 @@ export default {
           promises.push(this.uploadNewImage())
         }
         await Promise.all(promises)
-        await this.$store.dispatch('refreshDecks')
+        this.$emit('folder-changed')
       },
       uploadNewImage() {
         const form = new FormData()
@@ -87,7 +100,7 @@ export default {
       },
       async addFolder() {
         await axios.put('key/' + this.payload.id + '/folder', {name: 'New folder'})
-        await this.$store.dispatch('refreshDecks')
+        this.$emit('folder-changed')
       },
       async changeNewImageEvent(event) {
         this.newImage = event.target.files[0]
@@ -95,6 +108,10 @@ export default {
       resetNewImage() {
         this.newImage = null
       },
+      async addCommand() {
+        await axios.put('key/' + this.payload.id + '/command', {name: this.newCommandName, command_string: this.newCommandCommand})
+        this.$emit('folder-changed')
+      }
   }
 }
 </script>

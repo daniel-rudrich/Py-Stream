@@ -5,13 +5,20 @@
       :style="[$store.getters.selected !== payload.id ?
       {border: '1.5px solid black'} :
       {border: '4px solid red'}]"
-      @click="$store.commit('selectKey', payload.id)"
-    >
-      <img :src="image" style="max-width:100%; max-height:100%;">
-      <span v-if="payload.change_to_folder"><router-link :to="'/' + payload.change_to_folder.id">Change</router-link></span>
+      @click="keyClicked"
+    > 
+      <img
+        :src="image"
+        style="max-width:100%; max-height:100%;"
+      >
     </div>
-    
-    {{ payload.text || 'None' }}
+    <span
+      :style="[payload.change_to_folder ?
+      {color: 'blue'} :
+      {}]"
+    >
+      {{ payload.text || 'None' }}
+    </span>
   </div>
   
 </template>
@@ -31,6 +38,15 @@ export default {
     image() {
       if(this.payload.image_source === null) return 'https://www.elgato.com/themes/custom/smalcode/key-creator/assets/image_pool/sd31/btn_custom_trigger_hotkey2.svg'
       return 'http://localhost:8000' + this.payload.image_source
+    },
+  },
+  methods: {
+    keyClicked() {
+      if(this.$store.getters.selected === this.payload.id && this.payload.change_to_folder) {
+        this.$router.push('/' + this.payload.change_to_folder.id)
+      } else {
+        this.$store.commit('selectKey', this.payload.id)
+      }
     }
   }
 }
