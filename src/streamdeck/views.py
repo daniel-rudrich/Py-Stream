@@ -135,7 +135,8 @@ def key_image_upload(request, id):
         if serializer.is_valid():
             serializer.save()
 
-            update_key_display(streamdeckKey)
+            if check_connection(streamdeckKey.streamdeck):
+                update_key_display(streamdeckKey)
             return HttpResponse(serializer.data)
 
         return HttpResponse(status=404)
