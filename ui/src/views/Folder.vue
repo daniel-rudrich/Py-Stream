@@ -58,7 +58,7 @@ export default {
   methods: {
     async loadFolder() {
       const folderId = this.$route.params.folder || 1
-      const folder = await axios.get('streamdeck/' + this.$store.state.activeDeck + '/folders/' + folderId)
+      const folder = await axios.get('streamdecks/' + this.$store.state.activeDeck + '/folders/' + folderId)
       this.name = folder.data.name
       this.keys = folder.data.keys
       if(this.keys.find(key => key.id === this.$store.state.selected) === undefined) {
