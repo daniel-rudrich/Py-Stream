@@ -1,9 +1,5 @@
 from django.db import models
-from django.core.files.base import ContentFile
 import os
-from io import BytesIO
-import cairosvg
-from PIL import Image
 
 
 def get_image_path(instance, filename):

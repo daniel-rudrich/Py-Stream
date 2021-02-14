@@ -2,7 +2,7 @@
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
-from rest_framework.parsers import JSONParser, MultiPartParser
+from rest_framework.parsers import JSONParser
 
 from .serializers import (
     StreamdeckKeySerializer, FolderSerializer,
@@ -235,7 +235,6 @@ def command_detail(request, key_id, id):
     if request.method == 'DELETE':
         command.delete()
         return HttpResponse(status=204)
-
 
 
 @csrf_exempt

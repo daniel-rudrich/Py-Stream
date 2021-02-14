@@ -6,12 +6,21 @@ from rest_framework.fields import ImageField
 
 class StreamdeckKeySerializer(serializers.ModelSerializer):
     streamdeck = serializers.PrimaryKeyRelatedField(read_only=True)
+    Commands = serializers.SerializerMethodField()
 
     class Meta:
         model = StreamdeckKey
         fields = ['id', 'number', 'text', 'image_source',
-                  'folder', 'streamdeck', 'command', 'change_to_folder']
+                  'folder', 'streamdeck', 'Commands', 'change_to_folder']
         depth = 5
+
+    def get_Commands(self, obj):
+        commands_list = []
+        command = obj.command
+        while command:
+            commands_list.append(CommandSerializer(command).data)
+            command = command.following_command
+        return commands_list
 
 
 class StreamdeckKeyImageSerializer(serializers.ModelSerializer):
@@ -24,6 +33,8 @@ class StreamdeckKeyImageSerializer(serializers.ModelSerializer):
 
 
 class CommandSerializer(serializers.ModelSerializer):
+    following_command = serializers.PrimaryKeyRelatedField(read_only=True)
+
     class Meta:
         model = Command
         fields = ['id', 'name', 'command_string',
