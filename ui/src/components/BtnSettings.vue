@@ -94,8 +94,7 @@ export default {
       },
       uploadNewImage() {
         const form = new FormData()
-        form.append('name', 'image_source')
-        form.append('file', this.newImage)
+        form.append('image_source', this.newImage)
         return axios.put('key/' + this.payload.id + '/image_upload', form, {header: {'Content-Type': 'image/png'}})
       },
       async addFolder() {
