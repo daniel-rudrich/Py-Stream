@@ -157,10 +157,15 @@ def command_create(request, id):
         com_command_string = data['command_string']
         com_value = data.get('value', None)
         com_following_command = data.get('following_command', None)
+        com_type = data.get("command_type", 'shell')
+        com_directory = data.get("active_directory", ".")
+        if (com_type, com_type) not in Command.COMMAND_CHOICES:
+            return HttpResponse("command type not valid", status=400)
 
         command = Command.objects.create(
             name=com_name, command_string=com_command_string,
-            value=com_value, following_command=com_following_command)
+            value=com_value, following_command=com_following_command,
+            command_type=com_type, active_directory=com_directory)
 
         command.save()
 
@@ -216,7 +221,7 @@ def command_detail(request, key_id, id):
         command.command_string = data.get(
             "command_string", command.command_string)
         command.value = data.get("value", command.value)
-
+        command.active_directory = data.get("active_directory", command.active_directory)
         following_command_id = data.get("following_command", None)
         if following_command_id:
             try:

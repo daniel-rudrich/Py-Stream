@@ -38,7 +38,8 @@ class CommandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Command
         fields = ['id', 'name', 'command_string',
-                  'value', 'following_command']
+                  'value', 'following_command', 'active_directory',
+                  'command_type']
         depth = 5
 
 

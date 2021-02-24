@@ -5,6 +5,7 @@ from io import BytesIO
 import cairosvg
 
 from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
+from pynput.keyboard import Key, Controller
 from StreamDeck.ImageHelpers import PILHelper
 from StreamDeck.DeviceManager import DeviceManager
 from streamdeck.models import (
@@ -40,16 +41,103 @@ and prints the outcome
 def run_key_command(model_streamdeckKey):
 
     key_command = model_streamdeckKey.command
-
     while key_command:
-        process = subprocess.Popen(
-            key_command.command_string.split(), stdout=subprocess.PIPE)
-        print(process.communicate()[0])
-        key_command = key_command.following_command
+        if key_command.command_type == 'shell':
+            process = subprocess.Popen(
+                key_command.command_string.split(), stdout=subprocess.PIPE,
+                cwd=key_command.active_directory)
+            print(process.communicate()[0])
+            key_command = key_command.following_command
+        elif key_command.command_type == 'hotkey':
+            hotkey_function(key_command.command_string)
+            key_command = key_command.following_command
 
     # changes folder if this key is meant to
     if model_streamdeckKey.change_to_folder:
         change_to_folder(model_streamdeckKey.change_to_folder.id)
+
+
+"""
+Presses given hotkeys on keyboard
+"""
+
+
+def hotkey_function(keystring):
+    keys = parse_keys(keystring)
+    print(keys)
+    keyboard = Controller()
+    if len(keys) == 1:
+        keyboard.press(keys[0])
+        keyboard.release(keys[0])
+    if len(keys) == 2:
+        with keyboard.pressed(keys[0]):
+            keyboard.press(keys[1])
+            keyboard.release(keys[1])
+    if len(keys) == 3:
+        with keyboard.pressed(keys[0]):
+            with keyboard.pressed(keys[1]):
+                keyboard.press(keys[2])
+                keyboard.release(keys[2])
+
+
+def parse_keys(keystring):
+    splitKeys = keystring.split("+")
+    keys = []
+    key_dict = {
+        "space": Key.space,
+        "enter": Key.enter,
+        "esc": Key.esc,
+        "shift": Key.shift,
+        "ctrl": Key.ctrl,
+        "ctrl_l": Key.ctrl_l,
+        "ctrl_r": Key.ctrl_r,
+        "alt": Key.alt,
+        "alt_l": Key.alt_l,
+        "alt_r": Key.alt_r,
+        "alt_gr": Key.alt_gr,
+        "backspace": Key.backspace,
+        "caps_lock": Key.caps_lock,
+        "cmd": Key.cmd,
+        "cmd_l": Key.cmd_l,
+        "cmd_r": Key.cmd_r,
+        "del": Key.delete,
+        "insert": Key.insert,
+        "home": Key.home,
+        "page_down": Key.page_down,
+        "page_up": Key.page_up,
+        "pause": Key.pause,
+        "print_screen": Key.print_screen,
+        "down": Key.down,
+        "left": Key.left,
+        "up": Key.up,
+        "right": Key.right,
+        "end": Key.end,
+        "f1": Key.f1,
+        "f2": Key.f2,
+        "f3": Key.f3,
+        "f4": Key.f4,
+        "f5": Key.f5,
+        "f6": Key.f6,
+        "f7": Key.f7,
+        "f8": Key.f8,
+        "f9": Key.f9,
+        "f10": Key.f10,
+        "f11": Key.f11,
+        "f12": Key.f12,
+        "media_next": Key.media_next,
+        "media_play_pause": Key.media_play_pause,
+        "media_previous": Key.media_previous,
+        "media_volume_down": Key.media_volume_down,
+        "media_volume_up": Key.media_volume_up,
+        "media_volume_mute": Key.media_volume_mute,
+    }
+
+    for key in splitKeys:
+        if key in key_dict:
+            keys.append(key_dict[key])
+        else:
+            keys.append(key)
+    return keys
 
 
 """
