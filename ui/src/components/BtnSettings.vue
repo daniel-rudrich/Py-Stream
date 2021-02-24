@@ -24,13 +24,20 @@
     <br>
     {{ payload }}
 
+    <br><br>
+    {{ commands }}
+
     <b-modal id="add-command" title="Add command" @ok="addCommand()">
-      <b-form-select v-model="newCommandType" :options="[{value: 'sh', text: '(ba)sh'}]"></b-form-select>
+      <b-form-select v-model="newCommandType" :options="[{value: 'sh', text: '(ba)sh'}, {value: 'keybind', text: 'Keybind'}]"></b-form-select>
       <br>
       <br>
       <b-form-input v-model="newCommandName" placeholder="Enter command name"></b-form-input>
       <br>
-      <b-form-input v-model="newCommandCommand" placeholder="Enter command"></b-form-input>
+      <b-form-input v-show="newCommandType === 'sh'" v-model="newCommandCommand" placeholder="Enter command"></b-form-input>
+      <b-form-input v-show="newCommandType === 'keybind'" v-model="newCommandKeybind" placeholder="Press key" @keydown="keydown($event)" @keyup="keyup($event)"></b-form-input>
+      <br>
+      Keybind: {{ newCommandKeys.pressedString }}<br>
+      Keycodes: {{ newCommandKeys.pressed }}
     </b-modal>
   </div>
 </template>
@@ -53,7 +60,15 @@ export default {
       newImage: null,
       newCommandType: 'sh',
       newCommandName: '',
-      newCommandCommand: 'echo New'
+      newCommandCommand: 'echo New',
+      newCommandKeybind: '',
+      newCommandKeys: {
+        finished: true,
+        pressed: [],
+        pressedString: [],
+        first: null,
+
+      }
     }
   },
   mounted() {
@@ -94,8 +109,7 @@ export default {
       },
       uploadNewImage() {
         const form = new FormData()
-        form.append('name', 'image_source')
-        form.append('file', this.newImage)
+        form.append('image_source', this.newImage)
         return axios.put('key/' + this.payload.id + '/image_upload', form, {header: {'Content-Type': 'image/png'}})
       },
       async addFolder() {
@@ -111,6 +125,23 @@ export default {
       async addCommand() {
         await axios.put('key/' + this.payload.id + '/command', {name: this.newCommandName, command_string: this.newCommandCommand})
         this.$emit('folder-changed')
+      },
+      keydown(event) {
+        if(this.newCommandKeys.finished) {
+          this.newCommandKeys.first = event.keyCode
+          this.newCommandKeys.finished = false
+          this.newCommandKeys.pressed = [event.keyCode]
+          this.newCommandKeys.pressedString = [event.key]
+        } else if (!this.newCommandKeys.pressed.includes(event.keyCode)) {
+          this.newCommandKeys.pressed.push(event.keyCode)
+          this.newCommandKeys.pressedString.push(event.key)
+        }
+      },
+      keyup(event) {
+        if(this.newCommandKeys.finished === false && event.keyCode === this.newCommandKeys.first) {
+          this.newCommandKeys.finished = true
+          this.newCommandKeybind = ''
+        }
       }
   }
 }
