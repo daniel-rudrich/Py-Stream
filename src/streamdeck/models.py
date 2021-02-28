@@ -25,7 +25,8 @@ class Command(models.Model):
     name = models.CharField(max_length=100, default='Command')
     command_string = models.TextField()
     active_directory = models.TextField(default='.')
-    value = models.IntegerField(blank=True, null=True)
+    hotkeys = models.ForeignKey(
+        'hotkeys', blank=True, null=True, on_delete=models.SET_NULL)
     following_command = models.ForeignKey(
         'self', blank=True, null=True, on_delete=models.SET_NULL)
 
@@ -37,6 +38,14 @@ class Command(models.Model):
     command_type = models.CharField(max_length=6,
                                     choices=COMMAND_CHOICES,
                                     default="shell")
+
+
+class Hotkeys(models.Model):
+    key1 = models.IntegerField()
+    key2 = models.IntegerField(blank=True, null=True)
+    key3 = models.IntegerField(blank=True, null=True)
+    key4 = models.IntegerField(blank=True, null=True)
+    key5 = models.IntegerField(blank=True, null=True)
 
 
 class Folder(models.Model):

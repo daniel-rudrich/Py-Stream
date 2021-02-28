@@ -5,11 +5,11 @@ from io import BytesIO
 import cairosvg
 
 from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
-from pynput.keyboard import Key, Controller
+from pynput.keyboard import Key, Controller, KeyCode
 from StreamDeck.ImageHelpers import PILHelper
 from StreamDeck.DeviceManager import DeviceManager
 from streamdeck.models import (
-    Streamdeck, StreamdeckModel, StreamdeckKey, Folder)
+    Streamdeck, StreamdeckModel, StreamdeckKey, Folder, Hotkeys)
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 ASSETS_PATH = os.path.join(BASE_DIR, "assets")
@@ -49,7 +49,7 @@ def run_key_command(model_streamdeckKey):
             print(process.communicate()[0])
             key_command = key_command.following_command
         elif key_command.command_type == 'hotkey':
-            hotkey_function(key_command.command_string)
+            hotkey_function(key_command.hotkeys)
             key_command = key_command.following_command
 
     # changes folder if this key is meant to
@@ -62,22 +62,18 @@ Presses given hotkeys on keyboard
 """
 
 
-def hotkey_function(keystring):
-    keys = parse_keys(keystring)
-    print(keys)
+def hotkey_function(hotkeys):
+    keycodes = [hotkeys.key1, hotkeys.key2,
+                hotkeys.key3, hotkeys.key4, hotkeys.key5]
     keyboard = Controller()
-    if len(keys) == 1:
-        keyboard.press(keys[0])
-        keyboard.release(keys[0])
-    if len(keys) == 2:
-        with keyboard.pressed(keys[0]):
-            keyboard.press(keys[1])
-            keyboard.release(keys[1])
-    if len(keys) == 3:
-        with keyboard.pressed(keys[0]):
-            with keyboard.pressed(keys[1]):
-                keyboard.press(keys[2])
-                keyboard.release(keys[2])
+
+    for code in reversed(keycodes):
+        if code:
+            keyboard.press(KeyCode.from_vk(code))
+
+    for code in keycodes:
+        if code:
+            keyboard.release(KeyCode.from_vk(code))
 
 
 def parse_keys(keystring):
