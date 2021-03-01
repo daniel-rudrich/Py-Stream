@@ -24,13 +24,13 @@ change text/title of key
 **PUT /key/\<int:id>/image_upload -> needs file for *image_source* in request.data**   
 change image of streamdeck key
 
-**PUT /key/\<int:id>/command name=_string_, command_string=_string_(, value=_string_)(,active_directory=_string_)(,command_type=_string_)**  
+**PUT /key/\<int:id>/command name=_string_, command_string=_string_(,active_directory=_string_)(,command_type=_string_, hotkeys=_array of Keycodes_)**  
  add command to streamdeck key
 
 **GET /key/\<int:id>/command/\<int:command_id>**  
  returns command of streamdeck key   
-**PATCH /key/\<int:id>/command/\<int:command_id> (name =_string_), (command_string=_string_), (value=_string_)**  
- change command of streamdeck key  
+**PATCH /key/\<int:id>/command/\<int:command_id> (name =_string_), (command_string=_string_), (command_type=_string_), (hotkeys=_array of Keycodes_)**  
+ change command of streamdeck key. Available command types are 'shell' and 'hotkey' at the moment  
 **DELETE /key/\<int:id>/command/\<int:command_id>**  
  deletes command of streamdeck key
 
