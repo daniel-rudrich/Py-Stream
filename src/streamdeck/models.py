@@ -1,9 +1,5 @@
 from django.db import models
-from django.core.files.base import ContentFile
 import os
-from io import BytesIO
-import cairosvg
-from PIL import Image
 
 
 def get_image_path(instance, filename):
@@ -28,9 +24,28 @@ class StreamdeckKey(models.Model):
 class Command(models.Model):
     name = models.CharField(max_length=100, default='Command')
     command_string = models.TextField()
-    value = models.IntegerField(blank=True, null=True)
+    active_directory = models.TextField(default='.')
+    hotkeys = models.ForeignKey(
+        'Hotkeys', blank=True, null=True, on_delete=models.SET_NULL)
     following_command = models.ForeignKey(
         'self', blank=True, null=True, on_delete=models.SET_NULL)
+
+    COMMAND_CHOICES = (
+        ("shell", "shell"),
+        ("hotkey", "hotkey")
+    )
+
+    command_type = models.CharField(max_length=6,
+                                    choices=COMMAND_CHOICES,
+                                    default="shell")
+
+
+class Hotkeys(models.Model):
+    key1 = models.IntegerField()
+    key2 = models.IntegerField(blank=True, null=True)
+    key3 = models.IntegerField(blank=True, null=True)
+    key4 = models.IntegerField(blank=True, null=True)
+    key5 = models.IntegerField(blank=True, null=True)
 
 
 class Folder(models.Model):
