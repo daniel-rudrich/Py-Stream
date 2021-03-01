@@ -26,7 +26,7 @@ class Command(models.Model):
     command_string = models.TextField()
     active_directory = models.TextField(default='.')
     hotkeys = models.ForeignKey(
-        'hotkeys', blank=True, null=True, on_delete=models.SET_NULL)
+        'Hotkeys', blank=True, null=True, on_delete=models.SET_NULL)
     following_command = models.ForeignKey(
         'self', blank=True, null=True, on_delete=models.SET_NULL)
 

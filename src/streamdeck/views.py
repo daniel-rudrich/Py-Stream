@@ -7,8 +7,8 @@ from rest_framework.parsers import JSONParser
 from .serializers import (
     StreamdeckKeySerializer, FolderSerializer,
     StreamdeckSerializer, CommandSerializer,
-    StreamdeckKeyImageSerializer)
-from .models import Streamdeck, StreamdeckKey, Folder, Command
+    StreamdeckKeyImageSerializer, HotkeysSerializer)
+from .models import Streamdeck, StreamdeckKey, Folder, Command, Hotkeys
 from .streamdeck_comm.streamdeck_interface import (change_folder,
                                                    update_key_behavior,
                                                    update_key_display,
@@ -155,18 +155,40 @@ def command_create(request, id):
 
         com_name = data["name"]
         com_command_string = data['command_string']
-        com_value = data.get('value', None)
         com_following_command = data.get('following_command', None)
         com_type = data.get("command_type", 'shell')
         com_directory = data.get("active_directory", ".")
         if (com_type, com_type) not in Command.COMMAND_CHOICES:
             return HttpResponse("command type not valid", status=400)
 
+        hotkeys = data.get("hotkeys", None)
+        com_hotkeys = None
+
+        if hotkeys:
+            if len(hotkeys) > 5:
+                return HttpResponse("the number of hotkeys may not be >5", status=400)
+
+            com_hotkeys = Hotkeys.objects.create(key1=hotkeys.pop(0))
+
+            # this needs to be done more elegant somehow
+            if len(hotkeys) > 0:
+                com_hotkeys.key2 = hotkeys.pop(0)
+            if len(hotkeys) > 0:
+                com_hotkeys.key3 = hotkeys.pop(0)
+            if len(hotkeys) > 0:
+                com_hotkeys.key4 = hotkeys.pop(0)
+            if len(hotkeys) > 0:
+                com_hotkeys.key5 = hotkeys.pop(0)
+
+            com_hotkeys.save()
+
         command = Command.objects.create(
             name=com_name, command_string=com_command_string,
-            value=com_value, following_command=com_following_command,
+            following_command=com_following_command,
             command_type=com_type, active_directory=com_directory)
 
+        if com_hotkeys:
+            command.hotkeys = com_hotkeys
         command.save()
 
         # command is attached to the last command in the queue
@@ -220,15 +242,15 @@ def command_detail(request, key_id, id):
         command.name = data.get("name", command.name)
         command.command_string = data.get(
             "command_string", command.command_string)
-        command.value = data.get("value", command.value)
-        command.active_directory = data.get("active_directory", command.active_directory)
+        command.active_directory = data.get(
+            "active_directory", command.active_directory)
         following_command_id = data.get("following_command", None)
         if following_command_id:
             try:
                 following_command = Command.objects.get(
                     id=following_command_id)
             except Command.DoesNotExist:
-                return HttpResponse("The following_command id doe not lead to an existing command", status=404)
+                return HttpResponse("The following_command id does not lead to an existing command", status=404)
             if following_command:
                 command.following_command = following_command
 
@@ -240,6 +262,58 @@ def command_detail(request, key_id, id):
     if request.method == 'DELETE':
         command.delete()
         return HttpResponse(status=204)
+
+
+@csrf_exempt
+def hotkeys_detail(request, key_id, command_id):
+
+    try:
+        streamdeckKey = StreamdeckKey.objects.get(id=key_id)
+    except StreamdeckKey.DoesNotExist:
+        return HttpResponse("streamdeckKey could not be found", status=404)
+
+    # command needs to be attached to the key
+
+    command = streamdeckKey.command
+    ids = []
+    while command:
+        ids.append(command.id)
+        command = command.following_command
+
+    if command_id not in ids:
+        return HttpResponse("command not found under this key", status=404)
+
+    try:
+        command = Command.objects.get(id=command_id)
+    except Command.DoesNotExist:
+        return HttpResponse(status=404)
+
+    try:
+        hotkeys = Hotkeys.objects.get(id=command.hotkeys.id)
+    except Hotkeys.DoesNotExist:
+        return HttpResponse(status=404)
+
+    if request.method == 'GET':
+        serializer = HotkeysSerializer(hotkeys)
+        return JsonResponse(serializer.data, safe=False)
+
+    if request.method == 'PATCH':
+        data = JSONParser().parse(request)
+
+        hotkeys.key1 = data.get("key1", hotkeys.key1)
+        hotkeys.key2 = data.get("key2", hotkeys.key2)
+        hotkeys.key3 = data.get("key3", hotkeys.key3)
+        hotkeys.key4 = data.get("key4", hotkeys.key4)
+        hotkeys.key5 = data.get("key5", hotkeys.key5)
+
+        try:
+            hotkeys.save()
+        except ValueError:
+            return HttpResponse("Only Keycodes may be assigned to keys, not strings", status=400)
+
+        serializer = HotkeysSerializer(hotkeys)
+
+        return JsonResponse(serializer.data, safe=False)
 
 
 @csrf_exempt

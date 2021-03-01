@@ -1,4 +1,4 @@
-from .models import StreamdeckKey, Command, Folder, Streamdeck, StreamdeckModel
+from .models import StreamdeckKey, Command, Folder, Streamdeck, StreamdeckModel, Hotkeys
 from rest_framework import serializers
 from .svgimagefield import SVGAndImageFormField
 from rest_framework.fields import ImageField
@@ -38,9 +38,16 @@ class CommandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Command
         fields = ['id', 'name', 'command_string',
-                  'value', 'following_command', 'active_directory',
+                  'hotkeys', 'following_command', 'active_directory',
                   'command_type']
         depth = 5
+
+
+class HotkeysSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Hotkeys
+        fields = ['key1', 'key2', 'key3', 'key4', 'key5']
 
 
 class FolderSerializer(serializers.ModelSerializer):
