@@ -164,23 +164,11 @@ def command_create(request, id):
         hotkeys = data.get("hotkeys", None)
         com_hotkeys = None
 
-        if hotkeys:
-            if len(hotkeys) > 5:
-                return HttpResponse("the number of hotkeys may not be >5", status=400)
-
-            com_hotkeys = Hotkeys.objects.create(key1=hotkeys.pop(0))
-
-            # this needs to be done more elegant somehow
-            if len(hotkeys) > 0:
-                com_hotkeys.key2 = hotkeys.pop(0)
-            if len(hotkeys) > 0:
-                com_hotkeys.key3 = hotkeys.pop(0)
-            if len(hotkeys) > 0:
-                com_hotkeys.key4 = hotkeys.pop(0)
-            if len(hotkeys) > 0:
-                com_hotkeys.key5 = hotkeys.pop(0)
-
-            com_hotkeys.save()
+        hotkeysJson = data.get("hotkeys", None)
+        if hotkeysJson:
+            hotkeys = hotkeys_helper(hotkeysJson)
+            hotkeys.save()
+            com_hotkeys = hotkeys
 
         command = Command.objects.create(
             name=com_name, command_string=com_command_string,
@@ -244,6 +232,10 @@ def command_detail(request, key_id, id):
             "command_string", command.command_string)
         command.active_directory = data.get(
             "active_directory", command.active_directory)
+        com_type = data.get("command_type", command.command_type)
+        if (com_type, com_type) not in Command.COMMAND_CHOICES:
+            return HttpResponse("command type not valid", status=400)
+        command.command_type = com_type
         following_command_id = data.get("following_command", None)
         if following_command_id:
             try:
@@ -254,6 +246,12 @@ def command_detail(request, key_id, id):
             if following_command:
                 command.following_command = following_command
 
+        hotkeysJson = data.get("hotkeys", None)
+        if hotkeysJson:
+            hotkeys = hotkeys_helper(hotkeysJson)
+            hotkeys.save()
+            command.hotkeys = hotkeys
+
         command.save()
         serializer = CommandSerializer(command)
 
@@ -262,6 +260,52 @@ def command_detail(request, key_id, id):
     if request.method == 'DELETE':
         command.delete()
         return HttpResponse(status=204)
+
+
+# convert received json to a hotkes object
+def hotkeys_helper(hotkeysListJson):
+    hotkeys = Hotkeys.objects.create()
+    for hotkey in hotkeysListJson:
+        if "key1" in hotkey:
+            key = hotkey["key1"]["key"]
+            if hotkey["key1"]["location"] == 1:
+                key = key + "_l"
+            if hotkey["key1"]["location"] == 2:
+                key = key + "_r"
+            hotkeys.key1 = key
+
+        if "key2" in hotkey:
+            key = hotkey["key2"]["key"]
+            if hotkey["key2"]["location"] == 1:
+                key = key + "_l"
+            if hotkey["key2"]["location"] == 2:
+                key = key + "_r"
+            hotkeys.key2 = key
+
+        if "key3" in hotkey:
+            key = hotkey["key3"]["key"]
+            if hotkey["key3"]["location"] == 1:
+                key = key + "_l"
+            if hotkey["key3"]["location"] == 2:
+                key = key + "_r"
+            hotkeys.key3 = key
+
+        if "key4" in hotkey:
+            key = hotkey["key4"]["key"]
+            if hotkey["key4"]["location"] == 1:
+                key = key + "_l"
+            if hotkey["key4"]["location"] == 2:
+                key = key + "_r"
+            hotkeys.key4 = key
+
+        if "key5" in hotkey:
+            key = hotkey["key5"]["key"]
+            if hotkey["key5"]["location"] == 1:
+                key = key + "_l"
+            if hotkey["key5"]["location"] == 2:
+                key = key + "_r"
+            hotkeys.key5 = key
+    return hotkeys
 
 
 @csrf_exempt

@@ -41,11 +41,13 @@ class Command(models.Model):
 
 
 class Hotkeys(models.Model):
-    key1 = models.IntegerField()
-    key2 = models.IntegerField(blank=True, null=True)
-    key3 = models.IntegerField(blank=True, null=True)
-    key4 = models.IntegerField(blank=True, null=True)
-    key5 = models.IntegerField(blank=True, null=True)
+    key1 = models.CharField(max_length=10, 
+    
+    blank=True, null=True)
+    key2 = models.CharField(max_length=10, blank=True, null=True)
+    key3 = models.CharField(max_length=10, blank=True, null=True)
+    key4 = models.CharField(max_length=10, blank=True, null=True)
+    key5 = models.CharField(max_length=10, blank=True, null=True)
 
 
 class Folder(models.Model):

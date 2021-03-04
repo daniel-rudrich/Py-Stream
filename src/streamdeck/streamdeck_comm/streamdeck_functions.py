@@ -71,78 +71,77 @@ Presses given hotkeys on keyboard
 
 
 def hotkey_function(hotkeys):
-    keycodes = [hotkeys.key1, hotkeys.key2,
-                hotkeys.key3, hotkeys.key4, hotkeys.key5]
+    keys = [hotkeys.key1, hotkeys.key2,
+            hotkeys.key3, hotkeys.key4, hotkeys.key5]
+    parsedKeys = parse_keys(keys)
     keyboard = Controller()
 
-    for code in reversed(keycodes):
-        if code:
-            print(KeyCode.from_vk(code))
-            keyboard.press(KeyCode.from_vk(code))
+    for key in parsedKeys:
+        if key:
+            keyboard.press(key)
 
-    for code in keycodes:
-        if code:
-            keyboard.release(KeyCode.from_vk(code))
+    for key in reversed(parsedKeys):
+        if key:
+            keyboard.release(key)
 
 
-def parse_keys(keystring):
-    splitKeys = keystring.split("+")
-    keys = []
+def parse_keys(keys):
+    parsedKeys = []
     key_dict = {
         "space": Key.space,
-        "enter": Key.enter,
-        "esc": Key.esc,
-        "shift": Key.shift,
-        "ctrl": Key.ctrl,
-        "ctrl_l": Key.ctrl_l,
-        "ctrl_r": Key.ctrl_r,
-        "alt": Key.alt,
-        "alt_l": Key.alt_l,
-        "alt_r": Key.alt_r,
-        "alt_gr": Key.alt_gr,
-        "backspace": Key.backspace,
-        "caps_lock": Key.caps_lock,
-        "cmd": Key.cmd,
-        "cmd_l": Key.cmd_l,
-        "cmd_r": Key.cmd_r,
-        "del": Key.delete,
-        "insert": Key.insert,
-        "home": Key.home,
-        "page_down": Key.page_down,
-        "page_up": Key.page_up,
-        "pause": Key.pause,
-        "print_screen": Key.print_screen,
-        "down": Key.down,
-        "left": Key.left,
-        "up": Key.up,
-        "right": Key.right,
-        "end": Key.end,
-        "f1": Key.f1,
-        "f2": Key.f2,
-        "f3": Key.f3,
-        "f4": Key.f4,
-        "f5": Key.f5,
-        "f6": Key.f6,
-        "f7": Key.f7,
-        "f8": Key.f8,
-        "f9": Key.f9,
-        "f10": Key.f10,
-        "f11": Key.f11,
-        "f12": Key.f12,
-        "media_next": Key.media_next,
-        "media_play_pause": Key.media_play_pause,
-        "media_previous": Key.media_previous,
-        "media_volume_down": Key.media_volume_down,
-        "media_volume_up": Key.media_volume_up,
-        "media_volume_mute": Key.media_volume_mute,
+        "Enter": Key.enter,
+        "Escape": Key.esc,
+        "Shift": Key.shift,
+        "Control": Key.ctrl,
+        "Control_l": Key.ctrl_l,
+        "Control_R": Key.ctrl_r,
+        "Alt": Key.alt,
+        "Alt_l": Key.alt_l,
+        "Alt_r": Key.alt_r,
+        "AltGraph": Key.alt_gr,
+        "Backspace": Key.backspace,
+        "CapsLock": Key.caps_lock,
+        "Meta": Key.cmd,
+        "Meta_l": Key.cmd_l,
+        "Meta_r": Key.cmd_r,
+        "Delete": Key.delete,
+        "Insert": Key.insert,
+        "Home": Key.home,
+        "PageDown": Key.page_down,
+        "PageUp": Key.page_up,
+        "Pause": Key.pause,
+        "PrintScreen": Key.print_screen,
+        "ArrowDown": Key.down,
+        "ArrowLeft": Key.left,
+        "ArrowUp": Key.up,
+        "ArrowRight": Key.right,
+        "End": Key.end,
+        "F1": Key.f1,
+        "F2": Key.f2,
+        "F3": Key.f3,
+        "F4": Key.f4,
+        "F5": Key.f5,
+        "F6": Key.f6,
+        "F7": Key.f7,
+        "F8": Key.f8,
+        "F9": Key.f9,
+        "F10": Key.f10,
+        "F11": Key.f11,
+        "F12": Key.f12,
+        "Next": Key.media_next,
+        "Play/Pause": Key.media_play_pause,
+        "Previous": Key.media_previous,
+        "VolumeDown": Key.media_volume_down,
+        "VolumeUp": Key.media_volume_up,
+        "VolumeMute": Key.media_volume_mute,
     }
 
-    for key in splitKeys:
+    for key in keys:
         if key in key_dict:
-            keys.append(key_dict[key])
+            parsedKeys.append(key_dict[key])
         else:
-            keys.append(key)
-    return keys
+            parsedKeys.append(key)
+    return parsedKeys
 
 
 """
@@ -269,7 +268,7 @@ def render_key_image(deck, icon_filename, font_filename, label_text, key_number)
         image = PILHelper.create_scaled_image(
             deck, icon, margins=[0, 0, 20, 0])
         # Load a custom TrueType font and use it to overlay the key index
-        # draw key label onto the image a few pixels from the 
+        # draw key label onto the image a few pixels from the
         # bottom of the key.
         draw = ImageDraw.Draw(image)
         font = ImageFont.truetype(font_filename, 14)
