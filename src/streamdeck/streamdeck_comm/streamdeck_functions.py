@@ -9,7 +9,7 @@ import itertools
 
 from fractions import Fraction
 from PIL import Image, ImageSequence, ImageDraw, ImageFont, UnidentifiedImageError
-from pynput.keyboard import Key, Controller, KeyCode
+from pynput.keyboard import Key, Controller
 from StreamDeck.ImageHelpers import PILHelper
 from StreamDeck.DeviceManager import DeviceManager
 from StreamDeck.Transport.Transport import TransportError
@@ -272,7 +272,7 @@ def render_key_image(deck, icon_filename, font_filename, label_text, key_number)
         # bottom of the key.
         draw = ImageDraw.Draw(image)
         font = ImageFont.truetype(font_filename, 14)
-        draw.text((image.width / 2, image.height - 5), text=label_text,
+        draw.text((image.width / 2, image.height - 10), text=label_text,
                   font=font, anchor="ms", fill="white")
 
         return PILHelper.to_native_format(deck, image)
@@ -363,7 +363,6 @@ images on each Key
 
 
 def animate(fps, deck, key_images):
-    print(1)
     # Convert frames per second to frame time in seconds.
     #
     # Frame time often cannot be fully expressed by a float type,
@@ -426,7 +425,7 @@ yet
 
 
 def streamdeck_database_init(deck):
-    if not Streamdeck.objects.filter(serial_number=deck.get_serial_number()):
+    if not Streamdeck.objects.filter(serial_number=get_serial_number(deck)):
         # Check for StreamdeckModel in database.
         # Create a new one if it doesn't exist yet
 
@@ -445,11 +444,23 @@ def streamdeck_database_init(deck):
 
         new_folder = Folder.objects.create(name='default')
         Streamdeck.objects.create(name=deck.deck_type(),
-                                  serial_number=deck.get_serial_number(),
+                                  serial_number=get_serial_number(deck),
                                   brightness=30,
                                   streamdeck_model=streamdeckmodel,
                                   default_folder=new_folder
                                   )
+
+
+"""
+Remove unwanted characters from the end of the serial number
+and return sanatized serial number
+"""
+
+
+def get_serial_number(deck):
+    serialnumber = deck.get_serial_number()
+    serialnumber = serialnumber.replace("\x00", "").replace("\x01", "")
+    return serialnumber
 
 
 """
@@ -461,15 +472,15 @@ def init_streamdeck(deck):
     deck.open()
     deck.reset()
 
-    decks[deck.get_serial_number()] = deck
+    decks[get_serial_number(deck)] = deck
     print("Opened '{}' device (serial number: '{}')".format(
-        deck.deck_type(), deck.get_serial_number()))
+        deck.deck_type(), get_serial_number(deck)))
 
     streamdeck_database_init(deck)
 
     global active_streamdeck
     active_streamdeck = Streamdeck.objects.filter(
-        serial_number=deck.get_serial_number())[0]
+        serial_number=get_serial_number(deck))[0]
 
     deck.set_brightness(active_streamdeck.brightness)
 

@@ -8,7 +8,7 @@ def get_image_path(instance, filename):
 
 class StreamdeckKey(models.Model):
     number = models.IntegerField()
-    text = models.CharField(blank=True, max_length=50)
+    text = models.CharField(blank=True, max_length=10)
     image_source = models.FileField(
         upload_to=get_image_path, blank=True, null=True)
     folder = models.ForeignKey(
@@ -41,9 +41,7 @@ class Command(models.Model):
 
 
 class Hotkeys(models.Model):
-    key1 = models.CharField(max_length=10, 
-    
-    blank=True, null=True)
+    key1 = models.CharField(max_length=10, blank=True, null=True)
     key2 = models.CharField(max_length=10, blank=True, null=True)
     key3 = models.CharField(max_length=10, blank=True, null=True)
     key4 = models.CharField(max_length=10, blank=True, null=True)
