@@ -7,8 +7,11 @@ import time
 import threading
 import itertools
 
+from datetime import datetime, timedelta
+from timeit import default_timer as timer
 from fractions import Fraction
-from PIL import Image, ImageSequence, ImageDraw, ImageFont, UnidentifiedImageError
+from PIL import (Image, ImageSequence, ImageDraw,
+                 ImageFont, UnidentifiedImageError)
 from pynput.keyboard import Key, Controller
 from StreamDeck.ImageHelpers import PILHelper
 from StreamDeck.DeviceManager import DeviceManager
@@ -26,6 +29,9 @@ active_streamdeck = None
 active_folder = "default"
 decks = {}
 animated_images = {}
+clock_threads = {}
+stopwatch_threads = {}
+interval_shell_threads = {}
 stop_animation = False
 """
 Check if needed streamdeck is connected
@@ -51,18 +57,109 @@ def run_key_command(model_streamdeckKey):
     key_command = model_streamdeckKey.command
     while key_command:
         if key_command.command_type == 'shell':
-            process = subprocess.Popen(
-                key_command.command_string.split(), stdout=subprocess.PIPE,
-                cwd=key_command.active_directory)
-            print(process.communicate()[0])
+            if key_command.interval_time > 0:
+                thread = threading.Thread(target=run_shell_interval,
+                                          args=[model_streamdeckKey,
+                                                key_command.interval_time])
+                interval_shell_threads[key_command.id] = thread
+                thread.start()
+            else:
+                process = subprocess.Popen(
+                    key_command.command_string.split(), stdout=subprocess.PIPE,
+                    cwd=key_command.active_directory)
+                print(process.communicate()[0].decode("utf-8"))
             key_command = key_command.following_command
         elif key_command.command_type == 'hotkey':
             hotkey_function(key_command.hotkeys)
+            key_command = key_command.following_command
+        elif key_command.command_type == 'stopwatch':
+            global stopwatch_threads
+            if key_command.id not in stopwatch_threads:
+                thread = threading.Thread(target=run_stopwatch, args=[
+                    model_streamdeckKey])
+                thread.start()
+                stopwatch_threads[key_command.id] = thread
+            else:
+                thread = stopwatch_threads[key_command.id]
+                del stopwatch_threads[key_command.id]
+                thread.join()
             key_command = key_command.following_command
 
     # changes folder if this key is meant to
     if model_streamdeckKey.change_to_folder:
         change_to_folder(model_streamdeckKey.change_to_folder.id)
+
+
+"""
+run shell command every 'intervall' seconds and save result as text in key
+"""
+
+
+def run_shell_interval(model_streamdeckKey, interval):
+
+    command = model_streamdeckKey.command
+    while(True):
+
+        process = subprocess.Popen(
+            command.command_string.split(), stdout=subprocess.PIPE,
+            cwd=command.active_directory)
+        value = process.communicate()[0].decode("utf-8")
+        model_streamdeckKey.text = value
+        deck = decks[model_streamdeckKey.streamdeck.serial_number]
+        update_key_image(deck, model_streamdeckKey, False)
+
+        start_pause = datetime.now()
+        while(command.id in interval_shell_threads
+              and (datetime.now()-start_pause).seconds < interval):
+            time.sleep(1)
+
+        if command.id not in interval_shell_threads:
+            break
+
+
+"""
+run_stopwatch
+"""
+
+
+def run_stopwatch(model_streamdeckKey):
+    global decks
+    deck = decks[model_streamdeckKey.streamdeck.serial_number]
+    start = timer()
+    command_id = model_streamdeckKey.command.id
+    while (True):
+        curtime = timer()
+        model_streamdeckKey.text = str(timedelta(seconds=int(curtime - start)))
+        update_key_image(deck, model_streamdeckKey, False)
+        time.sleep(1)
+
+        if command_id not in stopwatch_threads:
+            break
+
+
+"""
+clock method for clock in format HH:MM
+updates every minute
+"""
+
+
+def key_clock(deck, streamdeckkey):
+
+    key_id = streamdeckkey.id
+    while(True):
+        current_time = datetime.now().strftime("%H:%M")
+        streamdeckkey.text = current_time
+        update_key_image(deck, streamdeckkey, True)
+
+        # exit while loop if 60 seconds are over or the thread
+        # for this clock needs to be stopped
+        start_pause = datetime.now()
+        while(key_id in clock_threads
+              and (datetime.now()-start_pause).seconds < 60):
+            time.sleep(1)
+
+        if key_id not in clock_threads:
+            break
 
 
 """
@@ -158,9 +255,34 @@ def change_to_folder(folder_id):
     if not check_deck_connection(keys[0].streamdeck):
         pass
 
+    # stop all threads of the current folder before changing
     global stop_animation
     stop_animation = True
     animated_images.clear()
+
+    global clock_threads
+
+    clock_thread_keys = list(clock_threads.keys())
+    for dict_key in clock_thread_keys:
+        clock_thread = clock_threads[dict_key]
+        del clock_threads[dict_key]
+        clock_thread.join()
+
+    global stopwatch_threads
+
+    stopwatch_threads_keys = list(stopwatch_threads.keys())
+    for dict_key in stopwatch_threads_keys:
+        stopwatch_thread = stopwatch_threads[dict_key]
+        del stopwatch_threads[dict_key]
+        stopwatch_thread.join()
+
+    global interval_shell_threads
+
+    interval_shell_keys = list(interval_shell_threads.keys())
+    for dict_key in interval_shell_keys:
+        shell_thread = interval_shell_threads[dict_key]
+        del interval_shell_threads[dict_key]
+        shell_thread.join()
 
     for key in keys:
         update_key_image(None, key, False)
@@ -206,7 +328,22 @@ def update_key_image(deck, model_streamdeckkey, state):
     if not deck:
         deck = decks[model_streamdeckkey.streamdeck.serial_number]
 
+    # handle keys with clock
+    if model_streamdeckkey.clock and not state:
+        if model_streamdeckkey.id not in clock_threads:
+            thread = threading.Thread(target=key_clock, args=[
+                                      deck, model_streamdeckkey])
+            thread.start()
+            clock_threads[model_streamdeckkey.id] = thread
+        pass
+
+    if not model_streamdeckkey.clock:
+        if model_streamdeckkey.id in clock_threads:
+            clock_threads[model_streamdeckkey.id].join()
+            del clock_threads[model_streamdeckkey.id]
+
     key_style = get_key_style(model_streamdeckkey)
+
     # Generate the custom key with the requested image and label.
     if(not key_style["icon"]):
         key_style["icon"] = PILHelper.create_image(deck)
@@ -217,7 +354,8 @@ def update_key_image(deck, model_streamdeckkey, state):
     # right now.
     if image:
         with deck:
-            # Update requested key with the generated image. (If its not animated)
+            # Update requested key with the generated image.
+            # (If its not animated)
             deck.set_key_image(model_streamdeckkey.number, image)
 
 
@@ -244,7 +382,8 @@ PIL module.
 """
 
 
-def render_key_image(deck, icon_filename, font_filename, label_text, key_number):
+def render_key_image(
+        deck, icon_filename, font_filename, label_text, key_number):
     # Resize the source image asset to best-fit the dimensions of a single key,
     # leaving a margin at the bottom so that we can draw the key title
     # afterwards.

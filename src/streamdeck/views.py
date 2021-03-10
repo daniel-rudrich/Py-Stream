@@ -111,6 +111,7 @@ def key_detail(request, id):
         data = JSONParser().parse(request)
 
         streamdeckKey.text = data.get("text", streamdeckKey.text)
+        streamdeckKey.clock = data.get("clock", streamdeckKey.clock)
         streamdeckKey.save()
         if check_connection(streamdeckKey.streamdeck):
             update_key_display(streamdeckKey)
@@ -157,6 +158,7 @@ def command_create(request, id):
         com_command_string = data['command_string']
         com_following_command = data.get('following_command', None)
         com_type = data.get("command_type", 'shell')
+        com_interval_time = data.get("interval_time", -1)
         com_directory = data.get("active_directory", ".")
         if (com_type, com_type) not in Command.COMMAND_CHOICES:
             return HttpResponse("command type not valid", status=400)
@@ -173,6 +175,7 @@ def command_create(request, id):
         command = Command.objects.create(
             name=com_name, command_string=com_command_string,
             following_command=com_following_command,
+            interval_time=com_interval_time,
             command_type=com_type, active_directory=com_directory)
 
         if com_hotkeys:
@@ -232,6 +235,9 @@ def command_detail(request, key_id, id):
             "command_string", command.command_string)
         command.active_directory = data.get(
             "active_directory", command.active_directory)
+        command.interval_time = data.get(
+            "interval_time", command.interval_time
+        )
         com_type = data.get("command_type", command.command_type)
         if (com_type, com_type) not in Command.COMMAND_CHOICES:
             return HttpResponse("command type not valid", status=400)
@@ -242,7 +248,8 @@ def command_detail(request, key_id, id):
                 following_command = Command.objects.get(
                     id=following_command_id)
             except Command.DoesNotExist:
-                return HttpResponse("The following_command id does not lead to an existing command", status=404)
+                return HttpResponse("The following_command id does not lead "
+                                    "to an existing command", status=404)
             if following_command:
                 command.following_command = following_command
 
@@ -262,7 +269,7 @@ def command_detail(request, key_id, id):
         return HttpResponse(status=204)
 
 
-# convert received json to a hotkes object
+# convert received json to a hotkeys object
 def hotkeys_helper(hotkeysListJson):
     hotkeys = Hotkeys.objects.create()
     for hotkey in hotkeysListJson:
@@ -353,7 +360,8 @@ def hotkeys_detail(request, key_id, command_id):
         try:
             hotkeys.save()
         except ValueError:
-            return HttpResponse("Only Keycodes may be assigned to keys, not strings", status=400)
+            return HttpResponse("Only Keycodes may be assigned to keys, "
+                                "not strings", status=400)
 
         serializer = HotkeysSerializer(hotkeys)
 
