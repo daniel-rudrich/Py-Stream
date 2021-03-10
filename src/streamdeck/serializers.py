@@ -1,4 +1,5 @@
-from .models import StreamdeckKey, Command, Folder, Streamdeck, StreamdeckModel, Hotkeys
+from .models import (StreamdeckKey, Command, Folder,
+                     Streamdeck, StreamdeckModel, Hotkeys)
 from rest_framework import serializers
 from .svgimagefield import SVGAndImageFormField
 from rest_framework.fields import ImageField
