@@ -75,16 +75,7 @@ export default {
   },
   computed: {
     commands() {
-      const commands = []
-      let next = this.payload.command
-      //let prev
-      while(next) {
-        commands.push(next)
-        //prev = next
-        next = next.following_command
-        //delete prev.following_command
-      }
-      return commands
+      return this.payload.Commands
     },
     imagePreview() {
       if(this.newImage === null) return ''
@@ -103,6 +94,7 @@ export default {
         }))
         if(this.newImage !== null) {
           promises.push(this.uploadNewImage())
+          this.resetNewImage()
         }
         await Promise.all(promises)
         this.$emit('folder-changed')

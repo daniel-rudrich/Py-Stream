@@ -1,6 +1,9 @@
 <template>
   <div v-if="payload">
     <b-row>
+        <b-col>
+            {{ payload.command_type }}
+        </b-col>
         <b-col cols="4">
             <b-form-input v-model="payload.name" placeholder="Command name"></b-form-input>
         </b-col>
