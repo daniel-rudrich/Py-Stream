@@ -28,13 +28,13 @@
     {{ commands }}
 
     <b-modal id="add-command" title="Add command" @ok="addCommand()">
-      <b-form-select v-model="newCommandType" :options="[{value: 'sh', text: '(ba)sh'}, {value: 'keybind', text: 'Keybind'}]"></b-form-select>
+      <b-form-select v-model="newCommandType" :options="[{value: 'shell', text: '(ba)sh'}, {value: 'hotkey', text: 'Hotkey'}]"></b-form-select>
       <br>
       <br>
       <b-form-input v-model="newCommandName" placeholder="Enter command name"></b-form-input>
       <br>
-      <b-form-input v-show="newCommandType === 'sh'" v-model="newCommandCommand" placeholder="Enter command"></b-form-input>
-      <b-form-input v-show="newCommandType === 'keybind'" v-model="newCommandKeybind" placeholder="Press key" @keydown="keydown($event)" @keyup="keyup($event)"></b-form-input>
+      <b-form-input v-show="newCommandType === 'shell'" v-model="newCommandCommand" placeholder="Enter command"></b-form-input>
+      <b-form-input v-show="newCommandType === 'hotkey'" v-model="newCommandKeybind" placeholder="Press key" @keydown="keydown($event)" @keyup="keyup($event)"></b-form-input>
       <br>
       Keybind: {{ newCommandKeys.pressedString }}<br>
       Keycodes: {{ newCommandKeys.pressed }}
@@ -58,7 +58,7 @@ export default {
   data() {
     return {
       newImage: null,
-      newCommandType: 'sh',
+      newCommandType: 'shell',
       newCommandName: '',
       newCommandCommand: 'echo New',
       newCommandKeybind: '',
@@ -67,7 +67,6 @@ export default {
         pressed: [],
         pressedString: [],
         first: null,
-
       }
     }
   },
@@ -115,7 +114,24 @@ export default {
         this.newImage = null
       },
       async addCommand() {
-        await axios.put('key/' + this.payload.id + '/command', {name: this.newCommandName, command_string: this.newCommandCommand})
+        let newCmd = {command_type: this.newCommandType}
+        newCmd.name = this.newCommandName
+        newCmd.command_string = ''
+        if(newCmd.command_type === 'shell') {
+          newCmd.command_string = this.newCommandCommand
+        } else if(newCmd.command_type === 'hotkey') {
+          newCmd.hotkeys = []
+          for(let i = 0; i < this.newCommandKeys.pressedString.length; i++) {
+            const key = {}
+            key['key' + (i + 1)] = {
+                key: this.newCommandKeys.pressedString[i],
+                location:i
+              }
+            newCmd.hotkeys.push(key)
+          }
+        }
+        console.log(newCmd)
+        await axios.put('key/' + this.payload.id + '/command', newCmd)
         this.$emit('folder-changed')
       },
       keydown(event) {
