@@ -19,7 +19,8 @@ export default new Vuex.Store({
     set: (state, [variable, value]) => {
       Vue.set(state, variable, value)
     },
-    selectKey: (state, key) => state.selected = key
+    selectKey: (state, key) => state.selected = key,
+    activeDeck: (state, deck) => state.activeDeck = deck
   },
   actions: {
     async initialize() {
