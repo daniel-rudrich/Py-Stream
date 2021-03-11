@@ -22,8 +22,9 @@ from streamdeck.streamdeck_comm.streamdeck_interface import streamdecks_init
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('streamdeck.urls')),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path('api/', include('streamdeck.urls')),
+    #path('', include('streamdeck.urls')),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + static(settings.FRONTEND_URL, document_root=settings.FRONTEND_ROOT)
 
 # initialize connection to streamdeck
 if 'runserver' in sys.argv:
