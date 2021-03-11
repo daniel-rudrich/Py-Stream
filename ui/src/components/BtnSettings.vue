@@ -2,7 +2,7 @@
   <div v-if="payload">
     <h4><img :src="image" style="height: 30px;">Button #{{ payload.id }}</h4>
     <br>
-    <b-form-input v-model="payload.text" placeholder="Enter key text"></b-form-input>
+    <b-form-input v-model="payload.text" placeholder="Enter key text" maxlength="10"></b-form-input>
     <br>
     <input type="file" accept="image/*" @change="changeNewImageEvent($event)" id="file-input">
     <a href="javascript:void(0)" @click="resetNewImage">Reset</a>
