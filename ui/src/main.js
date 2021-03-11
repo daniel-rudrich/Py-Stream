@@ -12,8 +12,13 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 Vue.use(BootstrapVue)
 Vue.use(IconsPlugin)
 
-axios.defaults.baseURL = 'http://localhost:8000/'
+console.log(window.location.host)
+if(window.location.host === 'localhost:8080')
+  axios.defaults.baseURL = 'http://localhost:8000/api/'
+else
+  axios.defaults.baseURL = '/api/'
 
+console.log(axios.defaults.baseURL)
 
 new Vue({
   router,
