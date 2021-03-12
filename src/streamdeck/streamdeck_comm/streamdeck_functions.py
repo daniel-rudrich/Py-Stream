@@ -332,7 +332,14 @@ def get_key_style(model_streamdeckKey):
 
 
 def update_key_image(deck, model_streamdeckkey, state):
-    # Determine what icon and label to use on the generated key.
+
+    global active_folder
+
+    # don't update key image if the key is not currently
+    # shown on the streamdeck
+    if not active_folder == model_streamdeckkey.folder.name:
+        return
+
     if not deck:
         deck = decks[model_streamdeckkey.streamdeck.serial_number]
 
