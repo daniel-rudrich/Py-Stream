@@ -24,7 +24,7 @@ class StreamdeckKey(models.Model):
 
 class Command(models.Model):
     name = models.CharField(max_length=100, default='Command')
-    command_string = models.TextField()
+    command_string = models.TextField(blank=True, null=True)
     active_directory = models.TextField(default='.')
     interval_time = models.IntegerField(blank=True, null=True, default=-1)
     hotkeys = models.ForeignKey(

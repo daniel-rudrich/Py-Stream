@@ -155,7 +155,7 @@ def command_create(request, id):
         data = JSONParser().parse(request)
 
         com_name = data["name"]
-        com_command_string = data['command_string']
+        com_command_string = data.get('command_string', "")
         com_following_command = data.get('following_command', None)
         com_type = data.get("command_type", 'shell')
         com_interval_time = data.get("interval_time", -1)
