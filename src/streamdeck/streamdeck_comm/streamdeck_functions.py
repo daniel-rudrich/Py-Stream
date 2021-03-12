@@ -64,10 +64,16 @@ def run_key_command(model_streamdeckKey):
                 interval_shell_threads[key_command.id] = thread
                 thread.start()
             else:
-                process = subprocess.Popen(
-                    key_command.command_string.split(), stdout=subprocess.PIPE,
-                    cwd=key_command.active_directory)
-                print(process.communicate()[0].decode("utf-8"))
+                try:
+                    process = subprocess.Popen(
+                        key_command.command_string.split(),
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        cwd=key_command.active_directory)
+                    print(process.communicate()[0].decode("utf-8"))
+                except:
+                    print("An error occured while running the shell-code")
+
             key_command = key_command.following_command
         elif key_command.command_type == 'hotkey':
             hotkey_function(key_command.hotkeys)
@@ -99,10 +105,12 @@ def run_shell_interval(model_streamdeckKey, interval):
 
     command = model_streamdeckKey.command
     while(True):
-
-        process = subprocess.Popen(
-            command.command_string.split(), stdout=subprocess.PIPE,
-            cwd=command.active_directory)
+        try:
+            process = subprocess.Popen(
+                command.command_string.split(), stdout=subprocess.PIPE,
+                cwd=command.active_directory)
+        except:
+            print("An error occured while running the shell-code")
         value = process.communicate()[0].decode("utf-8")
         model_streamdeckKey.text = value
         deck = decks[model_streamdeckKey.streamdeck.serial_number]
