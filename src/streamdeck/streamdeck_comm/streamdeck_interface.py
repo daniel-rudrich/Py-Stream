@@ -3,12 +3,24 @@ from .streamdeck_functions import (
     get_streamdecks, init_streamdeck,
     update_key_image, update_key_change_callback, run_key_command,
     change_to_folder, update_streamdeck, check_deck_connection)
+from sys import platform as _platform
+import os
 """
 Initializes all connected streamdecks
 """
 
 
 def streamdecks_init():
+
+    # set correct backend for pynput
+    if _platform == "linux" or _platform == "linux2":
+        os.environ["PYNPUT_BACKEND"] = "xorg"
+    elif _platform == "darwin":
+        os.environ["PYNPUT_BACKEND"] = "darwin"
+    elif _platform == "win32":
+        os.environ["PYNPUT_BACKEND"] = "win32"
+    else:
+        os.environ["PYNPUT_BACKEND"] = "xorg"
     streamdecks = get_streamdecks()
     for deck in streamdecks:
         init_streamdeck(deck)

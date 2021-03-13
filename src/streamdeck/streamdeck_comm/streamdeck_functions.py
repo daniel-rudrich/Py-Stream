@@ -631,7 +631,6 @@ def init_streamdeck(deck):
         deck.deck_type(), get_serial_number(deck)))
 
     streamdeck_database_init(deck)
-
     global active_streamdeck
     active_streamdeck = Streamdeck.objects.filter(
         serial_number=get_serial_number(deck))[0]
