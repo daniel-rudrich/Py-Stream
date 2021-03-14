@@ -12,7 +12,6 @@ from timeit import default_timer as timer
 from fractions import Fraction
 from PIL import (Image, ImageSequence, ImageDraw,
                  ImageFont, UnidentifiedImageError)
-from pynput.keyboard import Key, Controller
 from StreamDeck.ImageHelpers import PILHelper
 from StreamDeck.DeviceManager import DeviceManager
 from StreamDeck.Transport.Transport import TransportError
@@ -76,7 +75,9 @@ def run_key_command(model_streamdeckKey):
 
             key_command = key_command.following_command
         elif key_command.command_type == 'hotkey':
-            hotkey_function(key_command.hotkeys)
+            # hotkeys cannot be executed on a raspberrypi without display
+            if os.uname() != "raspberrypi":
+                hotkey_function(key_command.hotkeys)
             key_command = key_command.following_command
         elif key_command.command_type == 'stopwatch':
             global stopwatch_threads
@@ -176,6 +177,7 @@ Presses given hotkeys on keyboard
 
 
 def hotkey_function(hotkeys):
+    from pynput.keyboard import Controller
     keys = [hotkeys.key1, hotkeys.key2,
             hotkeys.key3, hotkeys.key4, hotkeys.key5]
     parsedKeys = parse_keys(keys)
@@ -191,6 +193,7 @@ def hotkey_function(hotkeys):
 
 
 def parse_keys(keys):
+    from pynput.keyboard import Key
     parsedKeys = []
     key_dict = {
         "space": Key.space,
