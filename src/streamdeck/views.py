@@ -158,7 +158,7 @@ def command_create(request, id):
         com_command_string = data.get('command_string', "")
         com_following_command = data.get('following_command', None)
         com_type = data.get("command_type", 'shell')
-        com_interval_time = data.get("interval_time", -1)
+        com_time_value = data.get("time_value", -1)
         com_directory = data.get("active_directory", ".")
         if (com_type, com_type) not in Command.COMMAND_CHOICES:
             return HttpResponse("command type not valid", status=400)
@@ -175,7 +175,7 @@ def command_create(request, id):
         command = Command.objects.create(
             name=com_name, command_string=com_command_string,
             following_command=com_following_command,
-            interval_time=com_interval_time,
+            time_value=com_time_value,
             command_type=com_type, active_directory=com_directory)
 
         if com_hotkeys:
@@ -235,8 +235,8 @@ def command_detail(request, key_id, id):
             "command_string", command.command_string)
         command.active_directory = data.get(
             "active_directory", command.active_directory)
-        command.interval_time = data.get(
-            "interval_time", command.interval_time
+        command.time_value = data.get(
+            "time_value", command.interval_time
         )
         com_type = data.get("command_type", command.command_type)
         if (com_type, com_type) not in Command.COMMAND_CHOICES:

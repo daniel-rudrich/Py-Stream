@@ -26,7 +26,7 @@ class Command(models.Model):
     name = models.CharField(max_length=100, default='Command')
     command_string = models.TextField(blank=True, null=True)
     active_directory = models.TextField(default='.')
-    interval_time = models.IntegerField(blank=True, null=True, default=-1)
+    time_value = models.IntegerField(blank=True, null=True, default=0)
     hotkeys = models.ForeignKey(
         'Hotkeys', blank=True, null=True, on_delete=models.SET_NULL)
     following_command = models.ForeignKey(
@@ -35,7 +35,8 @@ class Command(models.Model):
     COMMAND_CHOICES = (
         ("shell", "shell"),
         ("hotkey", "hotkey"),
-        ("stopwatch", "stopwatch")
+        ("stopwatch", "stopwatch"),
+        ("timer", "timer")
     )
 
     command_type = models.CharField(max_length=9,

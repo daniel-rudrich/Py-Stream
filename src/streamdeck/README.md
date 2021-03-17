@@ -24,7 +24,7 @@ change text/title of key
 **PUT /key/\<int:id>/image_upload -> needs file for *image_source* in request.data**   
 change image of streamdeck key
 
-**PUT /key/\<int:id>/command name=_string_, command_string=_string_(,active_directory=_string_)(,command_type=_string_), (interval_time=_integer_), (hotkeys=_array of keys_)**  
+**PUT /key/\<int:id>/command name=_string_, command_string=_string_(,active_directory=_string_)(,command_type=_string_), (time_value=_integer_), (hotkeys=_array of keys_)**  
  add command to streamdeck key. The hotkeys need to be given in the following form e.g. : hotkeys= [{"key1": {"key":"Control", "location":1}}, {"key2": {"key":"f", "location":0}}] 
 
 **GET /key/\<int:id>/command/\<int:command_id>**  
