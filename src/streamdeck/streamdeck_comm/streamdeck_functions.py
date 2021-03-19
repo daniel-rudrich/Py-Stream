@@ -1,4 +1,5 @@
 import os
+import platform
 import subprocess
 from pathlib import Path
 from io import BytesIO
@@ -75,7 +76,7 @@ def run_key_command(model_streamdeckKey):
                     print("Error: %s" % str(e))
         elif key_command.command_type == 'hotkey':
             # hotkeys cannot be executed on a raspberrypi without display
-            if os.uname() != "raspberrypi":
+            if platform.uname() != "raspberrypi":
                 hotkey_function(key_command.hotkeys)
         elif key_command.command_type == 'stopwatch':
             global stopwatch_threads
@@ -156,6 +157,7 @@ def run_shell_interval(model_streamdeckKey, interval):
                 cwd=command.active_directory)
         except Exception as e:
             print("Error: %s" % str(e))
+            break
         value = process.communicate()[0].decode("utf-8")
         model_streamdeckKey.text = value
         deck = decks[model_streamdeckKey.streamdeck.serial_number]
