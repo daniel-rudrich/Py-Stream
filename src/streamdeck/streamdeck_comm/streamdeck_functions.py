@@ -71,8 +71,8 @@ def run_key_command(model_streamdeckKey):
                         stderr=subprocess.PIPE,
                         cwd=key_command.active_directory)
                     print(process.communicate()[0].decode("utf-8"))
-                except:
-                    print("An error occured while running the shell-code")
+                except Exception as e:
+                    print("Error: %s" % str(e))
         elif key_command.command_type == 'hotkey':
             # hotkeys cannot be executed on a raspberrypi without display
             if os.uname() != "raspberrypi":
@@ -154,8 +154,8 @@ def run_shell_interval(model_streamdeckKey, interval):
             process = subprocess.Popen(
                 command.command_string.split(), stdout=subprocess.PIPE,
                 cwd=command.active_directory)
-        except:
-            print("An error occured while running the shell-code")
+        except Exception as e:
+            print("Error: %s" % str(e))
         value = process.communicate()[0].decode("utf-8")
         model_streamdeckKey.text = value
         deck = decks[model_streamdeckKey.streamdeck.serial_number]
@@ -471,7 +471,7 @@ def render_key_image(
 
     if(not blank_image_flag and icon.is_animated):
         # create frames for animation
-        frames = create_animation_frames(deck, icon)
+        frames = create_animation_frames(deck, icon, label_text, font_filename)
         animated_images[key_number] = frames
         return None
     else:
@@ -546,7 +546,7 @@ in the StreamDeck device's native image format.
 """
 
 
-def create_animation_frames(deck, image):
+def create_animation_frames(deck, image, label_text, font_filename):
     icon_frames = list()
 
     # Iterate through each animation frame of the source image
@@ -554,6 +554,10 @@ def create_animation_frames(deck, image):
         # Create new key image of the correct dimensions, black background.
         frame_image = PILHelper.create_scaled_image(deck, frame)
 
+        draw = ImageDraw.Draw(frame_image)
+        font = ImageFont.truetype(font_filename, 14)
+        draw.text((frame_image.width / 2, frame_image.height - 10),
+                  text=label_text, font=font, anchor="ms", fill='white')
         # Preconvert the generated image to the native format of the StreamDeck
         # so we don't need to keep converting it when showing it on the device.
         native_frame_image = PILHelper.to_native_format(deck, frame_image)
