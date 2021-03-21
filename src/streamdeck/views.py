@@ -236,7 +236,7 @@ def command_detail(request, key_id, id):
         command.active_directory = data.get(
             "active_directory", command.active_directory)
         command.time_value = data.get(
-            "time_value", command.interval_time
+            "time_value", command.time_value
         )
         com_type = data.get("command_type", command.command_type)
         if (com_type, com_type) not in Command.COMMAND_CHOICES:

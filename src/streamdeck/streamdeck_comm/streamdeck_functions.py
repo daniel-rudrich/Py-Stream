@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 ASSETS_PATH = os.path.join(BASE_DIR, "assets")
 MEDIA_PATH = os.path.join(BASE_DIR, "media")
 
-FRAMES_PER_SECOND = 30
+FRAMES_PER_SECOND = 10
 
 active_streamdeck = None
 active_folder = "default"
