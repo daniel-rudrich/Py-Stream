@@ -31,13 +31,11 @@
       <b-form-select v-model="newCommandType" :options="[{value: 'shell', text: '(ba)sh'}, {value: 'hotkey', text: 'Hotkey'}]"></b-form-select>
       <br>
       <br>
-      <b-form-input v-model="newCommandName" placeholder="Enter command name"></b-form-input>
+      <b-form-input v-model="newCommandName" placeholder="Enter command name (optional)"></b-form-input>
       <br>
       <b-form-input v-show="newCommandType === 'shell'" v-model="newCommandCommand" placeholder="Enter command"></b-form-input>
-      <b-form-input v-show="newCommandType === 'hotkey'" v-model="newCommandKeybind" placeholder="Press key" @keydown="keydown($event)" @keyup="keyup($event)"></b-form-input>
+      <span v-show="newCommandType === 'hotkey'" >You can edit the hotkeys after adding the command.</span>
       <br>
-      Keybind: {{ newCommandKeys.pressedString }}<br>
-      Keycodes: {{ newCommandKeys.pressed }}
     </b-modal>
   </div>
 </template>
@@ -62,13 +60,6 @@ export default {
       newCommandName: '',
       newCommandCommand: 'echo New',
       newCommandKeybind: '',
-      newCommandKeys: {
-        finished: true,
-        pressed: [],
-        pressedString: [],
-        pressedLocation: [],
-        first: null,
-      }
     }
   },
   mounted() {
@@ -121,39 +112,12 @@ export default {
         if(newCmd.command_type === 'shell') {
           newCmd.command_string = this.newCommandCommand
         } else if(newCmd.command_type === 'hotkey') {
-          newCmd.hotkeys = []
-          for(let i = 0; i < this.newCommandKeys.pressedString.length; i++) {
-            const key = {}
-            key['key' + (i + 1)] = {
-                key: this.newCommandKeys.pressedString[i],
-                location: this.newCommandKeys.pressedLocation[i]
-              }
-            newCmd.hotkeys.push(key)
-          }
+          newCmd.hotkeys = [{"key1":{"key":"Control","location":1}},{"key2":{"key":"1","location":0}}]
         }
         console.log(newCmd)
         await axios.put('key/' + this.payload.id + '/command', newCmd)
         this.$emit('folder-changed')
       },
-      keydown(event) {
-        if(this.newCommandKeys.finished) {
-          this.newCommandKeys.first = event.keyCode
-          this.newCommandKeys.finished = false
-          this.newCommandKeys.pressed = [event.keyCode]
-          this.newCommandKeys.pressedString = [event.key]
-          this.newCommandKeys.pressedLocation = [event.location]
-        } else if (!this.newCommandKeys.pressed.includes(event.keyCode)) {
-          this.newCommandKeys.pressed.push(event.keyCode)
-          this.newCommandKeys.pressedString.push(event.key)
-          this.newCommandKeys.pressedLocation.push(event.location)
-        }
-      },
-      keyup(event) {
-        if(this.newCommandKeys.finished === false && event.keyCode === this.newCommandKeys.first) {
-          this.newCommandKeys.finished = true
-          this.newCommandKeybind = ''
-        }
-      }
   }
 }
 </script>
