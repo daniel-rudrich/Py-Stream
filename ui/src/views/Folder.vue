@@ -51,13 +51,12 @@ export default {
     }
   },
   mounted() {
-    const curDeckDefaultFolder = this.$store.getters.activeDeckDefaultFolder
-    this.loadFolder(curDeckDefaultFolder)
+    this.loadFolder()
   },
   methods: {
-    async loadFolder(curDeckDefaultFolder) {
+    async loadFolder() {
       const folderId = this.$route.params.folder || 1
-      if(curDeckDefaultFolder === folderId) {
+      if(this.$store.getters.activeDeckDefaultFolder === folderId) {
         const folder = await axios.get('streamdecks/' + this.$store.state.activeDeck + '/folders/' + folderId)
         this.name = folder.data.name
         this.keys = folder.data.keys
@@ -69,7 +68,9 @@ export default {
         try {
           folder = await axios.get('streamdecks/' + this.$store.state.activeDeck + '/folders/' + folderId)
         } catch(err) {
-          this.$router.push('/' + curDeckDefaultFolder)
+          console.log('pushing to ' + '/' + this.$store.getters.activeDeckDefaultFolder)
+          this.$router.push('/' + this.$store.getters.activeDeckDefaultFolder)
+          return
         }
         this.name = folder.data.name
         this.keys = folder.data.keys

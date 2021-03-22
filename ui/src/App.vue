@@ -1,7 +1,7 @@
 <template>
   <div id="app" v-if="loaded">
     <div id="nav">
-      <router-link to="/1">StreamDeck</router-link> |
+      <router-link to="/1">Folders</router-link> |
       <router-link to="/settings">Settings</router-link>
       
     </div>
@@ -10,7 +10,6 @@
 </template>
 
 <script>
-import axios from 'axios'
 
 export default {
   data() {
@@ -25,15 +24,7 @@ export default {
     //this.loadModels()
   },
   methods: {
-    async loadModels() {
-      axios.get('http://localhost:8000/streamdeckmodel/')
-        .then((response) => {
-          this.$store.commit('set', ['models', response.data])
-        })
-        .catch((error) => {
-          console.log(error);
-        })
-    }
+    
   }
 }
 </script>
