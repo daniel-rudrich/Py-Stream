@@ -81,12 +81,14 @@ def streamdeck_folders(request, id):
 
 def streamdeck_folder(request, deck_id, id):
     try:
-        Streamdeck.objects.get(id=deck_id)
+        streamdeck = Streamdeck.objects.get(id=deck_id)
     except Streamdeck.DoesNotExist:
         return HttpResponse(status=404)
 
     try:
-        folder = Folder.objects.get(id=id)
+        folder_ids = StreamdeckKey.objects.filter(
+            streamdeck=streamdeck).values("folder").distinct()
+        folder = Folder.objects.filter(id__in=folder_ids).get(id=id)
     except Folder.DoesNotExist:
         return HttpResponse(status=404)
 
