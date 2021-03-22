@@ -83,6 +83,7 @@ export default {
         finished: true,
         pressed: [],
         pressedString: [],
+        pressedLocation: [],
         first: null,
       }
     }
@@ -115,7 +116,7 @@ export default {
             const key = {}
             key['key' + (i + 1)] = {
                 key: this.newCommandKeys.pressedString[i],
-                location:i
+                location: this.newCommandKeys.pressedLocation[i]
               }
             hotkeys.push(key)
           }
@@ -151,9 +152,11 @@ export default {
         this.newCommandKeys.finished = false
         this.newCommandKeys.pressed = [event.keyCode]
         this.newCommandKeys.pressedString = [event.key]
+        this.newCommandKeys.pressedLocation = [event.location]
       } else if (!this.newCommandKeys.pressed.includes(event.keyCode)) {
         this.newCommandKeys.pressed.push(event.keyCode)
         this.newCommandKeys.pressedString.push(event.key)
+        this.newCommandKeys.pressedLocation.push(event.location)
       }
     },
     keyup(event) {
