@@ -1,24 +1,34 @@
 <template>
   <div v-if="payload">
     <div
-      id="deck-btn"
-      :style="[$store.getters.selected !== payload.id ?
-      {border: '1.5px solid black'} :
-      {border: '4px solid red'}]"
-      @click="keyClicked"
-    > 
-      <img
-        :src="image"
-        style="max-width:100%; max-height:100%;"
-      >
+          id="deck-btn"
+          :style="[$store.getters.selected !== payload.id ?
+          {border: '1.5px solid black'} :
+          {border: '4px solid red'}]"
+          @click="keyClicked"
+        > 
+      <div class="d-flex flex-column">
+        <div>
+          
+            <img
+              :src="image"
+              style="max-width:65%; max-height:65%;"
+            >
+            
+        </div>
+        <div>
+          <span
+              
+              :style="[payload.change_to_folder ?
+              {color: 'blue'} :
+              {}]"
+            >
+              {{ payload.text }}
+            </span>
+        </div>
+      </div>
+    
     </div>
-    <span
-      :style="[payload.change_to_folder ?
-      {color: 'blue'} :
-      {}]"
-    >
-      {{ payload.text || 'None' }}
-    </span>
   </div>
   
 </template>
@@ -31,7 +41,6 @@ export default {
   ],
   data() {
     return {
-       
     }
   },
   computed: {
@@ -52,16 +61,15 @@ export default {
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 #deck-btn {
-    height: 70px;
-    width: 70px;
+    height: 80px;
+    width: 80px;
     border-radius: 13px;
-    margin-bottom: 15px;
-    /*background-image: url('https://www.elgato.com/themes/custom/smalcode/key-creator/assets/image_pool/sd3/btn_custom_folder.svg');*/
+    margin-bottom: 20px;
     background-position: center; /* Center the image */
     background-repeat: no-repeat; /* Do not repeat the image */
     background-size: cover; /* Resize the background image to cover the entire container */
+    overflow-x: hidden;
 }
 </style>
