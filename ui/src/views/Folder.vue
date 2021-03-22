@@ -51,17 +51,33 @@ export default {
     }
   },
   mounted() {
-    this.loadFolder()
+    const curDeckDefaultFolder = this.$store.getters.activeDeckDefaultFolder
+    this.loadFolder(curDeckDefaultFolder)
   },
   methods: {
-    async loadFolder() {
+    async loadFolder(curDeckDefaultFolder) {
       const folderId = this.$route.params.folder || 1
-      const folder = await axios.get('streamdecks/' + this.$store.state.activeDeck + '/folders/' + folderId)
-      this.name = folder.data.name
-      this.keys = folder.data.keys
-      if(this.keys.find(key => key.id === this.$store.state.selected) === undefined) {
-        this.$store.commit('selectKey', this.keys[0].id)
+      if(curDeckDefaultFolder === folderId) {
+        const folder = await axios.get('streamdecks/' + this.$store.state.activeDeck + '/folders/' + folderId)
+        this.name = folder.data.name
+        this.keys = folder.data.keys
+        if(this.keys.find(key => key.id === this.$store.state.selected) === undefined) {
+          this.$store.commit('selectKey', this.keys[0].id)
+        }
+      } else {
+        let folder
+        try {
+          folder = await axios.get('streamdecks/' + this.$store.state.activeDeck + '/folders/' + folderId)
+        } catch(err) {
+          this.$router.push('/' + curDeckDefaultFolder)
+        }
+        this.name = folder.data.name
+        this.keys = folder.data.keys
+        if(this.keys.find(key => key.id === this.$store.state.selected) === undefined) {
+          this.$store.commit('selectKey', this.keys[0].id)
+        }
       }
+      
     }
   },
   watch: {

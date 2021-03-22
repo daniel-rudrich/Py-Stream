@@ -59,6 +59,9 @@ export default new Vuex.Store({
     activeDeck: state => {
       return state.decks.find(deck => deck.id === state.activeDeck)
     },
+    activeDeckDefaultFolder: state => {
+      return (state.decks.find(deck => deck.id === state.activeDeck)).default_folder.id
+    },
     deckRows: (state, getters) => getters.activeDeck.streamdeck_model.key_count / getters.activeDeck.streamdeck_model.keys_per_row, 
     deckColumns: (state, getters) => getters.activeDeck.streamdeck_model.keys_per_row,
     selectedCommands: state => {
