@@ -48,6 +48,22 @@
         <b-button variant="danger" size="sm" @click="deleteCommand">Delete</b-button>
       </b-col>
     </b-row>
+    <b-row v-if="payload.command_type === 'stopwatch'">
+      <b-col>
+        {{ payload.command_type }}
+      </b-col>
+      <b-col cols="4">
+        <b-form-input v-model="payload.name" placeholder="Command name"></b-form-input>
+      </b-col>
+      <b-col  cols="4">
+        ---
+      </b-col>
+      <b-col>
+        <b-button variant="success" size="sm" @click="saveChanges">Save</b-button>
+        &nbsp;
+        <b-button variant="danger" size="sm" @click="deleteCommand">Delete</b-button>
+      </b-col>
+    </b-row>
   </div> 
 </template>
 

@@ -29,17 +29,13 @@
     &nbsp;
     <b-button variant="primary" @click="addFolder" v-show="payload.change_to_folder === null">Add folder</b-button>
     <br>
-    <br>
-    {{ payload }}
-
-    <br><br>
-    {{ commands }}
 
     <b-modal id="add-command" title="Add command" @ok="addCommand()">
       <b-form-select v-model="newCommandType" :options="[
         {value: 'shell', text: '(ba)sh'},
         {value: 'hotkey', text: 'Hotkey'},
-        {value: 'timer', text: 'Timer'}
+        {value: 'timer', text: 'Timer'},
+        {value: 'stopwatch', text: 'Stopwatch'}
       ]"></b-form-select>
       <br>
       <br>
