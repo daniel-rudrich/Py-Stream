@@ -4,6 +4,14 @@
     <br>
     <b-form-input v-model="payload.text" placeholder="Enter key text" maxlength="10"></b-form-input>
     <br>
+    <b-form-checkbox
+      v-model="payload.clock"
+      :value="true"
+      :unchecked-value="false"
+    >
+      Clock
+    </b-form-checkbox>
+    <br>
     <input type="file" accept="image/*" @change="changeNewImageEvent($event)" id="file-input">
     <a href="javascript:void(0)" @click="resetNewImage">Reset</a>
     <br>
@@ -28,13 +36,18 @@
     {{ commands }}
 
     <b-modal id="add-command" title="Add command" @ok="addCommand()">
-      <b-form-select v-model="newCommandType" :options="[{value: 'shell', text: '(ba)sh'}, {value: 'hotkey', text: 'Hotkey'}]"></b-form-select>
+      <b-form-select v-model="newCommandType" :options="[
+        {value: 'shell', text: '(ba)sh'},
+        {value: 'hotkey', text: 'Hotkey'},
+        {value: 'timer', text: 'Timer'}
+      ]"></b-form-select>
       <br>
       <br>
       <b-form-input v-model="newCommandName" placeholder="Enter command name (optional)"></b-form-input>
       <br>
       <b-form-input v-show="newCommandType === 'shell'" v-model="newCommandCommand" placeholder="Enter command"></b-form-input>
       <span v-show="newCommandType === 'hotkey'" >You can edit the hotkeys after adding the command.</span>
+      <b-form-input v-show="newCommandType === 'timer'" v-model="newCommandTimer" type="number" placeholder="Seconds"></b-form-input>
       <br>
     </b-modal>
   </div>
@@ -51,7 +64,6 @@ export default {
   ],
   components: {
       Command
-    
   },
   data() {
     return {
@@ -60,6 +72,7 @@ export default {
       newCommandName: '',
       newCommandCommand: 'echo New',
       newCommandKeybind: '',
+      newCommandTimer: 5,
     }
   },
   mounted() {
@@ -81,7 +94,8 @@ export default {
       async saveChanges() {
         const promises = []
         promises.push(axios.patch('key/' + this.payload.id, {
-            text: this.payload.text
+            text: this.payload.text,
+            clock: this.payload.clock || false
         }))
         if(this.newImage !== null) {
           promises.push(this.uploadNewImage())
@@ -113,6 +127,8 @@ export default {
           newCmd.command_string = this.newCommandCommand
         } else if(newCmd.command_type === 'hotkey') {
           newCmd.hotkeys = [{"key1":{"key":"Control","location":1}},{"key2":{"key":"1","location":0}}]
+        } else if(newCmd.command_type === 'timer') {
+          newCmd.time_value = parseInt(this.newCommandTimer)
         }
         console.log(newCmd)
         await axios.put('key/' + this.payload.id + '/command', newCmd)

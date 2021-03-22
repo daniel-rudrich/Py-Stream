@@ -32,6 +32,22 @@
         <b-button variant="danger" size="sm" @click="deleteCommand">Delete</b-button>
       </b-col>
     </b-row>
+    <b-row v-if="payload.command_type === 'timer'">
+      <b-col>
+        {{ payload.command_type }}
+      </b-col>
+      <b-col cols="4">
+        <b-form-input v-model="payload.name" placeholder="Command name"></b-form-input>
+      </b-col>
+      <b-col  cols="4">
+        <b-form-input v-model="payload.timer_value" placeholder="Seconds"></b-form-input>
+      </b-col>
+      <b-col>
+        <b-button variant="success" size="sm" @click="saveChanges">Save</b-button>
+        &nbsp;
+        <b-button variant="danger" size="sm" @click="deleteCommand">Delete</b-button>
+      </b-col>
+    </b-row>
   </div> 
 </template>
 
@@ -90,6 +106,7 @@ export default {
       const payloadChanged = {
         name: this.payload.name,
         command_string: this.payload.command_string,
+        timer_value: this.payload.timer_value,
         hotkeys: hotkeys
       }
       await axios.patch('key/' + this.keyid + '/command/' + this.payload.id, payloadChanged)
