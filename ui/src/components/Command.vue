@@ -24,8 +24,7 @@
         <b-form-input v-model="payload.name" placeholder="Command name"></b-form-input>
       </b-col>
       <b-col  cols="4">
-        <b-form-input :placeholder="keys" @keydown="keydown($event)" @keyup="keyup($event)"></b-form-input>
-        {{ keys }}
+        <b-button :variant="listeningButtonColor" size="sm" @click="keyListenerBtn">{{ keys }}</b-button>
       </b-col>
       <b-col>
         <b-button variant="success" size="sm" @click="saveChanges">Save</b-button>
@@ -47,6 +46,7 @@ export default {
   ],
   data() {
     return {
+      listening: false,
       newCommandKeys: {
         finished: true,
         pressed: [],
@@ -61,18 +61,19 @@ export default {
   computed: {
     keys() {
       if(this.newCommandKeys.pressedString.length > 0) {
-        let keys = ''
-        this.newCommandKeys.pressedString.forEach(element => keys += ' + ' + element)
-        return keys
+        return this.newCommandKeys.pressedString.join(' + ')
       } else {
         let keys = ''
-        if(this.payload.hotkeys.key1) keys += this.payload.hotkeys.key1 + ' + '
-        if(this.payload.hotkeys.key2) keys += this.payload.hotkeys.key2 + ' + '
-        if(this.payload.hotkeys.key3) keys += this.payload.hotkeys.key3 + ' + '
-        if(this.payload.hotkeys.key4) keys += this.payload.hotkeys.key4 + ' + '
-        if(this.payload.hotkeys.key5) keys += this.payload.hotkeys.key5 + ' + '
+        if(this.payload.hotkeys.key1) keys += this.payload.hotkeys.key1
+        if(this.payload.hotkeys.key2) keys += ' + ' + this.payload.hotkeys.key2
+        if(this.payload.hotkeys.key3) keys += ' + ' + this.payload.hotkeys.key3
+        if(this.payload.hotkeys.key4) keys += ' + ' + this.payload.hotkeys.key4
+        if(this.payload.hotkeys.key5) keys += ' + ' + this.payload.hotkeys.key5
         return keys
       }
+    },
+    listeningButtonColor() {
+      return this.listening ? 'warning' : 'secondary'
     }
   },
   methods: {
@@ -92,10 +93,24 @@ export default {
         hotkeys: hotkeys
       }
       await axios.patch('key/' + this.keyid + '/command/' + this.payload.id, payloadChanged)
+      this.newCommandKeys.pressed = []
+      this.newCommandKeys.pressedString = []
+      this.$emit('folder-changed')
     },
     async deleteCommand() {
       await axios.delete('key/' + this.keyid + '/command/' + this.payload.id)
       this.$emit('folder-changed')
+    },
+    keyListenerBtn() {
+      if(!this.listening) {
+        window.addEventListener('keydown', this.keydown)
+        window.addEventListener('keyup', this.keyup)
+        this.listening = true
+      } else {
+        window.removeEventListener('keydown', this.keydown)
+        window.removeEventListener('keyup', this.keyup)
+        this.listening = false
+      }
     },
     keydown(event) {
       if(this.newCommandKeys.finished) {
@@ -112,7 +127,15 @@ export default {
       if(this.newCommandKeys.finished === false && event.keyCode === this.newCommandKeys.first) {
         this.newCommandKeys.finished = true
         this.newCommandKeybind = ''
+        this.keyListenerBtn()
       }
+    },
+
+
+
+
+    changeHotkey() {
+
     }
   }
 }
