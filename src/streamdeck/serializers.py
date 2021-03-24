@@ -12,7 +12,8 @@ class StreamdeckKeySerializer(serializers.ModelSerializer):
     class Meta:
         model = StreamdeckKey
         fields = ['id', 'number', 'text', 'image_source',
-                  'folder', 'streamdeck', 'Commands', 'change_to_folder']
+                  'folder', 'streamdeck', 'Commands', 'change_to_folder',
+                  'clock']
         depth = 5
 
     def get_Commands(self, obj):
@@ -40,7 +41,7 @@ class CommandSerializer(serializers.ModelSerializer):
         model = Command
         fields = ['id', 'name', 'command_string',
                   'hotkeys', 'following_command', 'active_directory',
-                  'command_type']
+                  'command_type', 'time_value']
         depth = 5
 
 

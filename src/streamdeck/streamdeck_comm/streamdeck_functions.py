@@ -48,8 +48,7 @@ def check_deck_connection(model_streamdeck):
 
 
 """
-Runs the command of a streamdeck key in a shell
-and prints the outcome
+Runs the command of a streamdeck key
 """
 
 
@@ -59,11 +58,17 @@ def run_key_command(model_streamdeckKey):
     while key_command:
         if key_command.command_type == 'shell':
             if key_command.time_value > 0:
-                thread = threading.Thread(target=run_shell_interval,
-                                          args=[model_streamdeckKey,
-                                                key_command.time_value])
-                interval_shell_threads[key_command.id] = thread
-                thread.start()
+                global interval_shell_threads
+                if key_command.id not in interval_shell_threads:
+                    thread = threading.Thread(target=run_shell_interval,
+                                              args=[model_streamdeckKey,
+                                                    key_command.time_value])
+                    interval_shell_threads[key_command.id] = thread
+                    thread.start()
+                else:
+                    thread = interval_shell_threads[key_command.id]
+                    del interval_shell_threads[key_command.id]
+                    thread.join()
             else:
                 try:
                     process = subprocess.Popen(
@@ -150,6 +155,7 @@ run shell command every 'intervall' seconds and save result as text in key
 def run_shell_interval(model_streamdeckKey, interval):
 
     command = model_streamdeckKey.command
+    old_text = model_streamdeckKey.text
     while(True):
         try:
             process = subprocess.Popen(
@@ -169,6 +175,8 @@ def run_shell_interval(model_streamdeckKey, interval):
             time.sleep(1)
 
         if command.id not in interval_shell_threads:
+            model_streamdeckKey.text = old_text
+            update_key_image(deck, model_streamdeckKey, False)
             break
 
 
@@ -206,11 +214,9 @@ def key_clock(deck, streamdeckkey):
         streamdeckkey.text = current_time
         update_key_image(deck, streamdeckkey, True)
 
-        # exit while loop if 60 seconds are over or the thread
-        # for this clock needs to be stopped
-        start_pause = datetime.now()
+        # exit while loop when the minute switches
         while(key_id in clock_threads
-              and (datetime.now()-start_pause).seconds < 60):
+              and datetime.now().strftime("%H:%M") == current_time):
             time.sleep(1)
 
         if key_id not in clock_threads:
@@ -467,11 +473,12 @@ def render_key_image(
         blank_image_flag = True
         icon = icon_filename
     except UnidentifiedImageError:
+        # should only occur for svgs
         out = BytesIO()
         cairosvg.svg2png(url=icon_filename, write_to=out)
         icon = Image.open(out)
 
-    if(not blank_image_flag and icon.is_animated):
+    if(not blank_image_flag and getattr(icon, "is_animated", False)):
         # create frames for animation
         frames = create_animation_frames(deck, icon, label_text, font_filename)
         animated_images[key_number] = frames
