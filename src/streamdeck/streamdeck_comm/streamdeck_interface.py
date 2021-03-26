@@ -1,8 +1,9 @@
-
 from .streamdeck_functions import (
     get_streamdecks, init_streamdeck,
-    update_key_image, update_key_change_callback, run_key_command,
-    change_to_folder, update_streamdeck, check_deck_connection)
+    update_key_change_callback, run_key_command,
+    change_to_folder, update_streamdeck, check_deck_connection,
+    key_in_folder, get_deck)
+from .image_handling import update_key_image
 from sys import platform as _platform
 import os
 """
@@ -43,8 +44,10 @@ the key in the database
 """
 
 
-def update_key_display(streamdeckKey):
-    update_key_image(None, streamdeckKey, False)
+def update_key_display(streamdeckKey, state=False):
+    if key_in_folder(streamdeckKey):
+        deck = get_deck(streamdeckKey)
+        update_key_image(deck, streamdeckKey, state)
 
 
 """

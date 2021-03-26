@@ -25,16 +25,20 @@ ipaddr==2.2.0
 lockfile==0.12.2
 mccabe==0.6.1
 msgpack==0.6.2
+npm==0.1.1
+optional-django==0.1.0
 packaging==20.3
 pep517==0.8.2
 Pillow==8.1.0
 progress==1.5
+psutil==5.8.0
 pycodestyle==2.6.0
 pycparser==2.20
 pyflakes==2.2.0
 Pygments==2.7.4
 pynput==1.7.3
 pyparsing==2.4.6
+Pyphen==0.10.0
 PySocks==1.7.1
 python-xlib==0.29
 pytoml==0.1.21
@@ -48,4 +52,5 @@ streamdeck==0.8.2
 tinycss2==1.1.0
 toml==0.10.2
 urllib3==1.25.8
+WeasyPrint==52.4
 webencodings==0.5.1
