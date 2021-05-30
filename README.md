@@ -1,3 +1,18 @@
-# Application for the Elgato Stream Deck
+# Streamdeck Application
 
-This applications provides a linux and windows compatible graphical user interface to interact and use the elgato stream deck
+This is an application for the Elgato Stream Deck. 
+
+## Installation
+
+TODO
+
+## Usage
+
+TODO
+
+## Contributing
+[Contributing](./CONTRIBUTING.md)
+
+
+## License
+[MIT](./LICENSE)
