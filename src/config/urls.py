@@ -24,7 +24,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('streamdeck.urls')),
     # path('', include('streamdeck.urls')),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + static(settings.FRONTEND_URL, document_root=settings.FRONTEND_ROOT)
 
 # initialize connection to streamdeck
 if 'runserver' in sys.argv:
