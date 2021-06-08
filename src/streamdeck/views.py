@@ -395,7 +395,7 @@ def create_folder(request, key_id):
                     number=i, folder=folder,
                     streamdeck=streamdeckKey.streamdeck,
                     change_to_folder=streamdeckKey.folder,
-                    image_source="images/return-button.png")
+                    image_source="assets/return-button.png")
             else:
                 new_key = StreamdeckKey.objects.create(
                     number=i, folder=folder,

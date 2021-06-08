@@ -48,4 +48,4 @@ venv/
 .vscode/
 media/
 frontend/
-streamdeck/migrations
+migrations/
