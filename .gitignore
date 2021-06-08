@@ -48,4 +48,4 @@ venv/
 .vscode/
 media/
 frontend/
-package.lock.json
+streamdeck/migrations
