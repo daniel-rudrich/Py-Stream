@@ -32,12 +32,12 @@ def streamdeck_list(request):
 @csrf_exempt
 def streamdeck_detail(request, id):
     """
-    Retrieve, update or delete a code snippet
+    Change brightness or name of stream deck
     """
     try:
         streamdeck = Streamdeck.objects.get(id=id)
     except Streamdeck.DoesNotExist:
-        return HttpResponse(status=404)
+        return HttpResponse(f"Stream deck with id {id} not found", status=404)
 
     if request.method == 'GET':
         serializer = StreamdeckSerializer(streamdeck)
@@ -64,12 +64,12 @@ def streamdeck_detail(request, id):
 @csrf_exempt
 def streamdeck_folders(request, id):
     """
-    List all folder of a streamdeck
+    List all folders of a streamdeck
     """
     try:
         streamdeck = Streamdeck.objects.get(id=id)
     except Streamdeck.DoesNotExist:
-        return HttpResponse(status=404)
+        return HttpResponse(f"Stream deck with id {id} not found", status=404)
 
     if request.method == 'GET':
         folder_ids = StreamdeckKey.objects.filter(
@@ -83,14 +83,14 @@ def streamdeck_folder(request, deck_id, id):
     try:
         streamdeck = Streamdeck.objects.get(id=deck_id)
     except Streamdeck.DoesNotExist:
-        return HttpResponse(status=404)
+        return HttpResponse(f"Stream deck with id {deck_id} not found", status=404)
 
     try:
         folder_ids = StreamdeckKey.objects.filter(
             streamdeck=streamdeck).values("folder").distinct()
         folder = Folder.objects.filter(id__in=folder_ids).get(id=id)
     except Folder.DoesNotExist:
-        return HttpResponse(status=404)
+        return HttpResponse(f"Folder with id {id} not found", status=404)
 
     if request.method == 'GET':
         serializer = FolderSerializer(folder)
@@ -103,7 +103,7 @@ def key_detail(request, id):
     try:
         streamdeckKey = StreamdeckKey.objects.get(id=id)
     except StreamdeckKey.DoesNotExist:
-        return HttpResponse(status=404)
+        return HttpResponse(f"Stream deck key with id {id} not found", status=404)
 
     if request.method == 'GET':
         serializer = StreamdeckKeySerializer(streamdeckKey)
@@ -129,7 +129,7 @@ def key_image_upload(request, id):
     try:
         streamdeckKey = StreamdeckKey.objects.get(id=id)
     except StreamdeckKey.DoesNotExist:
-        return HttpResponse(status=404)
+        return HttpResponse(f"Stream deck key with id {id} not found", status=404)
 
     if request.method == 'PUT':
         serializer = StreamdeckKeyImageSerializer(
@@ -140,7 +140,7 @@ def key_image_upload(request, id):
 
             if check_connection(streamdeckKey.streamdeck):
                 update_key_display(streamdeckKey)
-            return HttpResponse(serializer.data)
+            return HttpResponse("Image uploaded successfully", serializer.data)
 
         return HttpResponse(status=404)
 
@@ -151,7 +151,7 @@ def command_create(request, id):
     try:
         streamdeckKey = StreamdeckKey.objects.get(id=id)
     except StreamdeckKey.DoesNotExist:
-        return HttpResponse(status=404)
+        return HttpResponse(f"Stream deck key with id {id} not found", status=404)
 
     if request.method == 'PUT':
         data = JSONParser().parse(request)
@@ -163,7 +163,7 @@ def command_create(request, id):
         com_time_value = data.get("time_value", -1)
         com_directory = data.get("active_directory", ".")
         if (com_type, com_type) not in Command.COMMAND_CHOICES:
-            return HttpResponse("command type not valid", status=400)
+            return HttpResponse("Command type not valid", status=400)
 
         hotkeys = data.get("hotkeys", None)
         com_hotkeys = None
@@ -207,7 +207,7 @@ def command_detail(request, key_id, id):
     try:
         streamdeckKey = StreamdeckKey.objects.get(id=key_id)
     except StreamdeckKey.DoesNotExist:
-        return HttpResponse("streamdeckKey could not be found", status=404)
+        return HttpResponse(f"Stream deck key with id {id} not found", status=404)
 
     # command needs to be attached to the key
 
@@ -218,7 +218,7 @@ def command_detail(request, key_id, id):
         command = command.following_command
 
     if id not in ids:
-        return HttpResponse("command not found under this key", status=404)
+        return HttpResponse(f"Command with id {id} not found under this stream deck key", status=404)
 
     try:
         command = Command.objects.get(id=id)
@@ -244,16 +244,6 @@ def command_detail(request, key_id, id):
         if (com_type, com_type) not in Command.COMMAND_CHOICES:
             return HttpResponse("command type not valid", status=400)
         command.command_type = com_type
-        following_command_id = data.get("following_command", None)
-        if following_command_id:
-            try:
-                following_command = Command.objects.get(
-                    id=following_command_id)
-            except Command.DoesNotExist:
-                return HttpResponse("The following_command id does not lead "
-                                    "to an existing command", status=404)
-            if following_command:
-                command.following_command = following_command
 
         hotkeysJson = data.get("hotkeys", None)
         if hotkeysJson:
@@ -268,7 +258,7 @@ def command_detail(request, key_id, id):
 
     if request.method == 'DELETE':
         command.delete()
-        return HttpResponse(status=204)
+        return HttpResponse("command deleted successfully", status=204)
 
 
 # convert received json to a hotkeys object
@@ -323,7 +313,7 @@ def hotkeys_detail(request, key_id, command_id):
     try:
         streamdeckKey = StreamdeckKey.objects.get(id=key_id)
     except StreamdeckKey.DoesNotExist:
-        return HttpResponse("streamdeckKey could not be found", status=404)
+        return HttpResponse(f"Stream deck key with id {key_id} not found",  status=404)
 
     # command needs to be attached to the key
 
@@ -334,7 +324,7 @@ def hotkeys_detail(request, key_id, command_id):
         command = command.following_command
 
     if command_id not in ids:
-        return HttpResponse("command not found under this key", status=404)
+        return HttpResponse(f"Command with id {command_id}not found under this key", status=404)
 
     try:
         command = Command.objects.get(id=command_id)
@@ -375,11 +365,13 @@ def create_folder(request, key_id):
     try:
         streamdeckKey = StreamdeckKey.objects.get(id=key_id)
     except StreamdeckKey.DoesNotExist:
-        return HttpResponse("streamdeckKey could not be found", status=404)
+        return HttpResponse(f"Stream deck key with id {id} not found", status=404)
 
     if request.method == 'PUT':
         data = JSONParser().parse(request)
 
+        if streamdeckKey.change_to_folder is not None:
+            return HttpResponse("This stream deck key already leads to a folder!", status=403)
         folder_name = data["name"]
 
         folder = Folder.objects.create(name=folder_name)
@@ -408,9 +400,9 @@ def create_folder(request, key_id):
     if request.method == 'DELETE':
         if streamdeckKey.change_to_folder:
             streamdeckKey.change_to_folder.delete()
-            return HttpResponse(status=204)
+            return HttpResponse("folder deleted succesfully", status=204)
         else:
-            return HttpResponse(status=404)
+            return HttpResponse("this stream deck key does not lead to a folder", status=404)
 
 
 @csrf_exempt
@@ -419,7 +411,7 @@ def change_to_folder(request, id):
     try:
         Folder.objects.get(id=id)
     except Folder.DoesNotExist:
-        return HttpResponse(status=404)
+        return HttpResponse(f"Folder with id {id} could not be found", status=404)
 
     if request.method == 'GET':
         change_folder(id)
