@@ -8,7 +8,10 @@ All the communication to the stream deck is done with the [Python Elgato Stream 
 -----------------------------------------------------------------------------
 ## Installation
 
-First the repository needs to be cloned via git.
+There are two ways to install and use this software:
+
+1. Per manual installation or running the installation script
+2. Pulling and running the docker image
 
 ### Linux
 
@@ -64,10 +67,24 @@ A big part of the installation is needed for the stream deck library. If any err
 ### Windows
 The software can also run under **windows**. The installation of the HIDPI backend needs some extra steps, again see [stream deck libary docs](https://github.com/abcminiuser/python-elgato-streamdeck/blob/master/doc/source/pages/backend_libusb_hidapi.rst) for further infromation. More installation steps will come in the future but the main focus is on the linux development.
 
+### Docker
+
+First of all you need to install docker on your system see [the official docs](https://docs.docker.com/get-docker/) for installation guides.
+
+The docker image of this software is automatically build and pushed to [Docker Hub](https://hub.docker.com/repository/docker/speksify/streamdeck-application) via the Travis CI and can be pulled with the following command:
+
+`docker pull speksify/streamdeck-application`
+
+After successfully pulling the docker image it can be run with the following command:
+
+`Sudo docker run -t -i -p 8000:8000 --privileged -v /dev/bus/usb:/dev/bus/usb streamdeck-application`
+
+The server can then be reached under `localhost:8000\index.html`.
+
 -----------------------------------------------------------------------------
 ## Usage
 
-After everything is installed the software can be run via the [run.sh](./run.sh) script which starts the virtual environment and the Django server. 
+After everything is installed the software can be run via the [run.sh](./run.sh) script which starts the virtual environment and the Django server (this is not needed when running the docker image). 
 The software offers several features such as:
 
 - displaying and uploading costum images onto the stream deck
@@ -75,6 +92,8 @@ The software offers several features such as:
 - executing keyboard key presses (e.g. alt+F4, ctrl+f) with stream deck keys
 - creating virtual folders/layers for the stream deck so more keys than physically available can be configured
 - built-in function: timer, stopwatch/countdown and displaying a running clock
+
+If you don't want to or can't use the GUI you can use the REST API. See the [docs](./docs/REST_API.md) for more information.
 
 -----------------------------------------------------------------------------
 ## Contributing
