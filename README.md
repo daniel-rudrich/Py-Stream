@@ -101,4 +101,4 @@ If you don't want to or can't use the GUI you can use the REST API. See the [doc
 
 -----------------------------------------------------------------------------
 ## License
-[MIT](./docs/LICENSE)
+[MIT](./LICENSE)
