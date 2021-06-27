@@ -14,12 +14,15 @@ MEDIA_PATH = os.path.join(BASE_DIR, "media")
 active_streamdeck = None
 active_folder = "default"
 decks = {}
-"""
-Check if needed streamdeck is connected
-"""
 
 
 def check_deck_connection(model_streamdeck):
+    """
+    Check if needed streamdeck is connected
+
+    :param model_streamdeck: stream deck model entity
+    """
+
     serial_number = model_streamdeck.serial_number
 
     if serial_number in decks:
@@ -27,12 +30,12 @@ def check_deck_connection(model_streamdeck):
         return deck.connected()
 
 
-"""
-Runs the command of a streamdeck key
-"""
-
-
 def run_commands(model_streamdeckKey):
+    """
+    Run attached commands of a streamdeck key
+
+    :param model_streamdeckKey : stream deck key with commands
+    """
     global decks
     deck = decks[model_streamdeckKey.streamdeck.serial_number]
     run_key_command(deck, model_streamdeckKey)
@@ -41,12 +44,13 @@ def run_commands(model_streamdeckKey):
         change_to_folder(model_streamdeckKey.change_to_folder.id)
 
 
-"""
-Load all the keys of the new active folder
-"""
-
-
 def change_to_folder(folder_id):
+    """
+    Stop all threads of the old folder and load all the keys of the new active folder
+
+    :param folder_id: id of folder
+    """
+
     folder = Folder.objects.get(id=folder_id)
     global active_folder
     active_folder = folder.name
@@ -71,14 +75,14 @@ def change_to_folder(folder_id):
     update_key_change_callback(keys[0].streamdeck.id, folder_id)
 
 
-"""
-Updates the behavior of all streamdeck keys.
-This method should be used after a command to
-streamdeck key was updated in the database
-"""
-
-
 def update_key_change_callback(model_streamdeck_id, folder_id):
+    """
+    Updates the behavior of all streamdeck keys.
+    This method should be used after a command of a streamdeck key was updated in the database
+
+    :param model_streamdeck_id: id of active stream deck model entity
+    :param folder_id: id of active folder
+    """
     # set global variables to currently active streamdeck and folder
     global active_streamdeck
     active_streamdeck = Streamdeck.objects.get(id=model_streamdeck_id)
@@ -88,35 +92,36 @@ def update_key_change_callback(model_streamdeck_id, folder_id):
     deck.set_key_callback(key_change_callback)
 
 
-"""
-This method is called when a physical key is pressed
-"""
+def key_change_callback(key, state):
+    """
+    This method is called when a physical key is pressed
 
-
-def key_change_callback(deck, key, state):
+    :param key: number of pressed key
+    :param state: run command if true
+    """
     list_key = get_active_keys(active_streamdeck, active_folder)
 
     if state:
         run_commands(list_key[key])
 
 
-"""
-Retrieves all connected streamdecks
-"""
-
-
 def get_streamdecks():
+    """
+    Retrieves all connected streamdecks
+    """
     streamdecks = DeviceManager().enumerate()
     return streamdecks
 
 
-"""
-Get default folder id and all the corresponding keys
-(seems to complicated maybe add streamdeck as foreignkey to folder)
-"""
-
-
 def get_active_keys(model_deck, foldername):
+    """
+    Get default folder id and all the corresponding keys
+    (seems to complicated maybe add streamdeck as foreignkey to folder)
+
+    :param model_deck: stream deck model entity
+    :param foldername: name of folder
+    :returns list of all active keys
+    """
     list_key = []
     folder_ids = StreamdeckKey.objects.filter(
         streamdeck=model_deck).values("folder").distinct()
@@ -128,35 +133,35 @@ def get_active_keys(model_deck, foldername):
     return list_key
 
 
-"""
-return deck with serialnumber
-"""
-
-
 def get_deck(model_streamdeckKey):
+    """
+    Return deck of stream deck key
+
+    :param model_streamdeckKey: stream deck key to find stream deck
+    """
     global decks
     return decks[model_streamdeckKey.streamdeck.serial_number]
 
 
-"""
-Update brightness of streamdeck
-"""
-
-
 def update_streamdeck(model_streamdeck):
+    """
+    Update brightness of stream deck
+
+    :params model_streamdeck: stream deck model entity
+    """
+
     deck = decks[model_streamdeck.serial_number]
     brightness = int(model_streamdeck.brightness)
     deck.set_brightness(brightness)
 
 
-"""
-Check for Streamdeck in database.
-Create a new one with corresponding StreamdeckModel if it doesn't exist
-yet
-"""
-
-
 def streamdeck_database_init(deck):
+    """
+    Check for stream deck in database.
+    Create a new one with corresponding StreamdeckModel if it doesn't exist yet
+
+    :params deck: stream deck
+    """
     if not Streamdeck.objects.filter(serial_number=get_serial_number(deck)):
         # Check for StreamdeckModel in database.
         # Create a new one if it doesn't exist yet
@@ -183,34 +188,35 @@ def streamdeck_database_init(deck):
                                   )
 
 
-"""
-Remove unwanted characters from the end of the serial number
-and return sanatized serial number
-"""
-
-
 def get_serial_number(deck):
+    """
+    Remove unwanted characters from the end of the serial number
+    and return sanatized serial number
+
+    :params deck: stream deck
+    :returns correct serial number of stream deck
+    """
     serialnumber = deck.get_serial_number()
     serialnumber = serialnumber.replace("\x00", "").replace("\x01", "")
     return serialnumber
 
 
-"""
-return wether key is in active folder
-"""
-
-
 def key_in_folder(model_streamdeckKey):
+    """
+    Check if key is in active folder
+
+    :param model_streamdeckKey: stream deck key
+    """
     global active_folder
     return active_folder == model_streamdeckKey.folder.name
 
 
-"""
-Initializes a streamdeck connection and all its keys
-"""
-
-
 def init_streamdeck(deck):
+    """
+    Initializes a streamdeck connection and all its keys
+
+    :param deck: stream deck
+    """
     deck.open()
     deck.reset()
 

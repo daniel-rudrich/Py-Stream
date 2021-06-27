@@ -6,12 +6,12 @@ from .streamdeck_functions import (
 from .image_handling import update_key_image
 from sys import platform as _platform
 import os
-"""
-Initializes all connected streamdecks
-"""
 
 
 def streamdecks_init():
+    """
+    Initialize all connected streamdecks
+    """
 
     # set correct backend for pynput
     if _platform == "linux" or _platform == "linux2":
@@ -27,64 +27,61 @@ def streamdecks_init():
         init_streamdeck(deck)
 
 
-"""
-Runs the command of a streamdeck key in a shell
-and prints the outcome
-"""
-
-
 def execute_key_command(model_streamdeckKey):
+    """
+    Runs the command of a streamdeck key
+
+    :param model_streamdeckKey: stream deck key
+    """
 
     run_key_command(model_streamdeckKey)
 
 
-"""
-Updates the display of a key after e.g. updating
-the key in the database
-"""
+def update_key_display(streamdeckKey):
+    """
+    Updates the display of a key after e.g. updating
+    the key in the database
 
-
-def update_key_display(streamdeckKey, state=False):
+    :param: streamdeckKey: stream deck key
+    """
     if key_in_folder(streamdeckKey):
         deck = get_deck(streamdeckKey)
-        update_key_image(deck, streamdeckKey, state)
-
-
-"""
-Updates the key behavior of the streamdeckkeys
-Use after updating commands of streamdeckkeys in the database
-"""
+        update_key_image(deck, streamdeckKey, False)
 
 
 def update_key_behavior(streamdeckKey):
+    """
+    Updates the key behavior of the streamdeckkeys
+    Use after updating commands of streamdeckkeys in the database
 
+    :param streamdeckKey: stream deck key
+    """
     update_key_change_callback(
         streamdeckKey.streamdeck.id, streamdeckKey.folder.id)
 
 
-"""
-Updates streamdeck when changing folder
-"""
-
-
 def change_folder(folder_id):
+    """
+    Updates streamdeck when changing folder
+
+    :param folder_id: id of folder
+    """
     change_to_folder(folder_id)
 
 
-"""
-Update streamdeck brightness after change
-"""
-
-
 def update_brightness(streamdeck):
+    """
+    Update streamdeck brightness
+
+    :param stream deck
+    """
     update_streamdeck(streamdeck)
 
 
-"""
-Check for streamdeck connection
-"""
-
-
 def check_connection(streamdeck):
+    """
+    Check for streamdeck connection
 
+    :param streamdeck: stream deck
+    """
     return check_deck_connection(streamdeck)

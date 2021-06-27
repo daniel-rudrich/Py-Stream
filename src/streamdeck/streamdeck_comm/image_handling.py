@@ -23,13 +23,14 @@ animated_images = {}
 clock_threads = {}
 stop_animation = False
 
-"""
-returns everything needed to add a streamkey_model as actual
-key to the streamdeck
-"""
-
 
 def get_key_style(model_streamdeckKey):
+    """
+    Returns everything needed to add a streamdeckkey_model as actual key to the streamdeck
+
+    :param model_streamdeckKey: stream deck key
+    :returns: name, icon, font and label of a stream deck key as dictionary
+    """
 
     if not model_streamdeckKey.image_source:
         icon = None
@@ -43,16 +44,19 @@ def get_key_style(model_streamdeckKey):
     }
 
 
-"""
- Creates a new key image based on the key index, style and current key state
- and updates the image on the StreamDeck.
-"""
+def update_key_image(deck, model_streamdeckKey, clock, text_color="white"):
+    """
+    Creates a new key image based on the key index, style and
+    current key state and updates the image on the StreamDeck.
 
-
-def update_key_image(deck, model_streamdeckKey, state, text_color="white"):
+    :param deck: active stream deck
+    :param model_streamdeckKey: stream deck key
+    :param clock: if false, remove clock from stream deck key
+    :param text_color: color of displayed text in stream deck key
+    """
 
     # handle keys with clock
-    if model_streamdeckKey.clock and not state:
+    if model_streamdeckKey.clock and not clock:
         add_clock_thread(deck, model_streamdeckKey)
 
     if not model_streamdeckKey.clock:
@@ -75,13 +79,13 @@ def update_key_image(deck, model_streamdeckKey, state, text_color="white"):
             deck.set_key_image(model_streamdeckKey.number, image)
 
 
-"""
-Adds clock thread to global dict clock_threads and starts it
-"""
-
-
 def add_clock_thread(deck, model_streamdeckKey):
+    """
+    Adds clock thread to global dict clock_threads and starts it
 
+    :param deck: active stream deck
+    :param model_streamdeckKey: stream deck key
+    """
     if model_streamdeckKey.id not in clock_threads:
         thread = threading.Thread(target=key_clock, args=[
                                   deck, model_streamdeckKey])
@@ -90,25 +94,25 @@ def add_clock_thread(deck, model_streamdeckKey):
     pass
 
 
-"""
-Remove clock thread from global dict clock_threads
-"""
-
-
 def delete_clock_thread(model_streamdeckKey):
+    """
+    Remove clock thread from global dict clock_threads
 
+    :param model_streamdeckKey: stream deck key
+    """
     if model_streamdeckKey.id in clock_threads:
         clock_threads[model_streamdeckKey.id].join()
         del clock_threads[model_streamdeckKey.id]
     pass
 
 
-"""
-Run clock in format HH:MM on key
-"""
-
-
 def key_clock(deck, model_streamdeckKey):
+    """
+    Run clock in format HH:MM on key
+
+    :param deck: active stream deck
+    :param model_streamdeckKey: stream deck key
+    """
     key_id = model_streamdeckKey.id
     while(True):
         current_time = datetime.now().strftime("%H:%M")
@@ -124,15 +128,21 @@ def key_clock(deck, model_streamdeckKey):
             break
 
 
-"""
-Generates a custom tile with run-time generated text and custom image via the
-PIL module.
-"""
-
-
 def render_key_image(
         deck, icon_filename, font_filename, label_text,
         key_number, text_color='white'):
+    """
+    Generates a custom tile with run-time generated text and custom image via the
+    PIL module. Adapted from stream deck library examples
+
+    :param deck: active stream deck
+    :param icon_filename: filename of image or actual image
+    :param font_filename: filename of font file
+    :param label_text: text of stream deck key
+    :param key_number: number of stream deck key on actual stream deck
+    :param text_color: color of text on stream deck key
+    """
+
     # Resize the source image asset to best-fit the dimensions of a single key,
     # leaving a margin at the bottom so that we can draw the key title
     # afterwards.
@@ -167,16 +177,20 @@ def render_key_image(
         return PILHelper.to_native_format(deck, image)
 
 
-"""
-Extracts out the individual animation frames of image (if
-any) and returns an infinite generator that returns the next animation frame,
-in the StreamDeck device's native image format.
-"""
-
-
 def create_animation_frames(deck, image, label_text, font_filename):
-    icon_frames = list()
+    """
+    Extracts out the individual animation frames of image (if
+    any) and returns an infinite generator that returns the next animation frame,
+    in the StreamDeck device's native image format.
 
+    :param deck: active stream deck
+    :param image: image which needs to be animated
+    :param label_text: text of stream deck key
+    :param font_filename: filename of font file
+    :returns Return an infinite cycle generator that returns the next animation frame each time it is called.
+    """
+
+    icon_frames = list()
     # Iterate through each animation frame of the source image
     for frame in ImageSequence.Iterator(image):
         # Create new key image of the correct dimensions, black background.
@@ -198,13 +212,16 @@ def create_animation_frames(deck, image, label_text, font_filename):
     return itertools.cycle(icon_frames)
 
 
-"""
-Helper unction that will run a periodic loop which updates the
-images on each Key
-"""
-
-
 def animate(fps, deck, key_images):
+    """
+    Helper function that will run a periodic loop which updates the
+    images on each Key
+
+    :param fps: fps of animated image
+    :param deck: active stream deck
+    :param key_images: images of key which will be looped
+    """
+
     # Convert frames per second to frame time in seconds.
     #
     # Frame time often cannot be fully expressed by a float type,
@@ -212,10 +229,8 @@ def animate(fps, deck, key_images):
     frame_time = Fraction(1, fps)
 
     # Get a starting absolute time reference point.
-    #
     # We need to use an absolute time clock, instead of relative sleeps
     # with a constant value, to avoid drifting.
-    #
     # Drifting comes from an overhead of scheduling the sleep itself -
     # it takes some small amount of time for `time.sleep()` to execute.
     next_frame = Fraction(time.monotonic())
@@ -260,7 +275,11 @@ def animate(fps, deck, key_images):
 
 
 def start_animated_images(deck):
+    """
+    Start threads of animated image
 
+    :param deck: active stream deck
+    """
     global animated_images
     global stop_animation
     stop_animation = False
@@ -268,12 +287,10 @@ def start_animated_images(deck):
                      FRAMES_PER_SECOND, deck, animated_images]).start()
 
 
-"""
-Stops all running threads and clears all thread dictionaries
-"""
-
-
 def clear_image_threads():
+    """
+    Stops all running threads and clears all thread dictionaries
+    """
     global stop_animation
     stop_animation = True
     animated_images.clear()

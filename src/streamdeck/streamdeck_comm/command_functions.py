@@ -12,13 +12,14 @@ interval_shell_threads = {}
 timer_threads = {}
 stopwatch_threads = {}
 
-"""
-runs commands attached to a streamdeck key
-"""
-
 
 def run_key_command(deck, model_streamdeckKey):
+    """
+    Runs commands that are attached to a stream deck key
 
+    :param deck: the active stream deck
+    :param model_streamdeckKey: stream deck key which commands shall be run
+    """
     key_command = model_streamdeckKey.command
     while key_command:
         if key_command.command_type == 'shell':
@@ -35,13 +36,13 @@ def run_key_command(deck, model_streamdeckKey):
         key_command = key_command.following_command
 
 
-"""
-Handles threading of shell commands
-"""
-
-
 def handle_shell_command(deck, model_streamdeckKey):
+    """
+    Handles threading of shell commands
 
+    :param deck: active stream deck
+    :param model_streamdeckKey: stream deck key with shell command
+    """
     key_command = model_streamdeckKey.command
     if key_command.time_value > 0:
         global interval_shell_threads
@@ -69,12 +70,13 @@ def handle_shell_command(deck, model_streamdeckKey):
             print("Error: %s" % str(e))
 
 
-"""
-Handles threading of stopwatch command
-"""
-
-
 def handle_stopwatch_command(deck, model_streamdeckKey):
+    """
+    Handles threading of stopwatch command
+
+    :param deck: active stream deck
+    :param model_streamdeckKey: stream deck key with stopwatch command
+    """
     global stopwatch_threads
 
     key_command = model_streamdeckKey.command
@@ -89,12 +91,13 @@ def handle_stopwatch_command(deck, model_streamdeckKey):
         thread.join()
 
 
-"""
-Handles threading of timer command
-"""
-
-
 def handle_timer_command(deck, model_streamdeckKey):
+    """
+    Handles threading of timer command
+
+    :param deck: active stream deck
+    :param model_streamdeckKey: stream deck key with timer command
+    """
     global timer_threads
 
     key_command = model_streamdeckKey.command
@@ -112,13 +115,14 @@ def handle_timer_command(deck, model_streamdeckKey):
         thread.join()
 
 
-"""
-run shell command every 'intervall' seconds and save result as text in key
-"""
-
-
 def run_shell_interval(deck, model_streamdeckKey, interval):
+    """
+    Run shell command every 'intervall' seconds and save result as text in key
 
+    :param deck: active stream deck
+    :param model_streamdeckKey: stream deck key with shell intervall command
+    :param interval: time between each shell command execution
+    """
     command = model_streamdeckKey.command
     old_text = model_streamdeckKey.text
     while(True):
@@ -145,12 +149,13 @@ def run_shell_interval(deck, model_streamdeckKey, interval):
             break
 
 
-"""
-Runs stopwatch on streamdeck key counting up seconds
-"""
-
-
 def run_stopwatch(deck, model_streamdeckKey):
+    """
+    Runs stopwatch on streamdeck key counting up seconds
+
+    :param deck: active stream deck
+    :param model_streamdeckKey: stream deck key with stopwatch command
+    """
     start = timer()
     command_id = model_streamdeckKey.command.id
     while (True):
@@ -163,12 +168,14 @@ def run_stopwatch(deck, model_streamdeckKey):
             break
 
 
-"""
-Runs timer counting down from timer_time to 0 in seconds
-"""
-
-
 def run_timer(deck, model_streamdeckKey, timer_time):
+    """
+    Runs timer counting down from specified time
+
+    :param deck: active stream deck
+    :param model_streamdeckKey: stream deck key with time command
+    :param timer_time: start time
+    """
     curtime = timer_time
     command_id = model_streamdeckKey.command.id
     while (curtime >= 0):
@@ -194,12 +201,12 @@ def run_timer(deck, model_streamdeckKey, timer_time):
             break
 
 
-"""
-Presses given hotkeys on keyboard
-"""
-
-
 def hotkey_function(hotkeys):
+    """
+    Presses given hotkeys on keyboard
+
+    :param hotkeys: hotkeys to press
+    """
     from pynput.keyboard import Controller
     keys = [hotkeys.key1, hotkeys.key2,
             hotkeys.key3, hotkeys.key4, hotkeys.key5]
@@ -215,12 +222,13 @@ def hotkey_function(hotkeys):
             keyboard.release(key)
 
 
-"""
-Parse javascript key texts to pynput keycodes
-"""
-
-
 def parse_keys(keys):
+    """
+    Parse javascript key texts to pynput keycodes
+
+    :param keys: keys coming as javascript key texts
+    :returns: list of pynput keys
+    """
     from pynput.keyboard import Key
     parsedKeys = []
     key_dict = {
@@ -280,13 +288,10 @@ def parse_keys(keys):
     return parsedKeys
 
 
-"""
-Stops all running threads and clears all thread dictionaries
-"""
-
-
 def clear_command_threads():
-
+    """
+    Stops all running threads and clears all thread dictionaries
+    """
     global stopwatch_threads
 
     stopwatch_threads_keys = list(stopwatch_threads.keys())
