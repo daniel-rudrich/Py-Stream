@@ -1,6 +1,5 @@
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
 from rest_framework.decorators import api_view
 from rest_framework.parsers import JSONParser
 
@@ -18,9 +17,6 @@ from .streamdeck_comm.streamdeck_interface import (change_folder,
 
 @csrf_exempt
 def streamdeck_list(request):
-    """
-    List all streamdecks
-    """
     if request.method == 'GET':
         streamdecks = Streamdeck.objects.all()
         serializer = StreamdeckSerializer(streamdecks, many=True)
@@ -29,9 +25,6 @@ def streamdeck_list(request):
 
 @csrf_exempt
 def streamdeck_detail(request, id):
-    """
-    Change brightness or name of stream deck
-    """
     try:
         streamdeck = Streamdeck.objects.get(id=id)
     except Streamdeck.DoesNotExist:
@@ -61,9 +54,6 @@ def streamdeck_detail(request, id):
 
 @csrf_exempt
 def streamdeck_folders(request, id):
-    """
-    List all folders of a streamdeck
-    """
     try:
         streamdeck = Streamdeck.objects.get(id=id)
     except Streamdeck.DoesNotExist:
