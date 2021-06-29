@@ -1,6 +1,6 @@
-# from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 from rest_framework.decorators import api_view
 from rest_framework.parsers import JSONParser
 
@@ -14,8 +14,6 @@ from .streamdeck_comm.streamdeck_interface import (change_folder,
                                                    update_key_display,
                                                    update_brightness,
                                                    check_connection)
-
-# Create your views here.
 
 
 @csrf_exempt

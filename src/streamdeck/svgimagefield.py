@@ -11,7 +11,8 @@ from django.forms import ImageField as DjangoImageField
 from PIL import Image
 
 """
-gist from https://gist.github.com/ramsrib/4ca2d66fa0063e5acf8b874ecb48cc5f
+Gist from https://gist.github.com/ramsrib/4ca2d66fa0063e5acf8b874ecb48cc5f
+Needed to upload svg images to the stream deck
 """
 
 
