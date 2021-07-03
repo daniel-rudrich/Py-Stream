@@ -92,7 +92,7 @@ def update_key_change_callback(model_streamdeck_id, folder_id):
     deck.set_key_callback(key_change_callback)
 
 
-def key_change_callback(key, state):
+def key_change_callback(deck, key, state):
     """
     This method is called when a physical key is pressed
 
