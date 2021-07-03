@@ -73,13 +73,19 @@ First of all you need to install docker on your system see [the official docs](h
 
 The docker image of this software is automatically build and pushed to [Docker Hub](https://hub.docker.com/repository/docker/speksify/streamdeck-application) via the Travis CI and can be pulled with the following command:
 
-`docker pull speksify/streamdeck-application`
+`sudo docker pull speksify/streamdeck-application`
+
+You can also manually build the docker image from the docker file:
+
+`sudo docker build -t streamdeck .`
 
 After successfully pulling the docker image it can be run with the following command:
 
-`Sudo docker run -t -i -p 8000:8000 --privileged -v /dev/bus/usb:/dev/bus/usb streamdeck-application`
+`Sudo docker run -t -i -p 8000:8000 --privileged -v /dev/bus/usb:/dev/bus/usb speksify/streamdeck-application`
 
-The server can then be reached under `localhost:8000\index.html`.
+The server can then be reached under `localhost:8000/index.html`.
+
+**Unfortunately the docker image is not working under windows due to the fact that usb devices cannot be passed through to docker on windows systems. See [this issue](https://github.com/docker/for-win/issues/3926) in the docker repository for reference.**
 
 -----------------------------------------------------------------------------
 ## Usage
@@ -94,6 +100,11 @@ The software offers several features such as:
 - built-in function: timer, stopwatch/countdown and displaying a running clock
 
 If you don't want to or can't use the GUI you can use the REST API. See the [docs](./docs/REST_API.md) for more information.
+
+-----------------------------------------------------------------------------
+## Additional Information
+
+This project is part of my master thesis in computer science. Therefore, till approximately November 2021 I will be working constantly and with my best efforts on this project. After that my contribution to this project will decline but I will do my best to make this software as stable and user friendly as possible till then!
 
 -----------------------------------------------------------------------------
 ## Contributing
