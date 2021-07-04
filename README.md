@@ -79,11 +79,13 @@ You can also manually build the docker image from the docker file:
 
 `sudo docker build -t streamdeck .`
 
-After successfully pulling the docker image it can be run with the following command:
+After successfully pulling the docker image run this before runnning the docker image to ensure pynput has access to the xserver of linux:
 
-`Sudo docker run -t -i -p 8000:8000 --privileged -v /dev/bus/usb:/dev/bus/usb speksify/streamdeck-application`
+`xhost local:`
 
-The server can then be reached under `localhost:8000/index.html`.
+Then, the docker image can be run:
+
+`Sudo docker run -t -i -p 8000:8000 --privileged -v /dev/bus/usb:/dev/bus/usb  -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=unix$DISPLAY streamdeck-application`
 
 **Unfortunately the docker image is not working under windows due to the fact that usb devices cannot be passed through to docker on windows systems. See [this issue](https://github.com/docker/for-win/issues/3926) in the docker repository for reference.**
 
