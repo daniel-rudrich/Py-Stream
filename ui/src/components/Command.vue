@@ -40,7 +40,7 @@
         <b-form-input v-model="payload.name" placeholder="Command name"></b-form-input>
       </b-col>
       <b-col  cols="4">
-        <b-form-input v-model="payload.timer_value" placeholder="Seconds"></b-form-input>
+        <b-form-input v-model="payload.time_value" placeholder="Seconds"></b-form-input>
       </b-col>
       <b-col>
         <b-button variant="success" size="sm" @click="saveChanges">Save</b-button>
@@ -123,7 +123,7 @@ export default {
       const payloadChanged = {
         name: this.payload.name,
         command_string: this.payload.command_string,
-        timer_value: this.payload.timer_value,
+        time_value: this.payload.time_value,
         hotkeys: hotkeys
       }
       await axios.patch('key/' + this.keyid + '/command/' + this.payload.id, payloadChanged)
