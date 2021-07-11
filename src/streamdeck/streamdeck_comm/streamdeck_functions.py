@@ -11,8 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 ASSETS_PATH = os.path.join(BASE_DIR, "assets")
 MEDIA_PATH = os.path.join(BASE_DIR, "media")
 
-active_streamdeck = None
-active_folder = "default"
+active_folder = 0
 decks = {}
 
 
@@ -50,10 +49,9 @@ def change_to_folder(folder_id):
 
     :param folder_id: id of folder
     """
-
     folder = Folder.objects.get(id=folder_id)
     global active_folder
-    active_folder = folder.name
+    active_folder = folder_id
     keys = StreamdeckKey.objects.filter(folder=folder)
 
     if not check_deck_connection(keys[0].streamdeck):
@@ -84,10 +82,9 @@ def update_key_change_callback(model_streamdeck_id, folder_id):
     :param folder_id: id of active folder
     """
     # set global variables to currently active streamdeck and folder
-    global active_streamdeck
     active_streamdeck = Streamdeck.objects.get(id=model_streamdeck_id)
     global active_folder
-    active_folder = Folder.objects.get(id=folder_id).name
+    active_folder = folder_id
     deck = decks[active_streamdeck.serial_number]
     deck.set_key_callback(key_change_callback)
 
@@ -96,10 +93,11 @@ def key_change_callback(deck, key, state):
     """
     This method is called when a physical key is pressed
 
+    :param deck: stream deck needed for the stream deck library
     :param key: number of pressed key
     :param state: run command if true
     """
-    list_key = get_active_keys(active_streamdeck, active_folder)
+    list_key = get_active_keys(active_folder)
 
     if state:
         run_commands(list_key[key])
@@ -113,23 +111,19 @@ def get_streamdecks():
     return streamdecks
 
 
-def get_active_keys(model_deck, foldername):
+def get_active_keys(folder_id):
     """
-    Get default folder id and all the corresponding keys
-    (seems to complicated maybe add streamdeck as foreignkey to folder)
+    Get all keys of folder with folder_id
 
-    :param model_deck: stream deck model entity
-    :param foldername: name of folder
+    :param folder_id: id of folder
     :returns list of all active keys
     """
+    print(folder_id)
     list_key = []
-    folder_ids = StreamdeckKey.objects.filter(
-        streamdeck=model_deck).values("folder").distinct()
-    default_folder = Folder.objects.filter(
-        id__in=folder_ids, name=foldername).values('id')[0]['id']
-    default_keys = list(
-        StreamdeckKey.objects.filter(folder=default_folder))
-    list_key.extend(default_keys)
+    folder = Folder.objects.get(id=folder_id)
+    keys = list(
+        StreamdeckKey.objects.filter(folder=folder))
+    list_key.extend(keys)
     return list_key
 
 
@@ -208,7 +202,7 @@ def key_in_folder(model_streamdeckKey):
     :param model_streamdeckKey: stream deck key
     """
     global active_folder
-    return active_folder == model_streamdeckKey.folder.name
+    return active_folder == model_streamdeckKey.folder.id
 
 
 def init_streamdeck(deck):
@@ -225,7 +219,6 @@ def init_streamdeck(deck):
         deck.deck_type(), get_serial_number(deck)))
 
     streamdeck_database_init(deck)
-    global active_streamdeck
     active_streamdeck = Streamdeck.objects.filter(
         serial_number=get_serial_number(deck))[0]
 
@@ -249,9 +242,10 @@ def init_streamdeck(deck):
             )
             list_key.append(new_key)
     else:
-        # Get default folder id and all the corresponding keys
-        # (seems to complicated maybe add streamdeck as foreignkey to folder)
-        list_key = get_active_keys(active_streamdeck, 'default')
+        # Get all active keys
+        global active_folder
+        active_folder = active_streamdeck.default_folder.id
+        list_key = get_active_keys(active_folder)
 
     # Load all keys onto the streamdeck
     for key in list_key:
