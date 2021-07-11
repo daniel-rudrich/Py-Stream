@@ -4,11 +4,17 @@
       <b-col>
           {{ payload.command_type }}
       </b-col>
-      <b-col cols="4">
+      <b-col cols="2">
           <b-form-input v-model="payload.name" placeholder="Command name"></b-form-input>
       </b-col>
-      <b-col  cols="4">
+      <b-col  cols="2">
           <b-form-input v-model="payload.command_string" placeholder="Command"></b-form-input>
+      </b-col>
+      <b-col  cols="2">
+          <b-form-input v-model="payload.active_directory" placeholder="."></b-form-input>
+      </b-col>
+      <b-col  cols="2">
+        <b-form-input v-model="payload.time_value" placeholder="Seconds"></b-form-input>
       </b-col>
       <b-col>
           <b-button variant="success" size="sm" @click="saveChanges">Save</b-button>
@@ -124,6 +130,7 @@ export default {
         name: this.payload.name,
         command_string: this.payload.command_string,
         time_value: this.payload.time_value,
+        active_directory: this.payload.active_directory,
         hotkeys: hotkeys
       }
       await axios.patch('key/' + this.keyid + '/command/' + this.payload.id, payloadChanged)

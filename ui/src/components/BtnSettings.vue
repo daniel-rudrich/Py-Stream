@@ -47,6 +47,8 @@
       <b-form-input v-model="newCommandName" placeholder="Enter command name (optional)"></b-form-input>
       <br>
       <b-form-input v-show="newCommandType === 'shell'" v-model="newCommandCommand" placeholder="Enter command"></b-form-input>
+      <b-form-input v-show="newCommandType === 'shell'" v-model="newShellTimer" type="number" placeholder="Seconds"></b-form-input>
+      <b-form-input v-show="newCommandType === 'shell'" v-model="newCommandDirectory" placeholder="."></b-form-input>
       <span v-show="newCommandType === 'hotkey'" >You can edit the hotkeys after adding the command.</span>
       <b-form-input v-show="newCommandType === 'timer'" v-model="newCommandTimer" type="number" placeholder="Seconds"></b-form-input>
       <br>
@@ -73,7 +75,9 @@ export default {
       newCommandName: '',
       newCommandCommand: 'echo New',
       newCommandKeybind: '',
+      newCommandDirectory: '.',
       newCommandTimer: 5,
+      newShellTimer: -1,
     }
   },
   mounted() {
@@ -126,6 +130,8 @@ export default {
         newCmd.command_string = ''
         if(newCmd.command_type === 'shell') {
           newCmd.command_string = this.newCommandCommand
+          newCmd.time_value = parseInt(this.newShellTimer)
+          newCmd.active_directory = this.newCommandDirectory
         } else if(newCmd.command_type === 'hotkey') {
           newCmd.hotkeys = [{"key1":{"key":"Control","location":1}},{"key2":{"key":"1","location":0}}]
         } else if(newCmd.command_type === 'timer') {

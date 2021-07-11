@@ -118,7 +118,6 @@ def get_active_keys(folder_id):
     :param folder_id: id of folder
     :returns list of all active keys
     """
-    print(folder_id)
     list_key = []
     folder = Folder.objects.get(id=folder_id)
     keys = list(
