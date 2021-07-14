@@ -13,7 +13,8 @@
     </b-form-checkbox>
     <br>
     <input type="file" accept="image/*" @change="changeNewImageEvent($event)" id="file-input">
-    <a href="javascript:void(0)" @click="resetNewImage">Reset</a>
+    <a style="margin-right:2.5em" href="javascript:void(0)" @click="resetNewImage">Reset</a>
+    <a href="javascript:void(0)" @click="removeImage">Remove Image</a>
     <br>
     <img v-show="newImage !== null" :src="imagePreview" height="70px" width="70px">
     <br v-show="newImage !== null">
@@ -30,11 +31,6 @@
     <b-button variant="primary" @click="addFolder" v-show="payload.change_to_folder === null">Add folder</b-button>
     <br>
     <br>
-    {{ payload }}
-
-    <br><br>
-    {{ commands }}
-
     <b-modal id="add-command" title="Add command" @ok="addCommand()">
       <b-form-select v-model="newCommandType" :options="[
         {value: 'shell', text: '(ba)sh'},
@@ -123,6 +119,9 @@ export default {
       },
       resetNewImage() {
         this.newImage = null
+      },
+      removeImage(){
+        return axios.delete('key/' + this.payload.id)
       },
       async addCommand() {
         let newCmd = {command_type: this.newCommandType}

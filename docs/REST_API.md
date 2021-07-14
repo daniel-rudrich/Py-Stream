@@ -365,8 +365,31 @@ None
 
 -------------------------------------------------------------------------------------------
 
-#### Deleting folders and commands
+#### Deleting images, folders and commands
 
+<details>
+<summary><code>DELETE</code><code><b>/api/key/{id}</b></code> deletes image of stream deck key</summary>
+
+
+##### URL Parameters
+
+> | name              |  type     | data type      | description                         |
+> |-------------------|-----------|----------------|-------------------------------------|
+> | `id`              |  required | int            | The specific stream deck key id     |
+
+##### Responses
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `204`         | `text/html; charset=utf-8`        | `Image deleted successfully`                                       |
+> | `404`         | `text/html; charset=utf-8`        | `Stream deck key with id {id} not found`                            |
+
+##### Example cURL
+
+> ```javascript
+>  curl -X DELETE http://localhost:8000/api/key/1
+> ```
+</details>
 <details>
 <summary><code>DELETE</code><code><b>/api/key/{id}/command/{command_id}</b></code> deletes command of stream deck key</summary>
 
@@ -382,7 +405,7 @@ None
 
 > | http code     | content-type                      | response                                                            |
 > |---------------|-----------------------------------|---------------------------------------------------------------------|
-> | `204`         | `text/html; charset=utf-8`        | `Command deleted succesfully`                                       |
+> | `204`         | `text/html; charset=utf-8`        | `Command deleted successfully`                                       |
 > | `400`         | `text/html; charset=utf-8`        | `Command type not valid`                                            |
 > | `404`         | `text/html; charset=utf-8`        | `Command with id {id} not found under this stream deck key`         |
 > | `404`         | `text/html; charset=utf-8`        | `Stream deck key with id {id} not found`                            |
@@ -392,7 +415,6 @@ None
 > ```javascript
 >  curl -X DELETE http://localhost:8000/api/key/1/command/1
 > ```
-</details>
 </details>
 
 <details>

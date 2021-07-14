@@ -109,6 +109,14 @@ def key_detail(request, id):
 
         return JsonResponse(serializer.data, safe=False)
 
+    if request.method == 'DELETE':
+        streamdeckKey.image_source = ""
+        if check_connection(streamdeckKey.streamdeck):
+            update_key_display(streamdeckKey)
+        streamdeckKey.save()
+
+        return HttpResponse(status=204)
+
 
 @csrf_exempt
 @api_view(['PUT'])
