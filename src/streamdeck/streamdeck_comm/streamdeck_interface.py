@@ -2,7 +2,7 @@ from .streamdeck_functions import (
     get_streamdecks, init_streamdeck,
     update_key_change_callback, run_key_command,
     change_to_folder, update_streamdeck, check_deck_connection,
-    key_in_folder, get_deck)
+    key_in_folder, get_deck, delete_folder)
 from .image_handling import update_key_image
 from sys import platform as _platform
 import os
@@ -67,6 +67,15 @@ def change_folder(folder_id):
     :param folder_id: id of folder
     """
     change_to_folder(folder_id)
+
+
+def delete_folders(folder):
+    """
+    Delete Folder and all its subfolders
+
+    :param folder: folder object
+    """
+    delete_folder(folder)
 
 
 def update_brightness(streamdeck):

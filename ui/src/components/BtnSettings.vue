@@ -29,6 +29,7 @@
     <b-button variant="primary" v-b-modal.add-command>Add command</b-button>
     &nbsp;
     <b-button variant="primary" @click="addFolder" v-show="payload.change_to_folder === null">Add folder</b-button>
+    <b-button variant="primary" @click="deleteFolder" v-show="payload.change_to_folder != null">Delete folder</b-button>
     <br>
     <br>
     <b-modal id="add-command" title="Add command" @ok="addCommand()">
@@ -112,6 +113,10 @@ export default {
       },
       async addFolder() {
         await axios.put('key/' + this.payload.id + '/folder', {name: 'New folder'})
+        this.$emit('folder-changed')
+      },
+      async deleteFolder() {
+        await axios.delete('key/' + this.payload.id + '/folder')
         this.$emit('folder-changed')
       },
       async changeNewImageEvent(event) {

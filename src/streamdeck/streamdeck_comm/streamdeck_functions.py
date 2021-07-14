@@ -136,6 +136,21 @@ def get_deck(model_streamdeckKey):
     return decks[model_streamdeckKey.streamdeck.serial_number]
 
 
+def delete_folder(folder):
+    """
+    Deletes a folder and all its subfolders
+
+    :param folder: folder object
+    """
+
+    keys = get_active_keys(folder.id)
+    for key in keys:
+        if key.change_to_folder is not None and key.number != 0:
+            delete_folder(key.change_to_folder)
+
+    folder.delete()
+
+
 def update_streamdeck(model_streamdeck):
     """
     Update brightness of stream deck
