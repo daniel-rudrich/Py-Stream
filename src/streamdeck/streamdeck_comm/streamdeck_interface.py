@@ -1,11 +1,12 @@
 from .streamdeck_functions import (
-    get_streamdecks, init_streamdeck,
+    check_connected_decks,
     update_key_change_callback, run_key_command,
     change_to_folder, update_streamdeck, check_deck_connection,
     key_in_folder, get_deck, delete_folder)
 from .image_handling import update_key_image
 from sys import platform as _platform
 import os
+import threading
 
 
 def streamdecks_init():
@@ -22,9 +23,11 @@ def streamdecks_init():
         os.environ["PYNPUT_BACKEND"] = "win32"
     else:
         os.environ["PYNPUT_BACKEND"] = "xorg"
-    streamdecks = get_streamdecks()
-    for deck in streamdecks:
-        init_streamdeck(deck)
+
+    # start thread which periodically checks for connected stream decks
+    thread = threading.Thread(target=check_connected_decks)
+    thread.daemon = True
+    thread.start()
 
 
 def execute_key_command(model_streamdeckKey):

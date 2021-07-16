@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import time
 from StreamDeck.DeviceManager import DeviceManager
 from streamdeck.models import (
     Streamdeck, StreamdeckModel, StreamdeckKey, Folder)
@@ -219,6 +220,35 @@ def key_in_folder(model_streamdeckKey):
     return active_folder == model_streamdeckKey.folder.id
 
 
+def check_connected_decks():
+    """
+    Checks for connected stream decks, initializes newly connected ones and
+    cleanes up after stream decks disconnect
+    """
+
+    while True:
+
+        global decks
+        connected_decks = get_streamdecks()
+
+        # if the number of "active" stream decks is different to the number of connected stream decks
+        # all "active" stream decks will be closed and all connected stream decks will be initialized
+
+        if len(decks) != len(connected_decks):
+            # remove all "active" stream decks
+            for deck in decks.items():
+                deck[1].close()
+            clear_command_threads()
+            clear_image_threads()
+            decks.clear()
+
+            # initialize all connected stream decks
+            for streamdeck in connected_decks:
+                init_streamdeck(streamdeck)
+
+        time.sleep(3)
+
+
 def init_streamdeck(deck):
     """
     Initializes a streamdeck connection and all its keys
@@ -228,13 +258,14 @@ def init_streamdeck(deck):
     deck.open()
     deck.reset()
 
-    decks[get_serial_number(deck)] = deck
+    serial_number = get_serial_number(deck)
+    decks[serial_number] = deck
     print("Opened '{}' device (serial number: '{}')".format(
-        deck.deck_type(), get_serial_number(deck)))
+        deck.deck_type(), serial_number))
 
     streamdeck_database_init(deck)
     active_streamdeck = Streamdeck.objects.filter(
-        serial_number=get_serial_number(deck))[0]
+        serial_number=serial_number)[0]
 
     deck.set_brightness(active_streamdeck.brightness)
 
