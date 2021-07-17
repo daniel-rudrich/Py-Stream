@@ -69,7 +69,7 @@ def change_to_folder(folder_id):
     for key in keys:
         update_key_image(deck, key, False)
 
-    start_animated_images(deck)
+    start_animated_images(deck, folder_id)
 
     update_key_change_callback(keys[0].streamdeck.id, folder_id)
 
@@ -119,11 +119,9 @@ def get_active_keys(folder_id):
     :param folder_id: id of folder
     :returns list of all active keys
     """
-    list_key = []
     folder = Folder.objects.get(id=folder_id)
-    keys = list(
+    list_key = list(
         StreamdeckKey.objects.filter(folder=folder))
-    list_key.extend(keys)
     return list_key
 
 
@@ -271,6 +269,7 @@ def init_streamdeck(deck):
 
     # Get all keys from the default folder of the streamdeck.
     # Create the keys and the folder if necessary
+    global active_folder
 
     list_key = []
     keys = StreamdeckKey.objects.filter(streamdeck=active_streamdeck.id)
@@ -286,9 +285,9 @@ def init_streamdeck(deck):
                 streamdeck=active_streamdeck
             )
             list_key.append(new_key)
+        active_folder = default_folder.id
     else:
         # Get all active keys
-        global active_folder
         active_folder = active_streamdeck.default_folder.id
         list_key = get_active_keys(active_folder)
 
@@ -296,6 +295,6 @@ def init_streamdeck(deck):
     for key in list_key:
         update_key_image(deck, key, False)
 
-    start_animated_images(deck)
+    start_animated_images(deck, active_folder)
 
     deck.set_key_callback(key_change_callback)

@@ -12,6 +12,7 @@ from PIL import (Image, ImageSequence, ImageDraw,
                  ImageFont, UnidentifiedImageError)
 from StreamDeck.ImageHelpers import PILHelper
 from StreamDeck.Transport.Transport import TransportError
+from streamdeck.models import (StreamdeckKey, Folder)
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 ASSETS_PATH = os.path.join(BASE_DIR, "assets")
@@ -21,7 +22,7 @@ FRAMES_PER_SECOND = 10
 
 animated_images = {}
 clock_threads = {}
-stop_animation = False
+stop_animation = {}
 
 
 def get_key_style(model_streamdeckKey):
@@ -164,6 +165,12 @@ def render_key_image(
         animated_images[key_number] = frames
         return None
     else:
+        global stop_animation
+        if key_number in animated_images:
+            stop_animation[key_number] = True
+            time.sleep(.5)
+            del stop_animation[key_number]
+            del animated_images[key_number]
         image = PILHelper.create_scaled_image(
             deck, icon, margins=[0, 0, 20, 0])
         # Load a custom TrueType font and use it to overlay the key index
@@ -212,7 +219,7 @@ def create_animation_frames(deck, image, label_text, font_filename):
     return itertools.cycle(icon_frames)
 
 
-def animate(fps, deck, key_images):
+def animate(fps, deck, key_images, key_number):
     """
     Helper function that will run a periodic loop which updates the
     images on each Key
@@ -237,15 +244,14 @@ def animate(fps, deck, key_images):
 
     # Periodic loop that will render every frame at the set FPS until
     # the StreamDeck device we're using is closed.
-    while not stop_animation:
+    while not stop_animation[key_number]:
         try:
             # Use a scoped-with on the deck to ensure we're the only
             # thread using it right now.
             with deck:
                 # Update the key images with the next animation frame.
                 try:
-                    for key, frames in key_images.items():
-                        deck.set_key_image(key, next(frames))
+                    deck.set_key_image(key_number, next(key_images[key_number]))
                 except RuntimeError:
                     break
         except TransportError as err:
@@ -274,17 +280,25 @@ def animate(fps, deck, key_images):
             time.sleep(sleep_interval)
 
 
-def start_animated_images(deck):
+def start_animated_images(deck, folder_id):
     """
-    Start threads of animated image
+    Start threads of animated image in current folder
 
     :param deck: active stream deck
+    :param folder_id: id of folder
     """
     global animated_images
     global stop_animation
-    stop_animation = False
-    threading.Thread(target=animate, args=[
-                     FRAMES_PER_SECOND, deck, animated_images]).start()
+
+    folder = Folder.objects.get(id=folder_id)
+    list_key = list(
+        StreamdeckKey.objects.filter(folder=folder))
+
+    for key in list_key:
+        if key.number in animated_images:
+            stop_animation[key.number] = False
+            threading.Thread(target=animate, args=[
+                FRAMES_PER_SECOND, deck, animated_images, key.number]).start()
 
 
 def clear_image_threads():
@@ -292,7 +306,8 @@ def clear_image_threads():
     Stops all running threads and clears all thread dictionaries
     """
     global stop_animation
-    stop_animation = True
+
+    stop_animation = stop_animation.fromkeys(stop_animation, True)
     animated_images.clear()
 
     global clock_threads
