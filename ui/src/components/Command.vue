@@ -2,6 +2,9 @@
   <div v-if="payload">
     <b-row v-if="payload.command_type === 'shell'">
       <b-col>
+        <b-button id="delete-button" variant="danger" size="sm" @click="deleteCommand">x</b-button>       
+      </b-col>
+      <b-col>
           {{ payload.command_type }}
       </b-col>
       <b-col cols="2">
@@ -17,12 +20,13 @@
         <b-form-input v-model="payload.time_value" placeholder="Seconds"></b-form-input>
       </b-col>
       <b-col>
-          <b-button variant="success" size="sm" @click="saveChanges">Save</b-button>
-          &nbsp;
-          <b-button variant="danger" size="sm" @click="deleteCommand">Delete</b-button>
+        <b-button variant="success" size="sm" @click="saveChanges">Save</b-button>
       </b-col>
     </b-row>
     <b-row v-if="payload.command_type === 'hotkey'">
+      <b-col>
+        <b-button id="delete-button" variant="danger" size="sm" @click="deleteCommand">x</b-button>       
+      </b-col>
       <b-col>
         {{ payload.command_type }}
       </b-col>
@@ -34,11 +38,12 @@
       </b-col>
       <b-col>
         <b-button variant="success" size="sm" @click="saveChanges">Save</b-button>
-        &nbsp;
-        <b-button variant="danger" size="sm" @click="deleteCommand">Delete</b-button>
       </b-col>
     </b-row>
     <b-row v-if="payload.command_type === 'timer'">
+      <b-col>
+        <b-button id="delete-button" variant="danger" size="sm" @click="deleteCommand">x</b-button>       
+      </b-col>
       <b-col>
         {{ payload.command_type }}
       </b-col>
@@ -50,11 +55,12 @@
       </b-col>
       <b-col>
         <b-button variant="success" size="sm" @click="saveChanges">Save</b-button>
-        &nbsp;
-        <b-button variant="danger" size="sm" @click="deleteCommand">Delete</b-button>
       </b-col>
     </b-row>
     <b-row v-if="payload.command_type === 'stopwatch'">
+      <b-col>
+        <b-button id="delete-button" variant="danger" size="sm" @click="deleteCommand">x</b-button>       
+      </b-col>
       <b-col>
         {{ payload.command_type }}
       </b-col>
@@ -66,8 +72,6 @@
       </b-col>
       <b-col>
         <b-button variant="success" size="sm" @click="saveChanges">Save</b-button>
-        &nbsp;
-        <b-button variant="danger" size="sm" @click="deleteCommand">Delete</b-button>
       </b-col>
     </b-row>
   </div> 
@@ -183,3 +187,13 @@ export default {
   }
 }
 </script>
+<style scoped>
+  #delete-button{
+    border-radius: 50%;
+    border: 1px solid white;
+    height: 28px;
+    width: 28px;
+    font-size: 16px;
+    padding: 0;
+  }
+</style>

@@ -1,37 +1,49 @@
 <template>
   <div v-if="payload">
-    <h4><img :src="image" style="height: 30px;">Button #{{ payload.id }}</h4>
-    <br>
-    <b-form-input v-model="payload.text" placeholder="Enter key text" maxlength="10"></b-form-input>
-    <br>
-    <b-form-checkbox
-      v-model="payload.clock"
-      :value="true"
-      :unchecked-value="false"
-    >
-      Clock
-    </b-form-checkbox>
-    <br>
-    <input type="file" accept="image/*" @change="changeNewImageEvent($event)" id="file-input">
-    <a style="margin-right:2.5em" href="javascript:void(0)" @click="resetNewImage">Reset</a>
-    <a href="javascript:void(0)" @click="removeImage">Remove Image</a>
-    <br>
-    <img v-show="newImage !== null" :src="imagePreview" height="70px" width="70px">
-    <br v-show="newImage !== null">
-    <br>
-    <b-button variant="success" @click="saveChanges">Save</b-button>
-    <br>
+    <b-row>
+      <b-col>
+        <h4>
+          <div class="container">
+          <img :src="image" style="height: 100px; z-index: 1;">
+          <button type="button" class="close" id="remove-image" aria-label="Close" @click="removeImage">
+            <span aria-hidden="true">×</span>
+          </button>
+          <imageUpload 
+            :keyid="payload.id" 
+            v-on:folder-changed="$emit('folder-changed')">
+          </imageUpload>
+          </div>
+        {{ payload.text }}
+        </h4>
+      </b-col>
+    
+    <!-- Text and clock key configuration-->
+      <b-col>
+        <b-form-input v-model="payload.text" v-on:change="waitToSave" placeholder="Enter key text" maxlength="10"/>
+        <br>
+        <b-form-checkbox
+        v-model="payload.clock"
+        :value="true"
+        :unchecked-value="false"
+        v-on:change="saveChanges"
+        >
+        Clock
+        </b-form-checkbox>
+        <br>
+        <b-button variant="primary" @click="addFolder" v-show="payload.change_to_folder === null">Add folder</b-button>
+        <b-button variant="primary" @click="deleteFolder" v-show="payload.change_to_folder != null">Delete folder</b-button>
+      </b-col>
+    </b-row>
     <h3>Commands</h3>
     <div v-for="command in commands" :key="command.id">
       <command :payload="command" :keyid="payload.id" v-on:folder-changed="$emit('folder-changed')"></command>
     </div>
     <br>
+
     <b-button variant="primary" v-b-modal.add-command>Add command</b-button>
-    &nbsp;
-    <b-button variant="primary" @click="addFolder" v-show="payload.change_to_folder === null">Add folder</b-button>
-    <b-button variant="primary" @click="deleteFolder" v-show="payload.change_to_folder != null">Delete folder</b-button>
     <br>
     <br>
+
     <b-modal id="add-command" title="Add command" @ok="addCommand()">
       <b-form-select v-model="newCommandType" :options="[
         {value: 'shell', text: '(ba)sh'},
@@ -50,12 +62,15 @@
       <b-form-input v-show="newCommandType === 'timer'" v-model="newCommandTimer" type="number" placeholder="Seconds"></b-form-input>
       <br>
     </b-modal>
+
+    
   </div>
 </template>
 
 <script>
 import axios from 'axios'
 import Command from '@/components/Command.vue'
+import ImageUpload from '@/components/ImageUpload.vue'
 
 export default {
   name: 'BtnSettings',
@@ -63,10 +78,13 @@ export default {
       'payload'
   ],
   components: {
-      Command
+      Command,
+      ImageUpload,
   },
   data() {
     return {
+      timeout: null,
+      waitTime: 1000,
       newImage: null,
       newCommandType: 'shell',
       newCommandName: '',
@@ -83,10 +101,6 @@ export default {
     commands() {
       return this.payload.Commands
     },
-    imagePreview() {
-      if(this.newImage === null) return ''
-      return URL.createObjectURL(this.newImage)
-    },
     image() {
       if(this.payload.image_source === null) return 'https://www.elgato.com/themes/custom/smalcode/key-creator/assets/image_pool/sd31/btn_custom_trigger_hotkey2.svg'
       return 'http://localhost:8000' + this.payload.image_source
@@ -94,22 +108,18 @@ export default {
   },
   methods: {
       async saveChanges() {
-        const promises = []
-        promises.push(axios.patch('key/' + this.payload.id, {
+        await axios.patch('key/' + this.payload.id, {
             text: this.payload.text,
             clock: this.payload.clock || false
-        }))
-        if(this.newImage !== null) {
-          promises.push(this.uploadNewImage())
-          this.resetNewImage()
-        }
-        await Promise.all(promises)
+        })
         this.$emit('folder-changed')
       },
-      uploadNewImage() {
-        const form = new FormData()
-        form.append('image_source', this.newImage)
-        return axios.put('key/' + this.payload.id + '/image_upload', form, {header: {'Content-Type': 'image/png'}})
+      waitToSave(){
+        // Unset previous timeout.
+        clearTimeout(this.timeout);
+        // Set current timeout.
+        // If no further changes after 1 second, then save the change.
+        this.timeout = setTimeout(function(){this.saveChanges()}.bind(this), this.waitTime);
       },
       async addFolder() {
         await axios.put('key/' + this.payload.id + '/folder', {name: 'New folder'})
@@ -122,11 +132,9 @@ export default {
       async changeNewImageEvent(event) {
         this.newImage = event.target.files[0]
       },
-      resetNewImage() {
-        this.newImage = null
-      },
-      removeImage(){
-        return axios.delete('key/' + this.payload.id)
+      async removeImage(){
+        await axios.delete('key/' + this.payload.id)
+        this.$emit('folder-changed')
       },
       async addCommand() {
         let newCmd = {command_type: this.newCommandType}
@@ -148,3 +156,34 @@ export default {
   }
 }
 </script>
+
+<style>
+  .form-control{
+    color:white;
+    background-color: #313131; 
+    border: 1px solid black;
+  }
+
+  .form-control:focus{
+    color:white;
+    background-color: #313131;
+  }
+  .modal-title{
+    color: white;
+  }
+
+  #remove-image{
+    transform: translate(-19px, -11px);
+    position: absolute;
+    color: white;
+    font-size: 25px;
+    padding: 4px;
+    height: 35px;
+    width: 35px;
+    border: 1px solid white;
+    background: red;
+    border-radius: 50%;
+    z-index: 4;
+  }
+  
+</style>
