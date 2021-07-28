@@ -3,8 +3,8 @@
     <div
           id="deck-btn"
           :style="[$store.getters.selected !== payload.id ?
-          {border: '1.5px solid black'} :
-          {border: '4px solid red'}]"
+          {border: '2px solid black'} :
+          {border: '4px solid #007bff'}]"
           @click="keyClicked"
         > 
       <div class="d-flex flex-column">
@@ -17,14 +17,9 @@
             
         </div>
         <div>
-          <span
-              
-              :style="[payload.change_to_folder ?
-              {color: 'blue'} :
-              {}]"
-            >
+          <span>
               {{ payload.text }}
-            </span>
+          </span>
         </div>
       </div>
     
@@ -70,6 +65,7 @@ export default {
     background-position: center; /* Center the image */
     background-repeat: no-repeat; /* Do not repeat the image */
     background-size: cover; /* Resize the background image to cover the entire container */
+    background-color: #313131;
     overflow-x: hidden;
 }
 </style>
