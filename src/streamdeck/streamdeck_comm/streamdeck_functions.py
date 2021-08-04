@@ -1,5 +1,3 @@
-import os
-from pathlib import Path
 import time
 from StreamDeck.DeviceManager import DeviceManager
 from streamdeck.models import (
@@ -8,9 +6,6 @@ from streamdeck.models import (
 from .image_handling import (
     update_key_image, start_animated_images, clear_image_threads)
 from .command_functions import run_key_command, clear_command_threads
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
-ASSETS_PATH = os.path.join(BASE_DIR, "assets")
-MEDIA_PATH = os.path.join(BASE_DIR, "media")
 
 active_folder = 0
 decks = {}

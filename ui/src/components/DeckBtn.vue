@@ -32,7 +32,7 @@
 export default {
   name: 'DeckBtn',
   props: [
-    'payload'
+    'payload',
   ],
   data() {
     return {
@@ -47,7 +47,7 @@ export default {
   methods: {
     keyClicked() {
       if(this.$store.getters.selected === this.payload.id && this.payload.change_to_folder) {
-        this.$router.push('/' + this.payload.change_to_folder.id)
+        this.$router.push({name: "Folder", params: {folder: this.payload.change_to_folder.id}})
       } else {
         this.$store.commit('selectKey', this.payload.id)
       }
@@ -67,5 +67,6 @@ export default {
     background-size: cover; /* Resize the background image to cover the entire container */
     background-color: #313131;
     overflow-x: hidden;
+    padding-top: 1px;
 }
 </style>

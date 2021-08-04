@@ -1,10 +1,5 @@
 <template>
   <div id="app" v-if="loaded">
-    <div id="nav">
-      <router-link to="/1">Folders</router-link> |
-      <router-link to="/settings">Settings</router-link>
-      
-    </div>
     <router-view/>
   </div>
 </template>

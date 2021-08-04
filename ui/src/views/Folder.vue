@@ -1,8 +1,23 @@
 <template>
   <div class="container about">
-    <h1>{{ $store.getters.activeDeck.name }}</h1>
-
-
+    <br>
+    <h1><b-form-select v-model="activeDeck" :options="streamdecksOptions" @change="changeActiveDeck" id="streamdeckSelect"></b-form-select><br></h1>
+    <b-row cols="7">
+      <b-col/>
+      <b-col/>
+      <b-col>
+        <p>Brightness: </p>
+      </b-col>
+      <b-col>
+        <b-form-slider ref="basic" id="demo-sb" v-model="brightness" :min="1" :max="100" v-on:change="waitToSave"></b-form-slider>
+      </b-col>
+      <b-col>
+        <p>{{brightness}}</p>
+      </b-col>
+      <b-col/>
+      <b-col/>
+    </b-row>
+    <br>
     <div v-if="keys.length > 0">
       <div
         class="row justify-content-center"
@@ -47,11 +62,23 @@ export default {
   data() {
     return {
       name: '',
-      keys: []
+      keys: [],
+      activeDeck: -1,
+      brightness: 0,
+      waitTime: 500,
     }
+  },
+  computed: {
+    streamdecksOptions() {
+      return this.$store.state.decks.map(deck => {return {value: deck.id, text: deck.name + ' (S/N: ' + deck.serial_number + ')'}})
+    }
+
   },
   mounted() {
     this.loadFolder()
+    this.activeDeck = this.$store.state.activeDeck
+    const active = this.$store.getters.activeDeck
+    this.brightness = active.brightness
   },
   methods: {
     async loadFolder() {
@@ -79,6 +106,24 @@ export default {
         }
       }
       
+    },
+    changeActiveDeck() {
+      this.$store.commit('activeDeck', this.activeDeck)
+      console.log("Active deck changed")
+    },
+    waitToSave(){
+        // Unset previous timeout.
+        clearTimeout(this.timeout);
+        // Set current timeout.
+        // If no further changes after 1 second, then save the change.
+        this.timeout = setTimeout(function(){this.saveChanges()}.bind(this), this.waitTime);
+    },
+
+    async saveChanges() {
+      await axios.patch('streamdecks/' + this.activeDeck, {
+          brightness: this.brightness,
+      })
+      await this.$store.dispatch('refreshDecks')
     }
   },
   watch: {
@@ -89,3 +134,14 @@ export default {
   
 }
 </script>
+<style scoped>
+  #streamdeckSelect{
+    background-color: #212121;
+    color: white;
+    border: none;
+    font-size: 25px;
+  }
+  .custom-select{
+    background: #212121 url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='4' height='5' viewBox='0 0 4 5'%3e%3cpath fill='white' d='M2 0L0 2h4zm0 5L0 3h4z'/%3e%3c/svg%3e") no-repeat right .75rem center/8px 10px !important;
+  }
+</style>

@@ -373,6 +373,8 @@ def create_folder(request, key_id):
 
         folder = Folder.objects.create(name=folder_name)
 
+        # set default folder image
+        streamdeckKey.image_source = "assets/default-folder.png"
         streamdeckKey.change_to_folder = folder
         streamdeckKey.save()
 

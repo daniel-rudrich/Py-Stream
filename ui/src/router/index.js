@@ -1,15 +1,10 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Settings from '../views/Settings.vue'
+
 
 Vue.use(VueRouter)
 
 const routes = [
-  {
-    path: '/settings',
-    name: 'Settings',
-    component: Settings
-  },
   {
     path: '/',
     redirect: '/1' // TODO: Get this from Store

@@ -34,6 +34,8 @@
         <b-button variant="primary" @click="deleteFolder" v-show="payload.change_to_folder != null">Delete folder</b-button>
       </b-col>
     </b-row>
+    <br>
+    <br>
     <h3>Commands</h3>
     <div v-for="command in commands" :key="command.id">
       <command :payload="command" :keyid="payload.id" v-on:folder-changed="$emit('folder-changed')"></command>

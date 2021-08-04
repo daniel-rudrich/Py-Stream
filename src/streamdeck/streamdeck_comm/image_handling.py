@@ -102,8 +102,10 @@ def delete_clock_thread(model_streamdeckKey):
     :param model_streamdeckKey: stream deck key
     """
     if model_streamdeckKey.id in clock_threads:
-        clock_threads[model_streamdeckKey.id].join()
+        thread = clock_threads[model_streamdeckKey.id]
         del clock_threads[model_streamdeckKey.id]
+        thread.join()
+
     pass
 
 

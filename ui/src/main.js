@@ -9,7 +9,11 @@ Vue.config.productionTip = false
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
+import bFormSlider from 'vue-bootstrap-slider'
+import 'bootstrap-slider/dist/css/bootstrap-slider.css'
+
 Vue.use(BootstrapVue)
+Vue.use(bFormSlider)
 Vue.use(IconsPlugin)
 
 console.log(window.location.host)

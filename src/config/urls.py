@@ -18,12 +18,13 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from config.views import home
 from streamdeck.streamdeck_comm.streamdeck_interface import streamdecks_init
 
 urlpatterns = [
+    path('', home),
     path('admin/', admin.site.urls),
     path('api/', include('streamdeck.urls')),
-    # path('', include('streamdeck.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) \
     + static(settings.FRONTEND_URL, document_root=settings.FRONTEND_ROOT)
 
