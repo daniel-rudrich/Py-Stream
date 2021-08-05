@@ -15,6 +15,7 @@
           </div>
         {{ payload.text }}
         </h4>
+        <p v-show="payload.change_to_folder != null">(folder)</p>
       </b-col>
     
     <!-- Text and clock key configuration-->
@@ -39,6 +40,7 @@
     <h3>Commands</h3>
     <div v-for="command in commands" :key="command.id">
       <command :payload="command" :keyid="payload.id" v-on:folder-changed="$emit('folder-changed')"></command>
+      <br>
     </div>
     <br>
 
@@ -55,12 +57,21 @@
       ]"></b-form-select>
       <br>
       <br>
+      <p>Command name:</p>
       <b-form-input v-model="newCommandName" placeholder="Enter command name (optional)"></b-form-input>
       <br>
+      <p v-show="newCommandType === 'shell'">Command string</p>
       <b-form-input v-show="newCommandType === 'shell'" v-model="newCommandCommand" placeholder="Enter command"></b-form-input>
+      <br v-show="newCommandType === 'shell'">
+      <p v-show="newCommandType === 'shell'">Shell timer value; set -1 if command should not be executed in a time intervall (in seconds)</p>
       <b-form-input v-show="newCommandType === 'shell'" v-model="newShellTimer" type="number" placeholder="Seconds"></b-form-input>
+      <br v-show="newCommandType === 'shell'">
+      <p v-show="newCommandType === 'shell'">Execution path (directory)</p>
       <b-form-input v-show="newCommandType === 'shell'" v-model="newCommandDirectory" placeholder="."></b-form-input>
-      <span v-show="newCommandType === 'hotkey'" >You can edit the hotkeys after adding the command.</span>
+      <br v-show="newCommandType === 'shell'">
+      <span v-show="newCommandType === 'hotkey'" color="white">You can edit the hotkeys after adding the command.</span>
+      <br v-show="newCommandType === 'hotkey'">
+      <p v-show="newCommandType === 'timer'">Timer value (in seconds)</p>
       <b-form-input v-show="newCommandType === 'timer'" v-model="newCommandTimer" type="number" placeholder="Seconds"></b-form-input>
       <br>
     </b-modal>
@@ -188,4 +199,7 @@ export default {
     z-index: 4;
   }
   
+  .modal-content{
+    color: white;
+  }
 </style>

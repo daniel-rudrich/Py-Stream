@@ -5,19 +5,31 @@
         <b-button id="delete-button" variant="danger" size="sm" @click="deleteCommand">x</b-button>       
       </b-col>
       <b-col>
-          {{ payload.command_type }}
+          <p class ="command-type">{{ payload.command_type }}</p>
       </b-col>
       <b-col cols="2">
-          <b-form-input v-model="payload.name" placeholder="Command name"></b-form-input>
+        <div class="command-col">
+        <label>Command name</label>
+        <b-form-input v-model="payload.name" placeholder="Command name"></b-form-input>
+        </div>
       </b-col>
       <b-col  cols="2">
-          <b-form-input v-model="payload.command_string" placeholder="Command"></b-form-input>
+        <div class="command-col">
+        <label>Command string</label>
+        <b-form-input v-model="payload.command_string" placeholder="Command"></b-form-input>
+        </div>
       </b-col>
       <b-col  cols="2">
-          <b-form-input v-model="payload.active_directory" placeholder="."></b-form-input>
+        <div class="command-col">
+        <label>Execution path</label>
+        <b-form-input v-model="payload.active_directory" placeholder="."></b-form-input>
+        </div>
       </b-col>
       <b-col  cols="2">
+        <div class="command-col">
+        <label>Timer value</label>
         <b-form-input v-model="payload.time_value" placeholder="Seconds"></b-form-input>
+        </div>
       </b-col>
       <b-col>
         <b-button variant="success" size="sm" @click="saveChanges">Save</b-button>
@@ -28,10 +40,13 @@
         <b-button id="delete-button" variant="danger" size="sm" @click="deleteCommand">x</b-button>       
       </b-col>
       <b-col>
-        {{ payload.command_type }}
+        <p class ="command-type">{{ payload.command_type }}</p>
       </b-col>
       <b-col cols="4">
+        <div class="command-col">
+        <label >Command Name</label>
         <b-form-input v-model="payload.name" placeholder="Command name"></b-form-input>
+        </div>
       </b-col>
       <b-col  cols="4">
         <b-button :variant="listeningButtonColor" size="sm" @click="keyListenerBtn">{{ keys }}</b-button>
@@ -45,13 +60,19 @@
         <b-button id="delete-button" variant="danger" size="sm" @click="deleteCommand">x</b-button>       
       </b-col>
       <b-col>
-        {{ payload.command_type }}
+        <p class ="command-type">{{ payload.command_type }}</p>
       </b-col>
       <b-col cols="4">
+        <div class="command-col">
+        <label >Command Name</label>
         <b-form-input v-model="payload.name" placeholder="Command name"></b-form-input>
+        </div>
       </b-col>
       <b-col  cols="4">
+        <div class="command-col">
+        <label>Time value</label>
         <b-form-input v-model="payload.time_value" placeholder="Seconds"></b-form-input>
+        </div>
       </b-col>
       <b-col>
         <b-button variant="success" size="sm" @click="saveChanges">Save</b-button>
@@ -62,13 +83,16 @@
         <b-button id="delete-button" variant="danger" size="sm" @click="deleteCommand">x</b-button>       
       </b-col>
       <b-col>
-        {{ payload.command_type }}
+        <p class ="command-type">{{ payload.command_type }}</p>
       </b-col>
       <b-col cols="4">
+        <div class="command-col">
+        <label>Command Name</label>
         <b-form-input v-model="payload.name" placeholder="Command name"></b-form-input>
+        </div>
       </b-col>
       <b-col  cols="4">
-        ---
+        <p class="command-type">---</p>
       </b-col>
       <b-col>
         <b-button variant="success" size="sm" @click="saveChanges">Save</b-button>
@@ -195,5 +219,18 @@ export default {
     width: 28px;
     font-size: 16px;
     padding: 0;
+    margin-top: auto;
+    margin-bottom: auto;
+  }
+  .col{
+    margin-top: auto;
+    margin-bottom: auto;
+  }
+  .command-type{
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+  .command-col{
+    text-align: left;
   }
 </style>
