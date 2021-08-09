@@ -105,7 +105,7 @@ The software offers several features such as:
 - creating virtual folders/layers for the stream deck so more keys than physically available can be configured
 - built-in function: timer, stopwatch/countdown and displaying a running clock
 
-If you don't want to or can't use the GUI you can use the REST API. See the [docs](./docs/REST_API.md) for more information.
+If you don't want to or can't use the GUI you can use the REST API. See the [docs](./docs/pages/usage/restapi.md) for more information.
 
 -----------------------------------------------------------------------------
 ## Additional Information
@@ -114,7 +114,7 @@ This project is part of my master thesis in computer science. Therefore, till ap
 
 -----------------------------------------------------------------------------
 ## Contributing
-[Contributing](./docs/CONTRIBUTING.md)
+[Contributing](./docs/pages/CONTRIBUTING.md)
 
 -----------------------------------------------------------------------------
 ## License
