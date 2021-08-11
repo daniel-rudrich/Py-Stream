@@ -1,7 +1,17 @@
 <template>
   <div class="container about">
     <br>
-    <h1><b-form-select v-model="activeDeck" :options="streamdecksOptions" @change="changeActiveDeck" id="streamdeckSelect"></b-form-select><br></h1>
+    <h1>
+      <b-row>
+        <b-col cols="0">
+          <b-button variant="primary" v-b-modal.change_name><b-icon icon="pencil-square"></b-icon></b-button>
+        </b-col>
+        <b-col cols="10">
+          <b-form-select v-model="activeDeck" :options="streamdecksOptions" @change="changeActiveDeck" id="streamdeckSelect"></b-form-select>
+        </b-col>
+      </b-row>
+    </h1>
+    <br>
     <b-row cols="7">
       <b-col/>
       <b-col/>
@@ -44,6 +54,10 @@
       v-on:folder-changed="loadFolder"
     />
 
+    <b-modal id="change_name" title="Change Name" @ok="saveName()">
+      <p>Stream Deck Name</p>
+      <b-form-input v-model="name" placeholder="Enter name"></b-form-input>
+    </b-modal>
   </div>
 </template>
 
@@ -79,6 +93,7 @@ export default {
     this.activeDeck = this.$store.state.activeDeck
     const active = this.$store.getters.activeDeck
     this.brightness = active.brightness
+    this.name = active.name
   },
   methods: {
     async loadFolder() {
@@ -122,6 +137,12 @@ export default {
     async saveChanges() {
       await axios.patch('streamdecks/' + this.activeDeck, {
           brightness: this.brightness,
+      })
+      await this.$store.dispatch('refreshDecks')
+    },
+    async saveName(){
+      await axios.patch('streamdecks/' + this.activeDeck, {
+          name: this.name,
       })
       await this.$store.dispatch('refreshDecks')
     }
