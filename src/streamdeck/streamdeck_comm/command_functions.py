@@ -187,17 +187,19 @@ def run_timer(deck, model_streamdeckKey, timer_time):
         if command_id not in timer_threads:
             break
     switch = 1
+    old_color = model_streamdeckKey.text_color
     while (True):
         if switch == 1:
-            color = 'white'
+            color = '#FFFFFF'
             switch = 0
         else:
-            color = 'red'
+            color = '#FF0000'
             switch = 1
-
-        update_key_image(deck, model_streamdeckKey, False, text_color=color)
+        model_streamdeckKey.text_color = color
+        update_key_image(deck, model_streamdeckKey, False)
         time.sleep(1)
         if command_id not in timer_threads:
+            model_streamdeckKey.text_color = old_color
             break
 
 

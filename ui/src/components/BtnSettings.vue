@@ -20,19 +20,52 @@
     
     <!-- Text and clock key configuration-->
       <b-col>
-        <b-form-input v-model="payload.text" v-on:change="waitToSave" placeholder="Enter key text" maxlength="10"/>
+        <b-row>
+          <b-form-input v-model="payload.text" v-on:change="waitToSave" placeholder="Enter key text" maxlength="10"/>
+        </b-row>
         <br>
-        <b-form-checkbox
-        v-model="payload.clock"
-        :value="true"
-        :unchecked-value="false"
-        v-on:change="saveChanges"
-        >
-        Clock
-        </b-form-checkbox>
-        <br>
-        <b-button variant="primary" @click="addFolder" v-show="payload.change_to_folder === null">Add folder</b-button>
-        <b-button variant="primary" @click="deleteFolder" v-show="payload.change_to_folder != null">Delete folder</b-button>
+        <b-row>
+          <b-col>
+            <b-form-checkbox
+              v-model="payload.clock"
+              :value="true"
+              :unchecked-value="false"
+              v-on:change="saveChanges"
+            >
+              Clock
+            </b-form-checkbox>
+            <br>
+            <b-button variant="primary" @click="addFolder" v-show="payload.change_to_folder === null">Add folder</b-button>
+            <b-button variant="primary" @click="deleteFolder" v-show="payload.change_to_folder != null">Delete folder</b-button>
+          </b-col>
+          <b-col>
+            <b-row>
+              <b-col>
+                <b-form-spinbutton id="sb-inline" v-model="payload.text_size" :min="1" :max="20" v-on:change="waitToSave"></b-form-spinbutton>
+              </b-col>
+              <b-col>
+                <v-input-colorpicker  v-model="payload.text_color" v-on:change="saveChanges" style="height: 38px;"/>
+              </b-col>
+            </b-row>
+            <br>
+            <b-row>
+              <b-col>
+                <b-button-group size="sm" style="margin-right: 10px;">
+                  <b-button class="text-button" v-bind:class="{'set-key': payload.text_bold}" @click="setTextStyle('bold')"><b>B</b></b-button>
+                  <b-button class="text-button" v-bind:class="{'set-key': payload.text_italic}" @click="setTextStyle('italic')"><i>I</i></b-button>
+                  <b-button class="text-button" v-bind:class="{'set-key': payload.text_underlined}" @click="setTextStyle('underlined')"><u>U</u></b-button>
+               </b-button-group>
+              </b-col>
+              <b-col>
+                <b-button-group size="sm">
+                  <b-button class="text-button" v-bind:class="[payload.text_position === 'top' ? 'set-key':'']" @click="setTextPosition('top')"><b-icon icon="align-top"></b-icon></b-button>
+                  <b-button class="text-button" v-bind:class="[payload.text_position === 'center' ? 'set-key':'']" @click="setTextPosition('center')"><b-icon icon="align-center"></b-icon></b-button>
+                  <b-button class="text-button" v-bind:class="[payload.text_position === 'bottom' ? 'set-key':'']" @click="setTextPosition('bottom')"><b-icon icon="align-bottom"></b-icon></b-button>
+                </b-button-group>
+              </b-col>
+            </b-row>
+          </b-col>
+        </b-row>
       </b-col>
     </b-row>
     <br>
@@ -123,7 +156,9 @@ export default {
       async saveChanges() {
         await axios.patch('key/' + this.payload.id, {
             text: this.payload.text,
-            clock: this.payload.clock || false
+            clock: this.payload.clock || false,
+            text_size: this.payload.text_size,
+            text_color: this.payload.text_color
         })
         this.$emit('folder-changed')
       },
@@ -133,6 +168,33 @@ export default {
         // Set current timeout.
         // If no further changes after 1 second, then save the change.
         this.timeout = setTimeout(function(){this.saveChanges()}.bind(this), this.waitTime);
+      },
+      async setTextPosition(position){
+        await axios.patch('key/' + this.payload.id, {text_position: position})
+        this.$emit('folder-changed')
+      },
+      async setTextStyle(style){
+        var bold = this.payload.text_bold
+        var italic = this.payload.text_italic
+        var underlined = this.payload.text_underlined
+
+        if (style == "bold"){
+          bold = !bold
+        }
+        if (style == "italic"){
+          italic = !italic
+        }
+        if (style == "underlined"){
+          underlined = !underlined
+        }
+
+        await axios.patch('key/' + this.payload.id, 
+        {
+          text_bold: bold, 
+          text_italic: italic, 
+          text_underlined: underlined
+        })
+        this.$emit('folder-changed')
       },
       async addFolder() {
         await axios.put('key/' + this.payload.id + '/folder', {name: 'New folder'})
@@ -199,7 +261,21 @@ export default {
     z-index: 4;
   }
   
+  .text-button{
+    background-color: #313131;
+    border-color: black;
+  }
+
+  .text-button.set-key{
+    background-color: #1f1e1e;
+  }
+
   .modal-content{
+    color: white;
+  }
+
+  .form-control.focus{
+    background-color: #313131;
     color: white;
   }
 </style>

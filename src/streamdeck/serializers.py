@@ -11,8 +11,10 @@ class StreamdeckKeySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StreamdeckKey
-        fields = ['id', 'number', 'text', 'image_source',
-                  'folder', 'streamdeck', 'Commands', 'change_to_folder',
+        fields = ['id', 'number', 'text', 'text_position', 'text_color',
+                  'font', 'text_size', 'image_source', 'folder',
+                  'text_bold', 'text_italic', 'text_underlined',
+                  'streamdeck', 'Commands', 'change_to_folder',
                   'clock']
         depth = 5
 

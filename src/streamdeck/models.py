@@ -7,8 +7,22 @@ def get_image_path(instance, filename):
 
 
 class StreamdeckKey(models.Model):
+
+    POSITION_CHOICES = (
+        ("center", "center"),
+        ("top", "top"),
+        ("bottom", "bottom")
+    )
+
     number = models.IntegerField()
     text = models.CharField(blank=True, max_length=10)
+    font = models.CharField(blank=True, max_length=30)
+    text_size = models.IntegerField(default=14)
+    text_position = models.CharField(choices=POSITION_CHOICES, default="bottom", max_length=6)
+    text_color = models.CharField(default="#FFFFFF", max_length=20)
+    text_bold = models.BooleanField(default=False)
+    text_italic = models.BooleanField(default=False)
+    text_underlined = models.BooleanField(default=False)
     image_source = models.FileField(
         upload_to=get_image_path, blank=True, null=True)
     folder = models.ForeignKey(

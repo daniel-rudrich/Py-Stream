@@ -11,10 +11,12 @@ import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 import bFormSlider from 'vue-bootstrap-slider'
 import 'bootstrap-slider/dist/css/bootstrap-slider.css'
+import InputColorPicker from 'vue-native-color-picker'
 
 Vue.use(BootstrapVue)
 Vue.use(bFormSlider)
 Vue.use(IconsPlugin)
+Vue.use(InputColorPicker)
 
 console.log(window.location.host)
 if(window.location.host === 'localhost:8080')

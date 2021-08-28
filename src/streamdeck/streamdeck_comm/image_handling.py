@@ -30,22 +30,32 @@ def get_key_style(model_streamdeckKey):
     Returns everything needed to add a streamdeckkey_model as actual key to the streamdeck
 
     :param model_streamdeckKey: stream deck key
-    :returns: name, icon, font and label of a stream deck key as dictionary
+    :returns: all stream deck key text information
     """
 
     if not model_streamdeckKey.image_source:
         icon = None
     else:
         icon = os.path.join(MEDIA_PATH, model_streamdeckKey.image_source.name)
+
+    if model_streamdeckKey.font:
+        font = os.path.join(ASSETS_PATH, model_streamdeckKey.font)
+    else:
+        font = "arial.ttf"
+
     return {
         "name": model_streamdeckKey.number,
         "icon": icon,
-        "font": os.path.join(ASSETS_PATH, "Roboto-Regular.ttf"),
-        "label": model_streamdeckKey.text
+        "font": font,
+        "text_size": model_streamdeckKey.text_size,
+        "text_color": model_streamdeckKey.text_color,
+        "text_position": model_streamdeckKey.text_position,
+        "label": model_streamdeckKey.text,
+        "underlined": model_streamdeckKey.text_underlined
     }
 
 
-def update_key_image(deck, model_streamdeckKey, clock, text_color="white"):
+def update_key_image(deck, model_streamdeckKey, clock):
     """
     Creates a new key image based on the key index, style and
     current key state and updates the image on the StreamDeck.
@@ -58,6 +68,9 @@ def update_key_image(deck, model_streamdeckKey, clock, text_color="white"):
 
     # handle keys with clock
     if model_streamdeckKey.clock and not clock:
+        # the clock thread needs to be restarted or else text style changes will not
+        # be recognized by the clock thread
+        delete_clock_thread(model_streamdeckKey)
         add_clock_thread(deck, model_streamdeckKey)
 
     if not model_streamdeckKey.clock:
@@ -68,9 +81,7 @@ def update_key_image(deck, model_streamdeckKey, clock, text_color="white"):
     # Generate the custom key with the requested image and label.
     if(not key_style["icon"]):
         key_style["icon"] = PILHelper.create_image(deck)
-    image = render_key_image(
-        deck, key_style["icon"], key_style["font"], key_style["label"],
-        model_streamdeckKey.number, text_color)
+    image = render_key_image(deck, key_style)
     # Use a scoped-with on the deck to ensure we're the only thread using it
     # right now.
     if image:
@@ -131,62 +142,67 @@ def key_clock(deck, model_streamdeckKey):
             break
 
 
-def render_key_image(
-        deck, icon_filename, font_filename, label_text,
-        key_number, text_color='white'):
+def render_key_image(deck, key_style):
     """
     Generates a custom tile with run-time generated text and custom image via the
     PIL module. Adapted from stream deck library examples
 
     :param deck: active stream deck
-    :param icon_filename: filename of image or actual image
-    :param font_filename: filename of font file
-    :param label_text: text of stream deck key
-    :param key_number: number of stream deck key on actual stream deck
-    :param text_color: color of text on stream deck key
+    :param key_style: holds all key formatting information
     """
 
     # Resize the source image asset to best-fit the dimensions of a single key,
     # leaving a margin at the bottom so that we can draw the key title
     # afterwards.
     blank_image_flag = False
+
     try:
-        icon = Image.open(icon_filename)
+        icon = Image.open(key_style["icon"])
     except AttributeError:
         blank_image_flag = True
-        icon = icon_filename
+        icon = key_style["icon"]
     except UnidentifiedImageError:
         # should only occur for svgs
         out = BytesIO()
-        cairosvg.svg2png(url=icon_filename, write_to=out)
+        cairosvg.svg2png(url=key_style["icon"], write_to=out)
         icon = Image.open(out)
 
     if(not blank_image_flag and getattr(icon, "is_animated", False)):
-        # create frames for animation
-        frames = create_animation_frames(deck, icon, label_text, font_filename)
-        animated_images[key_number] = frames
+        frames = create_animation_frames(deck, icon, key_style)
+        animated_images[key_style["name"]] = frames
         return None
     else:
         global stop_animation
-        if key_number in animated_images:
-            stop_animation[key_number] = True
+        if key_style["name"] in animated_images:
+            stop_animation[key_style["name"]] = True
             time.sleep(.5)
-            del stop_animation[key_number]
-            del animated_images[key_number]
+            del stop_animation[key_style["name"]]
+            del animated_images[key_style["name"]]
         image = PILHelper.create_scaled_image(
             deck, icon, margins=[0, 0, 20, 0])
-        # Load a custom TrueType font and use it to overlay the key index
-        # draw key label onto the image a few pixels from the
-        # bottom of the key.
         draw = ImageDraw.Draw(image)
-        font = ImageFont.truetype(font_filename, 14)
-        draw.text((image.width / 2, image.height - 10), text=label_text,
-                  font=font, anchor="ms", fill=text_color)
+        font = ImageFont.truetype(key_style["font"], key_style["text_size"])
+
+        text_positions = {
+            "bottom": (image.width / 2, image.height - 10),
+            "center": (image.width / 2, image.height - 30),
+            # fontsize/5 is used as padding as otherwise the text will not be fully shown
+            "top": (image.width / 2, image.height - 60 + key_style["text_size"]/5)
+        }
+
+        draw.text(text_positions[key_style["text_position"]], text=key_style["label"],
+                  font=font, anchor="ms", fill=key_style["text_color"])
+
+        if key_style["underlined"]:
+            width = draw.textsize(key_style["label"], font=font)[0]
+            lx, ly = text_positions[key_style["text_position"]]
+            ly = ly + 5
+            draw.line((lx - width/2, ly, lx + width/2, ly), fill=key_style["text_color"])
 
         return PILHelper.to_native_format(deck, image)
 
 
-def create_animation_frames(deck, image, label_text, font_filename):
+def create_animation_frames(deck, image, key_style):
     """
     Extracts out the individual animation frames of image (if
     any) and returns an infinite generator that returns the next animation frame,
@@ -206,9 +222,24 @@ def create_animation_frames(deck, image, label_text, font_filename):
         frame_image = PILHelper.create_scaled_image(deck, frame)
 
         draw = ImageDraw.Draw(frame_image)
-        font = ImageFont.truetype(font_filename, 14)
-        draw.text((frame_image.width / 2, frame_image.height - 10),
-                  text=label_text, font=font, anchor="ms", fill='white')
+        font = ImageFont.truetype(key_style["font"], key_style["text_size"])
+
+        text_positions = {
+            "bottom": (frame_image.width / 2, frame_image.height - 10),
+            "center": (frame_image.width / 2, frame_image.height - 30),
+            # fontsize/5 is used as padding as otherwise the text will not be fully shown
+            "top": (frame_image.width / 2, frame_image.height - 60 + key_style["text_size"]/5)
+        }
+
+        draw.text(text_positions[key_style["text_position"]], text=key_style["label"],
+                  font=font, anchor="ms", fill=key_style["text_color"])
+
+        if key_style["underlined"]:
+            width = draw.textsize(key_style["label"], font=font)[0]
+            lx, ly = text_positions[key_style["text_position"]]
+            ly = ly + 5
+            draw.line((lx - width/2, ly, lx + width/2, ly), fill=key_style["text_color"])
+
         # Preconvert the generated image to the native format of the StreamDeck
         # so we don't need to keep converting it when showing it on the device.
         native_frame_image = PILHelper.to_native_format(deck, frame_image)

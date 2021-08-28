@@ -297,7 +297,7 @@ None
 > | http code     | content-type                      | response                                                            |
 > |---------------|-----------------------------------|---------------------------------------------------------------------|
 > | `200`         | `application/json`                | `json string`                                                       |
-> | `404`         | `text/html; charset=utf-8`        | `Stream deck with id {id} not found`                            |
+> | `404`         | `text/html; charset=utf-8`        | `Stream deck with id {id} not found`                                |
 
 ##### Example cURL
 
@@ -320,7 +320,14 @@ None
 
 > | name              |  type     | data type      | description                         |
 > |-------------------|-----------|----------------|-------------------------------------|
-> | `text`            |  required | string         |  text of stream deck key            |
+> | `text`            |  optional | string         |  text of stream deck key            |
+> | `clock`           |  optional | int            |  1 if key should show a clock       |
+> | `text_size`       |  optional | int            |  size of text                       |
+> | `text_position`   |  optional | string         |  text position (top, center, bottom)|
+> | `text_color`      |  optional | string         |  text color as hex value            |
+> | `bold`            |  optional | bool           |  true for bold text                 |
+> | `italic`          |  optional | bool           |  true of italic text                |
+> | `underlined`      |  optional | bool           |  true for underlined text           |
 
 ##### Responses
 
@@ -328,6 +335,8 @@ None
 > |---------------|-----------------------------------|---------------------------------------------------------------------|
 > | `200`         | `application/json`                | `json string`                                                       |
 > | `404`         | `text/html; charset=utf-8`        | `Stream deck key with id {id} not found`                            |
+> | `422`         | `text/html; charset=utf-8`        | `Color string is invalid`                                           |
+> | `422`         | `text/html; charset=utf-8`        | `Text position value is invalid`                                    |
 
 ##### Example cURL
 

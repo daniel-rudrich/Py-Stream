@@ -2,7 +2,7 @@ from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from rest_framework.parsers import JSONParser
-
+from PIL import ImageColor
 from .serializers import (
     StreamdeckKeySerializer, FolderSerializer,
     StreamdeckSerializer, CommandSerializer,
@@ -102,8 +102,35 @@ def key_detail(request, id):
         data = JSONParser().parse(request)
 
         streamdeckKey.text = data.get("text", streamdeckKey.text)
+        streamdeckKey.text_bold = data.get("text_bold", streamdeckKey.text_bold)
+        streamdeckKey.text_italic = data.get("text_italic", streamdeckKey.text_italic)
+        streamdeckKey.text_underlined = data.get("text_underlined", streamdeckKey.text_underlined)
+
+        font = "arial.ttf"
+        if streamdeckKey.text_bold and streamdeckKey.text_italic:
+            font = "arialbi.ttf"
+        elif streamdeckKey.text_bold:
+            font = "arialbd.ttf"
+        elif streamdeckKey.text_italic:
+            font = "ariali.ttf"
+
+        streamdeckKey.font = font
+        streamdeckKey.text_color = data.get("text_color", streamdeckKey.text_color)
+
+        try:
+            ImageColor.getrgb(streamdeckKey.text_color)
+        except ValueError:
+            return HttpResponse("The given color string is not valid", status=422)
+
+        streamdeckKey.text_position = data.get("text_position", streamdeckKey.text_position)
+
+        if streamdeckKey.text_position not in ["top", "center", "bottom"]:
+            return HttpResponse("The given position value is not valid", status=422)
+
+        streamdeckKey.text_size = data.get("text_size", streamdeckKey.text_size)
         streamdeckKey.clock = data.get("clock", streamdeckKey.clock)
         streamdeckKey.save()
+
         if check_connection(streamdeckKey.streamdeck):
             update_key_display(streamdeckKey)
         serializer = StreamdeckKeySerializer(streamdeckKey)
