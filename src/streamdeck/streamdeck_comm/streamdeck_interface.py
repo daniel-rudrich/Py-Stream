@@ -1,6 +1,6 @@
 from .streamdeck_functions import (
     check_connected_decks,
-    update_key_change_callback, run_key_command,
+    update_key_change_callback, run_commands,
     change_to_folder, update_streamdeck, check_deck_connection,
     key_in_folder, get_deck, delete_folder)
 from .image_handling import update_key_image
@@ -37,7 +37,7 @@ def execute_key_command(model_streamdeckKey):
     :param model_streamdeckKey: stream deck key
     """
 
-    run_key_command(model_streamdeckKey)
+    run_commands(model_streamdeckKey)
 
 
 def update_key_display(streamdeckKey):

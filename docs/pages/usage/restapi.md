@@ -167,6 +167,31 @@ None
 
 </details>
 
+<details>
+<summary markdown="span"><code>GET</code><code><b>/api/key/{id}/run_commands</b></code> run commands of the stream deck key</summary>
+
+
+##### URL Parameters
+
+> | name              |  type     | data type      | description                         |
+> |-------------------|-----------|----------------|-------------------------------------|
+> | `id`              |  required | int            | The specific key id                 |
+
+##### Responses
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `200`         | `application/json`                | json string                                                         |
+> | `404`         | `text/html; charset=utf-8`        | `Stream deck key with id {id} not found`                            |
+
+##### Example cURL
+
+> ```javascript
+>  curl -X GET -H "Content-Type: application/json" http://localhost:8000/api/key/1/run_commands
+> ```
+
+</details>
+
 -------------------------------------------------------------------------------------------
 
 #### Uploading images or creating folders and commands

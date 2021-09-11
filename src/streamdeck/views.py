@@ -13,7 +13,8 @@ from .streamdeck_comm.streamdeck_interface import (change_folder,
                                                    update_key_behavior,
                                                    update_key_display,
                                                    update_brightness,
-                                                   check_connection)
+                                                   check_connection,
+                                                   execute_key_command)
 
 
 @csrf_exempt
@@ -144,6 +145,19 @@ def key_detail(request, id):
         streamdeckKey.save()
 
         return HttpResponse(status=204)
+
+
+@csrf_exempt
+def run_key_commands(request, id):
+
+    try:
+        streamdeckKey = StreamdeckKey.objects.get(id=id)
+    except StreamdeckKey.DoesNotExist:
+        return HttpResponse(f"Stream deck key with id {id} not found", status=404)
+
+    if request.method == 'GET':
+        execute_key_command(streamdeckKey)
+        return HttpResponse("Commands executed", status=200)
 
 
 @csrf_exempt

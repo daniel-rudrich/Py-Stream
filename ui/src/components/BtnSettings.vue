@@ -70,7 +70,10 @@
     </b-row>
     <br>
     <br>
-    <h3>Commands</h3>
+    <h3>
+      Commands
+      <b-button variant="primary" @click="runCommands" v-show="payload.Commands.length > 0">Run Commands</b-button>
+    </h3>
     <div v-for="command in commands" :key="command.id">
       <command :payload="command" :keyid="payload.id" v-on:folder-changed="$emit('folder-changed')"></command>
       <br>
@@ -228,6 +231,10 @@ export default {
         await axios.put('key/' + this.payload.id + '/command', newCmd)
         this.$emit('folder-changed')
       },
+      async runCommands(){
+        await axios.get('key/' + this.payload.id + '/run_commands')
+        this.$emit('folder-changed')
+      }
   }
 }
 </script>
