@@ -14,7 +14,8 @@ from .streamdeck_comm.streamdeck_interface import (change_folder,
                                                    update_key_display,
                                                    update_brightness,
                                                    check_connection,
-                                                   execute_key_command)
+                                                   execute_key_command,
+                                                   get_key_image)
 
 
 @csrf_exempt
@@ -181,6 +182,19 @@ def key_image_upload(request, id):
             return HttpResponse("Image uploaded successfully", serializer.data)
 
         return HttpResponse(status=404)
+
+
+@csrf_exempt
+def key_image(request, id):
+
+    try:
+        streamdeckKey = StreamdeckKey.objects.get(id=id)
+    except StreamdeckKey.DoesNotExist:
+        return HttpResponse(f"Stream deck key with id {id} not found", status=404)
+
+    if request.method == 'GET':
+        image = get_key_image(streamdeckKey)
+        return HttpResponse(image, content_type="image/jpeg")
 
 
 @csrf_exempt

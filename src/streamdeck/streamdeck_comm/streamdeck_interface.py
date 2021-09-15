@@ -3,7 +3,7 @@ from .streamdeck_functions import (
     update_key_change_callback, run_commands,
     change_to_folder, update_streamdeck, check_deck_connection,
     key_in_folder, get_deck, delete_folder)
-from .image_handling import update_key_image
+from .image_handling import update_key_image, render_key_image
 from sys import platform as _platform
 import os
 import threading
@@ -50,6 +50,21 @@ def update_key_display(streamdeckKey):
     if key_in_folder(streamdeckKey):
         deck = get_deck(streamdeckKey)
         update_key_image(deck, streamdeckKey, False)
+
+
+def get_key_image(model_streamdeckKey):
+    """
+    Get rendered image of stream deck key
+
+    :param model_streamdeckKey: stream deck key
+    :returns: rendered image or None if the key does not belong to an active stream deck
+    """
+
+    deck = get_deck(model_streamdeckKey)
+    if deck is not None:
+        return render_key_image(deck, model_streamdeckKey, True)
+    else:
+        return None
 
 
 def update_key_behavior(streamdeckKey):

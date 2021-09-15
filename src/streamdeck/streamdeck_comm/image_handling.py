@@ -3,6 +3,7 @@ import threading
 import cairosvg
 import itertools
 import time
+import base64
 
 from pathlib import Path
 from datetime import datetime
@@ -76,12 +77,8 @@ def update_key_image(deck, model_streamdeckKey, clock):
     if not model_streamdeckKey.clock:
         delete_clock_thread(model_streamdeckKey)
 
-    key_style = get_key_style(model_streamdeckKey)
-
     # Generate the custom key with the requested image and label.
-    if(not key_style["icon"]):
-        key_style["icon"] = PILHelper.create_image(deck)
-    image = render_key_image(deck, key_style)
+    image = render_key_image(deck, model_streamdeckKey)
     # Use a scoped-with on the deck to ensure we're the only thread using it
     # right now.
     if image:
@@ -142,19 +139,29 @@ def key_clock(deck, model_streamdeckKey):
             break
 
 
-def render_key_image(deck, key_style):
+def render_key_image(deck, model_streamdeckKey, image_object=False):
     """
     Generates a custom tile with run-time generated text and custom image via the
     PIL module. Adapted from stream deck library examples
 
     :param deck: active stream deck
-    :param key_style: holds all key formatting information
+    :param model_streamdeckKey: stream deck key
+    :param image_object: if true method returns Image object instead of memoryview
+
+    :rtype: memoryview
+    :returns: rendered image for the stream deck key
     """
 
     # Resize the source image asset to best-fit the dimensions of a single key,
     # leaving a margin at the bottom so that we can draw the key title
     # afterwards.
     blank_image_flag = False
+
+    key_style = get_key_style(model_streamdeckKey)
+
+    # Generate the custom key with the requested image and label.
+    if(not key_style["icon"]):
+        key_style["icon"] = PILHelper.create_image(deck)
 
     try:
         icon = Image.open(key_style["icon"])
@@ -179,7 +186,7 @@ def render_key_image(deck, key_style):
             del stop_animation[key_style["name"]]
             del animated_images[key_style["name"]]
         image = PILHelper.create_scaled_image(
-            deck, icon, margins=[0, 0, 20, 0])
+            deck, icon, margins=[0, 0, 0, 0])
         draw = ImageDraw.Draw(image)
         font = ImageFont.truetype(key_style["font"], key_style["text_size"])
 
@@ -199,7 +206,13 @@ def render_key_image(deck, key_style):
             ly = ly + 5
             draw.line((lx - width/2, ly, lx + width/2, ly), fill=key_style["text_color"])
 
-        return PILHelper.to_native_format(deck, image)
+        if image_object:
+            buf = BytesIO()
+            image.save(buf, format='JPEG')
+            img_str = base64.b64encode(buf.getvalue())
+            return img_str
+        else:
+            return PILHelper.to_native_format(deck, image)
 
 
 def create_animation_frames(deck, image, key_style):

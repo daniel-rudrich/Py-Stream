@@ -4,16 +4,15 @@
       <b-col>
         <h4>
           <div class="container">
-          <img :src="image" style="height: 100px; z-index: 1;">
-          <button type="button" class="close" id="remove-image" aria-label="Close" @click="removeImage">
-            <span aria-hidden="true">×</span>
-          </button>
-          <imageUpload 
-            :keyid="payload.id" 
-            v-on:folder-changed="$emit('folder-changed')">
-          </imageUpload>
+            <buttonImage :payload="payload"></buttonImage>
+            <button type="button" class="close" id="remove-image" aria-label="Close" @click="removeImage">
+              <span aria-hidden="true">×</span>
+            </button>
+            <imageUpload 
+              :keyid="payload.id"
+              v-on:folder-changed="$emit('folder-changed')">
+            </imageUpload>
           </div>
-        {{ payload.text }}
         </h4>
         <p v-show="payload.change_to_folder != null">(folder)</p>
       </b-col>
@@ -120,6 +119,7 @@
 import axios from 'axios'
 import Command from '@/components/Command.vue'
 import ImageUpload from '@/components/ImageUpload.vue'
+import ButtonImage from './ButtonImage.vue'
 
 export default {
   name: 'BtnSettings',
@@ -129,6 +129,7 @@ export default {
   components: {
       Command,
       ImageUpload,
+      ButtonImage
   },
   data() {
     return {
@@ -142,18 +143,15 @@ export default {
       newCommandDirectory: '.',
       newCommandTimer: 5,
       newShellTimer: -1,
+      original_image: null,
     }
-  },
-  mounted() {
   },
   computed: {
     commands() {
       return this.payload.Commands
     },
-    image() {
-      if(this.payload.image_source === null) return 'https://www.elgato.com/themes/custom/smalcode/key-creator/assets/image_pool/sd31/btn_custom_trigger_hotkey2.svg'
-      return 'http://localhost:8000' + this.payload.image_source
-    }
+  },
+  beforeUpdate() {
   },
   methods: {
       async saveChanges() {
@@ -232,7 +230,7 @@ export default {
         this.$emit('folder-changed')
       },
       async runCommands(){
-        await axios.get('key/' + this.payload.id + '/run_commands')
+        await axios.get('key/' + this.payload.id + '/run_commands', {header: {'Content-Type': 'image/png'}})
         this.$emit('folder-changed')
       }
   }
@@ -255,7 +253,7 @@ export default {
   }
 
   #remove-image{
-    transform: translate(-19px, -11px);
+    transform: translate(20px, -90px);
     position: absolute;
     color: white;
     font-size: 25px;

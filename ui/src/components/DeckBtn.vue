@@ -3,24 +3,12 @@
     <div
           id="deck-btn"
           :style="[$store.getters.selected !== payload.id ?
-          {border: '2px solid black'} :
+          {} :
           {border: '4px solid #007bff'}]"
           @click="keyClicked"
         > 
       <div class="d-flex flex-column">
-        <div>
-          
-            <img
-              :src="image"
-              style="max-width:65%; max-height:65%;"
-            >
-            
-        </div>
-        <div>
-          <span>
-              {{ payload.text }}
-          </span>
-        </div>
+        <buttonImage :payload="payload"></buttonImage>
       </div>
     
     </div>
@@ -29,20 +17,19 @@
 </template>
 
 <script>
+import ButtonImage from './ButtonImage.vue'
+
 export default {
   name: 'DeckBtn',
   props: [
     'payload',
   ],
+  components: {
+    ButtonImage,
+  },
   data() {
     return {
     }
-  },
-  computed: {
-    image() {
-      if(this.payload.image_source === null) return 'https://www.elgato.com/themes/custom/smalcode/key-creator/assets/image_pool/sd31/btn_custom_trigger_hotkey2.svg'
-      return 'http://localhost:8000' + this.payload.image_source
-    },
   },
   methods: {
     keyClicked() {
@@ -51,7 +38,7 @@ export default {
       } else {
         this.$store.commit('selectKey', this.payload.id)
       }
-    }
+    },
   }
 }
 </script>
@@ -67,6 +54,6 @@ export default {
     background-size: cover; /* Resize the background image to cover the entire container */
     background-color: #313131;
     overflow-x: hidden;
-    padding-top: 1px;
+    overflow-y: hidden;
 }
 </style>

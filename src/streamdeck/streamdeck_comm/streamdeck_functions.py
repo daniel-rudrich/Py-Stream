@@ -125,9 +125,14 @@ def get_deck(model_streamdeckKey):
     Return deck of stream deck key
 
     :param model_streamdeckKey: stream deck key to find stream deck
+    :returns stream deck or None if there is no active stream deck corresponding to the key
     """
     global decks
-    return decks[model_streamdeckKey.streamdeck.serial_number]
+    key = model_streamdeckKey.streamdeck.serial_number
+    if key in decks:
+        return decks[key]
+    else:
+        return None
 
 
 def delete_folder(folder):
