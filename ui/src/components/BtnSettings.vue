@@ -18,7 +18,7 @@
       </b-col>
     
     <!-- Text and clock key configuration-->
-      <b-col>
+      <b-col id="text-format">
         <b-row>
           <b-form-input v-model="payload.text" v-on:change="waitToSave" placeholder="Enter key text" maxlength="10"/>
         </b-row>
@@ -266,6 +266,12 @@ export default {
     z-index: 4;
   }
   
+  #text-format{
+    border: 3px solid black;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    box-shadow: 0px 0px 4px 0px #444
+  }
   .text-button{
     background-color: #313131;
     border-color: black;

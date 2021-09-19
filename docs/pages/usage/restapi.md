@@ -252,6 +252,36 @@ None
 </details>
 
 <details>
+<summary markdown="span"><code>PUT</code><code><b>/api/streamdecks/{id}/image_upload</b></code> upload image to stream deck</summary>
+
+
+##### URL Parameters
+
+> | name              |  type     | data type      | description                         |
+> |-------------------|-----------|----------------|-------------------------------------|
+> | `id`              |  required | int            | The specific stream deck id                 |
+
+##### Data Parameters
+
+> | name              |  type     | data type      | description                         |
+> |-------------------|-----------|----------------|-------------------------------------|
+> | `full_deck_image`    |  required | request.data   | the image itself                    |
+
+##### Responses
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `200`         | `text/html; charset=utf-8`        | `Image uploaded successfully`                                       |
+> | `404`         | `text/html; charset=utf-8`        | `Stream deck with id {id} not found`                            |
+
+##### Example cURL
+
+> ```javascript
+>  curl -X PUT -F "full_deck_image=@/path/to/image.png" http://localhost:8000/api/streamdecks/1/image_upload 
+> ```
+</details>
+
+<details>
 <summary markdown="span"><code>PUT</code><code><b>/api/key/{id}/command</b></code> add command to stream deck key</summary>
 
 
@@ -436,6 +466,30 @@ None
 -------------------------------------------------------------------------------------------
 
 #### Deleting images, folders and commands
+
+<details>
+<summary markdown="span"><code>DELETE</code><code><b>/api/streamdecks/{id}/image_delete</b></code> delete image of stream deck</summary>
+
+
+##### URL Parameters
+
+> | name              |  type     | data type      | description                         |
+> |-------------------|-----------|----------------|-------------------------------------|
+> | `id`              |  required | int            | The specific stream deck id     |
+
+##### Responses
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `204`         | `text/html; charset=utf-8`        | `Image deleted successfully`                                       |
+> | `404`         | `text/html; charset=utf-8`        | `Stream deck with id {id} not found`                            |
+
+##### Example cURL
+
+> ```javascript
+>  curl -X DELETE http://localhost:8000/api/streamdecks/1/image_delete
+> ```
+</details>
 
 <details>
 <summary markdown="span"><code>DELETE</code><code><b>/api/key/{id}</b></code> deletes image of stream deck key</summary>

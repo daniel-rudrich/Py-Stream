@@ -6,7 +6,7 @@ from PIL import ImageColor
 from .serializers import (
     StreamdeckKeySerializer, FolderSerializer,
     StreamdeckSerializer, CommandSerializer,
-    StreamdeckKeyImageSerializer, HotkeysSerializer)
+    StreamdeckKeyImageSerializer, HotkeysSerializer, StreamdeckImageSerializer)
 from .models import Streamdeck, StreamdeckKey, Folder, Command, Hotkeys
 from .streamdeck_comm.streamdeck_interface import (change_folder,
                                                    delete_folders,
@@ -15,7 +15,8 @@ from .streamdeck_comm.streamdeck_interface import (change_folder,
                                                    update_brightness,
                                                    check_connection,
                                                    execute_key_command,
-                                                   get_key_image)
+                                                   get_key_image,
+                                                   update_deck_image)
 
 
 @csrf_exempt
@@ -68,6 +69,44 @@ def streamdeck_folders(request, id):
         folders = Folder.objects.filter(id__in=folder_ids)
         serializer = FolderSerializer(folders, many=True)
         return JsonResponse(serializer.data, safe=False)
+
+
+@csrf_exempt
+@api_view(['PUT'])
+def streamdeck_image(request, id):
+    try:
+        streamdeck = Streamdeck.objects.get(id=id)
+    except Streamdeck.DoesNotExist:
+        return HttpResponse(f"Stream deck with id {id} not found", status=404)
+
+    if request.method == 'PUT':
+        serializer = StreamdeckImageSerializer(
+            streamdeck, data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+
+            if check_connection(streamdeck):
+                update_deck_image(streamdeck)
+            return HttpResponse("Image uploaded successfully", serializer.data)
+
+        return HttpResponse(status=404)
+
+
+@csrf_exempt
+def streamdeck_delete_image(request, id):
+    try:
+        streamdeck = Streamdeck.objects.get(id=id)
+    except Streamdeck.DoesNotExist:
+        return HttpResponse(f"Stream deck with id {id} not found", status=404)
+
+    if request.method == 'DELETE':
+        streamdeck.full_deck_image = ""
+        streamdeck.save()
+        if check_connection(streamdeck):
+            update_deck_image(streamdeck)
+
+        return HttpResponse(status=204)
 
 
 def streamdeck_folder(request, deck_id, id):

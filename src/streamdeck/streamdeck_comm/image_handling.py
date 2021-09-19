@@ -217,6 +217,7 @@ def render_key_image(deck, model_streamdeckKey, image_object=False):
 
 def create_animation_frames(deck, image, key_style):
     """
+    TAKEN AND MODIFIED FROM STREAM DECK LIBRARY EXAMPLES by Dean Camera
     Extracts out the individual animation frames of image (if
     any) and returns an infinite generator that returns the next animation frame,
     in the StreamDeck device's native image format.
@@ -267,6 +268,7 @@ def create_animation_frames(deck, image, key_style):
 
 def animate(fps, deck, key_images, key_number):
     """
+    TAKEN AND MODIFIED FROM STREAM DECK LIBRARY EXAMPLES by Dean Camera
     Helper function that will run a periodic loop which updates the
     images on each Key
 
@@ -345,6 +347,82 @@ def start_animated_images(deck, folder_id):
             stop_animation[key.number] = False
             threading.Thread(target=animate, args=[
                 FRAMES_PER_SECOND, deck, animated_images, key.number]).start()
+
+
+def create_full_deck_sized_image(deck, key_spacing, image_filename):
+    """
+    TAKEN FROM STREAM DECK LIBRARY EXAMPLES by Dean Camera
+    Generates an image that is correctly sized to fit across all keys of
+    a given Stream Deck
+
+    :param deck: active stream deck
+    :param key_spacing: space between stream deck keys
+    :param image_filename: filename of image
+
+    :rtype PIL Image object
+    :returns deck sized image
+    """
+    key_rows, key_cols = deck.key_layout()
+    key_width, key_height = deck.key_image_format()['size']
+    spacing_x, spacing_y = key_spacing
+
+    # Compute total size of the full StreamDeck image, based on the number of
+    # buttons along each axis. This doesn't take into account the spaces between
+    # the buttons that are hidden by the bezel.
+    key_width *= key_cols
+    key_height *= key_rows
+
+    # Compute the total number of extra non-visible pixels that are obscured by
+    # the bezel of the StreamDeck.
+    spacing_x *= key_cols - 1
+    spacing_y *= key_rows - 1
+
+    # Compute final full deck image size, based on the number of buttons and
+    # obscured pixels.
+    full_deck_image_size = (key_width + spacing_x, key_height + spacing_y)
+
+    # Resize the image to suit the StreamDeck's full image size (note: will not
+    # preserve the correct aspect ratio).
+    image = Image.open(os.path.join(MEDIA_PATH, image_filename)).convert("RGBA")
+    return image.resize(full_deck_image_size, Image.LANCZOS)
+
+
+def crop_key_image_from_deck_sized_image(deck, image, key_spacing, key):
+    """
+    TAKEN FROM STREAM DECK LIBRARY EXAMPLES by Dean Camera
+    Crops out a key-sized image from a larger deck-sized image, at the location
+    occupied by the given key index.
+
+    :param deck: active stream deck
+    :param image: deck sized image
+    :param key_spacing: space between stream deck keys
+    :param key: key index
+    :returns key-sized PIL image for the key
+    """
+    key_rows, key_cols = deck.key_layout()
+    key_width, key_height = deck.key_image_format()['size']
+    spacing_x, spacing_y = key_spacing
+
+    # Determine which row and column the requested key is located on.
+    row = key // key_cols
+    col = key % key_cols
+
+    # Compute the starting X and Y offsets into the full size image that the
+    # requested key should display.
+    start_x = col * (key_width + spacing_x)
+    start_y = row * (key_height + spacing_y)
+
+    # Compute the region of the larger deck image that is occupied by the given
+    # key, and crop out that segment of the full image.
+    region = (start_x, start_y, start_x + key_width, start_y + key_height)
+    segment = image.crop(region)
+
+    # Create a new key-sized image, and paste in the cropped section of the
+    # larger image.
+    key_image = PILHelper.create_image(deck)
+    key_image.paste(segment)
+
+    return PILHelper.to_native_format(deck, key_image)
 
 
 def clear_image_threads():

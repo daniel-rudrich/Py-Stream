@@ -69,8 +69,18 @@ class StreamdeckSerializer(serializers.ModelSerializer):
     class Meta:
         model = Streamdeck
         fields = ['id', 'name', 'serial_number',
-                  'brightness', 'streamdeck_model', 'default_folder']
+                  'brightness', 'streamdeck_model', 'default_folder',
+                  'full_deck_image']
         depth = 1
+
+
+class StreamdeckImageSerializer(serializers.ModelSerializer):
+    full_deck_image = ImageField(
+        required=False, _DjangoImageField=SVGAndImageFormField)
+
+    class Meta:
+        model = Streamdeck
+        fields = ['full_deck_image']
 
 
 class StreamdeckModelSerializer(serializers.ModelSerializer):

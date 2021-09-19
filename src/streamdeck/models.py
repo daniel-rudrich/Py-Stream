@@ -6,6 +6,10 @@ def get_image_path(instance, filename):
     return os.path.join('images', str(instance.id), filename)
 
 
+def get_image_path_streamdeck(instance, filename):
+    return os.path.join('images/streamdeck', str(instance.id), filename)
+
+
 class StreamdeckKey(models.Model):
 
     POSITION_CHOICES = (
@@ -84,3 +88,5 @@ class Streamdeck(models.Model):
         'StreamdeckModel', on_delete=models.CASCADE)
     default_folder = models.ForeignKey(
         'Folder', on_delete=models.CASCADE, null=True)
+    full_deck_image = models.FileField(
+        upload_to=get_image_path_streamdeck, blank=True, null=True)

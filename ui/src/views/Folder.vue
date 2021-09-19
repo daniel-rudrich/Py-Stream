@@ -3,8 +3,11 @@
     <br>
     <h1>
       <b-row>
-        <b-col cols="0">
-          <b-button variant="primary" v-b-modal.change_name><b-icon icon="pencil-square"></b-icon></b-button>
+        <b-col cols="1">
+          <deck-settings 
+              :streamdeckid="this.activeDeck"
+              v-on:folder-changed="$emit('folder-changed')">
+          </deck-settings>
         </b-col>
         <b-col cols="10">
           <b-form-select v-model="activeDeck" :options="streamdecksOptions" @change="changeActiveDeck" id="streamdeckSelect"></b-form-select>
@@ -53,11 +56,6 @@
       :payload="keys.find(key => key.id === $store.state.selected)"
       v-on:folder-changed="loadFolder"
     />
-
-    <b-modal id="change_name" title="Change Name" @ok="saveName()">
-      <p>Stream Deck Name</p>
-      <b-form-input v-model="name" placeholder="Enter name"></b-form-input>
-    </b-modal>
   </div>
 </template>
 
@@ -65,13 +63,15 @@
 //import store from '@/store'
 import DeckBtn from '@/components/DeckBtn.vue'
 import BtnSettings from '@/components/BtnSettings.vue'
+import DeckSettings from '@/components/DeckSettings.vue'
 import axios from 'axios'
 
 export default {
   name: 'Home',
   components: {
     DeckBtn,
-    BtnSettings
+    BtnSettings,
+    DeckSettings
   },
   data() {
     return {
@@ -93,7 +93,6 @@ export default {
     this.activeDeck = this.$store.state.activeDeck
     const active = this.$store.getters.activeDeck
     this.brightness = active.brightness
-    this.name = active.name
   },
   methods: {
     async loadFolder() {
@@ -140,12 +139,6 @@ export default {
       })
       await this.$store.dispatch('refreshDecks')
     },
-    async saveName(){
-      await axios.patch('streamdecks/' + this.activeDeck, {
-          name: this.name,
-      })
-      await this.$store.dispatch('refreshDecks')
-    }
   },
   watch: {
     "$route.params.folder"() {
