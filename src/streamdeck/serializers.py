@@ -70,7 +70,7 @@ class StreamdeckSerializer(serializers.ModelSerializer):
         model = Streamdeck
         fields = ['id', 'name', 'serial_number',
                   'brightness', 'streamdeck_model', 'default_folder',
-                  'full_deck_image']
+                  'full_deck_image', 'screensaver_image', 'screensaver_time']
         depth = 1
 
 
@@ -81,6 +81,15 @@ class StreamdeckImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Streamdeck
         fields = ['full_deck_image']
+
+
+class StreamdeckScreensaverSerializer(serializers.ModelSerializer):
+    screensaver_image = ImageField(
+        required=False, _DjangoImageField=SVGAndImageFormField)
+
+    class Meta:
+        model = Streamdeck
+        fields = ['screensaver_image']
 
 
 class StreamdeckModelSerializer(serializers.ModelSerializer):

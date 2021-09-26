@@ -1,4 +1,5 @@
 import time
+import threading
 from StreamDeck.DeviceManager import DeviceManager
 from streamdeck.models import (
     Streamdeck, StreamdeckModel, StreamdeckKey, Folder)
@@ -10,6 +11,9 @@ from .command_functions import run_key_command, clear_command_threads
 
 active_folder = 0
 decks = {}
+screensaver_thread = None
+stop_screensaver = False
+screensaver_current_time = 0
 
 
 def check_deck_connection(model_streamdeck):
@@ -103,10 +107,22 @@ def key_change_callback(deck, key, state):
     :param key: number of pressed key
     :param state: run command if true
     """
+
+    reset_screensaver_time()
+
     list_key = get_active_keys(active_folder)
 
     if state:
         run_commands(list_key[key])
+
+
+def reset_screensaver_time():
+    """
+    Sets the screensaver time back to 0
+    """
+
+    global screensaver_current_time
+    screensaver_current_time = 0
 
 
 def get_streamdecks():
@@ -292,6 +308,65 @@ def update_full_deck_image(deck, image_filename):
             deck.set_key_image(k, key_image)
 
 
+def screensaver_function(deck, model_streamdeck):
+    """
+    Runs the screensaver functionality. Should not be run on the main thread
+
+    :param deck: Deck for the screensaver
+    :param model_streamdeck: streamdeck object of the database
+    """
+    s_time = int(model_streamdeck.screensaver_time)
+    global screensaver_current_time
+    global stop_screensaver
+    while not stop_screensaver:
+
+        # count idle time until the screensaver time is reached
+        while screensaver_current_time < s_time and not stop_screensaver:
+            screensaver_current_time = screensaver_current_time + 1
+            time.sleep(1)
+
+        if stop_screensaver:
+            break
+        # stop animated images and clock images
+        clear_image_threads()
+
+        # display screensaver image on the streamdeck
+        update_full_deck_image(deck, model_streamdeck.screensaver_image.name)
+
+        # stop the screensaver when the time is set to 0 again
+        while screensaver_current_time > 0 and not stop_screensaver:
+            time.sleep(1)
+
+        # load all key images onto the stream deck again and start the relevant
+        # image threads
+        update_full_deck_image(deck, model_streamdeck.full_deck_image.name)
+
+
+def reset_screensaver(model_streamdeck):
+    """
+    Restart screensaver function to retrieve updated screensaver times
+
+    :param model_streamdeck: stream deck from the database
+    """
+    deck = decks[model_streamdeck.serial_number]
+
+    global stop_screensaver
+    stop_screensaver = True
+    global screensaver_current_time
+    screensaver_current_time = 0
+
+    global screensaver_thread
+
+    if(screensaver_thread is not None):
+        screensaver_thread.join()
+
+    stop_screensaver = False
+    # start screensaver thread
+    screensaver_thread = threading.Thread(target=screensaver_function, args=[
+        deck, model_streamdeck])
+    screensaver_thread.start()
+
+
 def init_streamdeck(deck):
     """
     Initializes a streamdeck connection and all its keys
@@ -346,5 +421,13 @@ def init_streamdeck(deck):
     else:
         update_full_deck_image(deck, active_streamdeck.full_deck_image.name)
         pass
+
+    # start screensaver thread
+    thread = threading.Thread(target=screensaver_function, args=[
+        deck, active_streamdeck])
+
+    global screensaver_thread
+    screensaver_thread = thread
+    screensaver_thread.start()
 
     deck.set_key_callback(key_change_callback)

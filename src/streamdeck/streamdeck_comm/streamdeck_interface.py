@@ -2,7 +2,8 @@ from .streamdeck_functions import (
     check_connected_decks,
     update_key_change_callback, run_commands,
     change_to_folder, update_streamdeck, check_deck_connection,
-    key_in_folder, get_deck, delete_folder, update_full_deck_image)
+    key_in_folder, get_deck, delete_folder, update_full_deck_image,
+    reset_screensaver_time, reset_screensaver)
 from .image_handling import update_key_image, render_key_image
 from sys import platform as _platform
 import os
@@ -48,6 +49,7 @@ def update_key_display(streamdeckKey):
     :param: streamdeckKey: stream deck key
     """
     if key_in_folder(streamdeckKey):
+        reset_screensaver_time()
         deck = get_deck(streamdeckKey.streamdeck.serial_number)
         update_key_image(deck, streamdeckKey, False)
 
@@ -58,8 +60,10 @@ def update_deck_image(streamdeck):
 
     :param streamdeck: stream deck to update
     """
+
     deck = get_deck(streamdeck.serial_number)
     update_full_deck_image(deck, streamdeck.full_deck_image.name)
+    reset_screensaver(streamdeck)
 
 
 def get_key_image(model_streamdeckKey):
@@ -112,7 +116,17 @@ def update_brightness(streamdeck):
 
     :param stream deck
     """
+    reset_screensaver_time()
     update_streamdeck(streamdeck)
+
+
+def refresh_screensaver(streamdeck):
+    """
+    Refresh the screensaver after changing the screensaver trigger time
+
+    :param stream deck
+    """
+    reset_screensaver(streamdeck)
 
 
 def check_connection(streamdeck):

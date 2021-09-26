@@ -207,6 +207,7 @@ def render_key_image(deck, model_streamdeckKey, image_object=False):
             draw.line((lx - width/2, ly, lx + width/2, ly), fill=key_style["text_color"])
 
         if image_object:
+            # this is used to display the image in a browser
             buf = BytesIO()
             image.save(buf, format='JPEG')
             img_str = base64.b64encode(buf.getvalue())

@@ -6,7 +6,8 @@ from PIL import ImageColor
 from .serializers import (
     StreamdeckKeySerializer, FolderSerializer,
     StreamdeckSerializer, CommandSerializer,
-    StreamdeckKeyImageSerializer, HotkeysSerializer, StreamdeckImageSerializer)
+    StreamdeckKeyImageSerializer, HotkeysSerializer, StreamdeckImageSerializer,
+    StreamdeckScreensaverSerializer)
 from .models import Streamdeck, StreamdeckKey, Folder, Command, Hotkeys
 from .streamdeck_comm.streamdeck_interface import (change_folder,
                                                    delete_folders,
@@ -16,7 +17,11 @@ from .streamdeck_comm.streamdeck_interface import (change_folder,
                                                    check_connection,
                                                    execute_key_command,
                                                    get_key_image,
-                                                   update_deck_image)
+                                                   update_deck_image,
+                                                   refresh_screensaver)
+
+MAX_SCREENSAVER_TIME = 86400
+SCREENSAVER_DEFAULT_IMAGE = "assets/default_image.png"
 
 
 @csrf_exempt
@@ -43,10 +48,16 @@ def streamdeck_detail(request, id):
 
         streamdeck.name = data.get("name", streamdeck.name)
         streamdeck.brightness = data.get("brightness", streamdeck.brightness)
+        streamdeck.screensaver_time = data.get("screensaver_time", streamdeck.screensaver_time)
+
+        if int(streamdeck.screensaver_time) > MAX_SCREENSAVER_TIME or int(streamdeck.screensaver_time) <= 0:
+            streamdeck.screensaver_time = 60
 
         streamdeck.save()
         if check_connection(streamdeck):
             update_brightness(streamdeck)
+            refresh_screensaver(streamdeck)
+
         serializer = StreamdeckSerializer(streamdeck)
 
         return JsonResponse(serializer.data, safe=False)
@@ -106,6 +117,40 @@ def streamdeck_delete_image(request, id):
         if check_connection(streamdeck):
             update_deck_image(streamdeck)
 
+        return HttpResponse(status=204)
+
+
+@csrf_exempt
+@api_view(['PUT'])
+def screensaver_image(request, id):
+    try:
+        streamdeck = Streamdeck.objects.get(id=id)
+    except Streamdeck.DoesNotExist:
+        return HttpResponse(f"Stream deck with id {id} not found", status=404)
+
+    if request.method == 'PUT':
+        serializer = StreamdeckScreensaverSerializer(
+            streamdeck, data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            refresh_screensaver(streamdeck)
+            return HttpResponse("Image uploaded successfully", serializer.data)
+
+        return HttpResponse(status=404)
+
+
+@csrf_exempt
+def screensaver_delete_image(request, id):
+    try:
+        streamdeck = Streamdeck.objects.get(id=id)
+    except Streamdeck.DoesNotExist:
+        return HttpResponse(f"Stream deck with id {id} not found", status=404)
+
+    if request.method == 'DELETE':
+        streamdeck.screensaver_image = SCREENSAVER_DEFAULT_IMAGE
+        streamdeck.save()
+        refresh_screensaver(streamdeck)
         return HttpResponse(status=204)
 
 

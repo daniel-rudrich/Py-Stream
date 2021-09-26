@@ -123,6 +123,7 @@ export default {
     },
     changeActiveDeck() {
       this.$store.commit('activeDeck', this.activeDeck)
+      this.loadFolder()
       console.log("Active deck changed")
     },
     waitToSave(){

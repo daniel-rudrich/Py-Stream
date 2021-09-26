@@ -1,5 +1,9 @@
 from django.db import models
+from pathlib import Path
 import os
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+DEFAULT_IMAGE = os.path.join(BASE_DIR, "assets/default_image.png")
 
 
 def get_image_path(instance, filename):
@@ -7,6 +11,10 @@ def get_image_path(instance, filename):
 
 
 def get_image_path_streamdeck(instance, filename):
+    return os.path.join('images/streamdeck', str(instance.id), filename)
+
+
+def get_image_path_screensaver(instance, filename):
     return os.path.join('images/streamdeck', str(instance.id), filename)
 
 
@@ -90,3 +98,6 @@ class Streamdeck(models.Model):
         'Folder', on_delete=models.CASCADE, null=True)
     full_deck_image = models.FileField(
         upload_to=get_image_path_streamdeck, blank=True, null=True)
+    screensaver_image = models.FileField(
+        upload_to=get_image_path_screensaver, blank=True, null=True, default=DEFAULT_IMAGE)
+    screensaver_time = models.IntegerField(default=60)
