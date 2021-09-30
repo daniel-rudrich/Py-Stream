@@ -3,7 +3,7 @@ from pathlib import Path
 import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-DEFAULT_IMAGE = os.path.join(BASE_DIR, "assets/default_image.png")
+DEFAULT_IMAGE = os.path.join(BASE_DIR, "media/assets/default_image.png")
 
 
 def get_image_path(instance, filename):

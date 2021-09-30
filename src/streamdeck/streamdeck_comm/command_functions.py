@@ -117,7 +117,7 @@ def handle_timer_command(deck, model_streamdeckKey):
 
 def run_shell_interval(deck, model_streamdeckKey, interval):
     """
-    Run shell command every 'intervall' seconds and save result as text in key
+    Run shell command every 'interval' seconds and save result as text in key
 
     :param deck: active stream deck
     :param model_streamdeckKey: stream deck key with shell intervall command
@@ -241,6 +241,8 @@ def parse_keys(keys):
         "Control": Key.ctrl,
         "Control_l": Key.ctrl_l,
         "Control_R": Key.ctrl_r,
+        "Shift_l": Key.shift,
+        "Shift_R": Key.shift,
         "Alt": Key.alt,
         "Alt_l": Key.alt_l,
         "Alt_r": Key.alt_r,
@@ -288,6 +290,28 @@ def parse_keys(keys):
         else:
             parsedKeys.append(key)
     return parsedKeys
+
+
+def check_for_active_command():
+    """
+    Checks wether there is an active command thread
+
+    :returns: bool
+    """
+
+    for int_thread in interval_shell_threads:
+        if int_thread.is_alive():
+            return True
+
+    for timer_thread in timer_threads:
+        if timer_thread.is_alive():
+            return True
+
+    for stopwatch_thread in stopwatch_threads:
+        if stopwatch_thread.is_alive():
+            return True
+
+    return False
 
 
 def clear_command_threads():

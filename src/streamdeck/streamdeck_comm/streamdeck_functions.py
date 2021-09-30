@@ -7,7 +7,7 @@ from streamdeck.models import (
 from .image_handling import (
     update_key_image, start_animated_images, clear_image_threads,
     create_full_deck_sized_image, crop_key_image_from_deck_sized_image)
-from .command_functions import run_key_command, clear_command_threads
+from .command_functions import check_for_active_command, run_key_command, clear_command_threads
 
 active_folder = 0
 decks = {}
@@ -327,6 +327,10 @@ def screensaver_function(deck, model_streamdeck):
 
         if stop_screensaver:
             break
+
+        if check_for_active_command():
+            screensaver_current_time = 0
+            continue
         # stop animated images and clock images
         clear_image_threads()
 

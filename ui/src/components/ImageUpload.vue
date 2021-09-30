@@ -180,6 +180,7 @@ form:hover {
   z-index: 3;
   opacity: 0;
   border-radius: 10%;
+  font-size: 18px;
 }
 
 #upload-trigger-key:hover {
