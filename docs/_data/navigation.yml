@@ -1,0 +1,7 @@
+main:
+  - title: "Installation"
+    url: /installation/
+  - title: "Usage"
+    url: /usage/
+  - title: "About"
+    url: /about/
