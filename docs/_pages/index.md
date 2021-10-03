@@ -6,7 +6,7 @@ layout: single
 title: Linux Stream Deck Application
 permalink: /
 header:
-  image: "/assets/images/landing.PNG"
+  image: /streamdeck-application/docs/assets/images/landing.PNG
 ---
 
 This is an application for the Elgato Stream Deck which functionalities should be comparable to the officially provided Software of Elgato. The key difference is: this software is working under Linux and is fully open-source! Furthermore the GUI is provided via a one-page website which means the stream deck is configurable from other devices in the same network which the stream deck is not directly connected to via USB.
