@@ -9,11 +9,12 @@ from .image_handling import (
     create_full_deck_sized_image, crop_key_image_from_deck_sized_image)
 from .command_functions import check_for_active_command, run_key_command, clear_command_threads
 
-active_folder = 0
+active_folder = {}
 decks = {}
 screensaver_thread = None
 stop_screensaver = False
 screensaver_current_time = 0
+serial_numbers = {}
 
 
 def check_deck_connection(model_streamdeck):
@@ -41,19 +42,21 @@ def run_commands(model_streamdeckKey):
     run_key_command(deck, model_streamdeckKey)
     # changes folder if this key is meant to
     if model_streamdeckKey.change_to_folder:
-        change_to_folder(model_streamdeckKey.change_to_folder.id)
+        change_to_folder(model_streamdeckKey.change_to_folder.id, model_streamdeckKey.streamdeck.serial_number)
 
 
-def change_to_folder(folder_id):
+def change_to_folder(folder_id, deck_serial_number):
     """
     Stop all threads of the old folder and load all the keys of the new active folder
 
     :param folder_id: id of folder
     """
+
     folder = Folder.objects.get(id=folder_id)
-    global active_folder
-    active_folder = folder_id
     keys = StreamdeckKey.objects.filter(folder=folder)
+
+    global active_folder
+    active_folder[deck_serial_number] = folder_id
 
     if not check_deck_connection(keys[0].streamdeck):
         pass
@@ -63,11 +66,9 @@ def change_to_folder(folder_id):
 
     clear_command_threads()
 
-    streamdeck_serialnumber = keys[0].streamdeck.serial_number
-
     active_streamdeck = Streamdeck.objects.filter(
-        serial_number=streamdeck_serialnumber)[0]
-    deck = decks[streamdeck_serialnumber]
+        serial_number=deck_serial_number)[0]
+    deck = decks[deck_serial_number]
 
     # load image that covers the whole deck if existing else
     # load images of all single stream deck keys
@@ -80,7 +81,7 @@ def change_to_folder(folder_id):
         update_full_deck_image(deck, active_streamdeck.full_deck_image.name)
         pass
 
-    update_key_change_callback(keys[0].streamdeck.id, folder_id)
+    # update_key_change_callback(keys[0].streamdeck.id, folder_id)
 
 
 def update_key_change_callback(model_streamdeck_id, folder_id):
@@ -94,7 +95,7 @@ def update_key_change_callback(model_streamdeck_id, folder_id):
     # set global variables to currently active streamdeck and folder
     active_streamdeck = Streamdeck.objects.get(id=model_streamdeck_id)
     global active_folder
-    active_folder = folder_id
+    active_folder[active_streamdeck.serial_number] = folder_id
     deck = decks[active_streamdeck.serial_number]
     deck.set_key_callback(key_change_callback)
 
@@ -109,9 +110,7 @@ def key_change_callback(deck, key, state):
     """
 
     reset_screensaver_time()
-
-    list_key = get_active_keys(active_folder)
-
+    list_key = get_active_keys(active_folder[get_serial_number(deck)])
     if state:
         run_commands(list_key[key])
 
@@ -240,8 +239,9 @@ def key_in_folder(model_streamdeckKey):
 
     :param model_streamdeckKey: stream deck key
     """
+    serial_number = model_streamdeckKey.streamdeck.serial_number
     global active_folder
-    return active_folder == model_streamdeckKey.folder.id
+    return active_folder[serial_number] == model_streamdeckKey.folder.id
 
 
 def check_connected_decks():
@@ -282,17 +282,16 @@ def update_full_deck_image(deck, image_filename):
     """
 
     # load all key images if there is not a full sized image to be set
+    serial_number = get_serial_number(deck)
 
     if image_filename == "":
-        list_key = get_active_keys(active_folder)
+        list_key = get_active_keys(active_folder[serial_number])
         for key in list_key:
             update_key_image(deck, key, False)
-        start_animated_images(deck, active_folder)
+        start_animated_images(deck, active_folder[serial_number])
     else:
         key_spacing = (36, 36)
         full_image = create_full_deck_sized_image(deck, key_spacing, image_filename)
-
-        clear_image_threads()
 
         clear_command_threads()
 
@@ -379,7 +378,6 @@ def init_streamdeck(deck):
     """
     deck.open()
     deck.reset()
-
     serial_number = get_serial_number(deck)
     decks[serial_number] = deck
     print("Opened '{}' device (serial number: '{}')".format(
@@ -409,11 +407,11 @@ def init_streamdeck(deck):
                 streamdeck=active_streamdeck
             )
             list_key.append(new_key)
-        active_folder = default_folder.id
+        active_folder[serial_number] = default_folder.id
     else:
         # Get all active keys
-        active_folder = active_streamdeck.default_folder.id
-        list_key = get_active_keys(active_folder)
+        active_folder[serial_number] = active_streamdeck.default_folder.id
+        list_key = get_active_keys(active_folder[serial_number])
 
     # load image that covers the whole deck if existing else
     # load images of all single stream deck keys
@@ -421,7 +419,7 @@ def init_streamdeck(deck):
         # Load all keys onto the streamdeck
         for key in list_key:
             update_key_image(deck, key, False)
-        start_animated_images(deck, active_folder)
+        start_animated_images(deck, active_folder[serial_number])
     else:
         update_full_deck_image(deck, active_streamdeck.full_deck_image.name)
         pass
