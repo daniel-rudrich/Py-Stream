@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from timeit import default_timer as timer
 from .image_handling import update_key_image
 
+# keys of thread dictionary are all of the form key: (commandId, serial_number)
 interval_shell_threads = {}
 timer_threads = {}
 stopwatch_threads = {}
@@ -44,6 +45,7 @@ def handle_shell_command(deck, model_streamdeckKey):
     :param model_streamdeckKey: stream deck key with shell command
     """
     key_command = model_streamdeckKey.command
+    serial_number = model_streamdeckKey.streamdeck.serial_number
     if key_command.time_value > 0:
         global interval_shell_threads
         if key_command.id not in interval_shell_threads:
@@ -51,11 +53,11 @@ def handle_shell_command(deck, model_streamdeckKey):
                                       args=[deck,
                                             model_streamdeckKey,
                                             key_command.time_value])
-            interval_shell_threads[key_command.id] = thread
+            interval_shell_threads[(key_command.id, serial_number)] = thread
             thread.start()
         else:
-            thread = interval_shell_threads[key_command.id]
-            del interval_shell_threads[key_command.id]
+            thread = interval_shell_threads[(key_command.id, serial_number)]
+            del interval_shell_threads[(key_command.id, serial_number)]
             thread.join()
     else:
         try:
@@ -80,14 +82,16 @@ def handle_stopwatch_command(deck, model_streamdeckKey):
     global stopwatch_threads
 
     key_command = model_streamdeckKey.command
+    serial_number = model_streamdeckKey.streamdeck.serial_number
+
     if key_command.id not in stopwatch_threads:
         thread = threading.Thread(target=run_stopwatch, args=[
             deck, model_streamdeckKey])
         thread.start()
-        stopwatch_threads[key_command.id] = thread
+        stopwatch_threads[(key_command.id, serial_number)] = thread
     else:
-        thread = stopwatch_threads[key_command.id]
-        del stopwatch_threads[key_command.id]
+        thread = stopwatch_threads[(key_command.id, serial_number)]
+        del stopwatch_threads[(key_command.id, serial_number)]
         thread.join()
 
 
@@ -101,6 +105,8 @@ def handle_timer_command(deck, model_streamdeckKey):
     global timer_threads
 
     key_command = model_streamdeckKey.command
+    serial_number = model_streamdeckKey.streamdeck.serial_number
+
     if key_command.id not in timer_threads:
         thread = threading.Thread(target=run_timer,
                                   args=[deck,
@@ -108,10 +114,10 @@ def handle_timer_command(deck, model_streamdeckKey):
                                         key_command.time_value
                                         ])
         thread.start()
-        timer_threads[key_command.id] = thread
+        timer_threads[(key_command.id, serial_number)] = thread
     else:
-        thread = timer_threads[key_command.id]
-        del timer_threads[key_command.id]
+        thread = timer_threads[(key_command.id, serial_number)]
+        del timer_threads[(key_command.id, serial_number)]
         thread.join()
 
 
@@ -125,6 +131,7 @@ def run_shell_interval(deck, model_streamdeckKey, interval):
     """
     command = model_streamdeckKey.command
     old_text = model_streamdeckKey.text
+    serial_number = model_streamdeckKey.streamdeck.serial_number
     while(True):
         try:
             process = subprocess.Popen(
@@ -139,11 +146,11 @@ def run_shell_interval(deck, model_streamdeckKey, interval):
         update_key_image(deck, model_streamdeckKey, False)
 
         start_pause = datetime.now()
-        while(command.id in interval_shell_threads
+        while((command.id, serial_number) in interval_shell_threads
               and (datetime.now()-start_pause).seconds < interval):
             time.sleep(1)
 
-        if command.id not in interval_shell_threads:
+        if (command.id, serial_number) not in interval_shell_threads:
             model_streamdeckKey.text = old_text
             update_key_image(deck, model_streamdeckKey, False)
             break
@@ -158,13 +165,14 @@ def run_stopwatch(deck, model_streamdeckKey):
     """
     start = timer()
     command_id = model_streamdeckKey.command.id
+    serial_number = model_streamdeckKey.streamdeck.serial_number
     while (True):
         curtime = timer()
         model_streamdeckKey.text = str(timedelta(seconds=int(curtime - start)))
         update_key_image(deck, model_streamdeckKey, False)
         time.sleep(1)
 
-        if command_id not in stopwatch_threads:
+        if (command_id, serial_number) not in stopwatch_threads:
             break
 
 
@@ -178,13 +186,15 @@ def run_timer(deck, model_streamdeckKey, timer_time):
     """
     curtime = timer_time
     command_id = model_streamdeckKey.command.id
+    serial_number = model_streamdeckKey.streamdeck.serial_number
+
     while (curtime >= 0):
         model_streamdeckKey.text = str(timedelta(seconds=int(curtime)))
         update_key_image(deck, model_streamdeckKey, False)
         curtime = curtime - 1
         time.sleep(1)
 
-        if command_id not in timer_threads:
+        if (command_id, serial_number) not in timer_threads:
             break
     switch = 1
     old_color = model_streamdeckKey.text_color
@@ -198,7 +208,7 @@ def run_timer(deck, model_streamdeckKey, timer_time):
         model_streamdeckKey.text_color = color
         update_key_image(deck, model_streamdeckKey, False)
         time.sleep(1)
-        if command_id not in timer_threads:
+        if (command_id, serial_number) not in timer_threads:
             model_streamdeckKey.text_color = old_color
             break
 
@@ -292,29 +302,32 @@ def parse_keys(keys):
     return parsedKeys
 
 
-def check_for_active_command():
+def check_for_active_command(serial_number):
     """
-    Checks wether there is an active command thread
+    Checks wether there is an active command thread or not
 
     :returns: bool
     """
 
-    for int_thread in interval_shell_threads:
-        if int_thread.is_alive():
-            return True
+    for int_thread_key in interval_shell_threads.keys():
+        if int_thread_key[1] == serial_number:
+            if interval_shell_threads[int_thread_key].is_alive():
+                return True
 
-    for timer_thread in timer_threads:
-        if timer_thread.is_alive():
-            return True
+    for timer_thread_key in timer_threads.keys():
+        if timer_thread_key[1] == serial_number:
+            if timer_threads[timer_thread_key].is_alive():
+                return True
 
-    for stopwatch_thread in stopwatch_threads:
-        if stopwatch_thread.is_alive():
-            return True
+    for stopwatch_thread_key in stopwatch_threads.keys():
+        if stopwatch_thread_key[1] == serial_number:
+            if stopwatch_threads[stopwatch_thread_key].is_alive():
+                return True
 
     return False
 
 
-def clear_command_threads():
+def clear_command_threads(serial_number):
     """
     Stops all running threads and clears all thread dictionaries
     """
@@ -322,22 +335,25 @@ def clear_command_threads():
 
     stopwatch_threads_keys = list(stopwatch_threads.keys())
     for dict_key in stopwatch_threads_keys:
-        stopwatch_thread = stopwatch_threads[dict_key]
-        del stopwatch_threads[dict_key]
-        stopwatch_thread.join()
+        if dict_key[1] == serial_number:
+            stopwatch_thread = stopwatch_threads[dict_key]
+            del stopwatch_threads[dict_key]
+            stopwatch_thread.join()
 
     global interval_shell_threads
 
     interval_shell_keys = list(interval_shell_threads.keys())
     for dict_key in interval_shell_keys:
-        shell_thread = interval_shell_threads[dict_key]
-        del interval_shell_threads[dict_key]
-        shell_thread.join()
+        if dict_key[1] == serial_number:
+            shell_thread = interval_shell_threads[dict_key]
+            del interval_shell_threads[dict_key]
+            shell_thread.join()
 
     global timer_threads
 
     timer_thread_keys = list(timer_threads.keys())
     for dict_key in timer_thread_keys:
-        timer_thread = timer_threads[dict_key]
-        del timer_threads[dict_key]
-        timer_thread.join()
+        if dict_key[1] == serial_number:
+            timer_thread = timer_threads[dict_key]
+            del timer_threads[dict_key]
+            timer_thread.join()

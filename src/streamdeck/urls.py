@@ -19,5 +19,4 @@ urlpatterns = [
     path('key/<int:id>/command', views.command_create),
     path('key/<int:key_id>/command/<int:id>', views.command_detail),
     path('key/<int:key_id>/folder', views.create_folder),
-    path('change_folder/<int:id>', views.change_to_folder)
 ]

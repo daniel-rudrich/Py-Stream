@@ -49,7 +49,7 @@ def update_key_display(streamdeckKey):
     :param: streamdeckKey: stream deck key
     """
     if key_in_folder(streamdeckKey):
-        reset_screensaver_time()
+        reset_screensaver_time(streamdeckKey.streamdeck.serial_number)
         deck = get_deck(streamdeckKey.streamdeck.serial_number)
         update_key_image(deck, streamdeckKey, False)
 
@@ -116,7 +116,7 @@ def update_brightness(streamdeck):
 
     :param stream deck
     """
-    reset_screensaver_time()
+    reset_screensaver_time(streamdeck.serial_number)
     update_streamdeck(streamdeck)
 
 

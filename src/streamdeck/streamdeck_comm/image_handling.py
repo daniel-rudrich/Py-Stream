@@ -21,8 +21,11 @@ MEDIA_PATH = os.path.join(BASE_DIR, "media")
 
 FRAMES_PER_SECOND = 10
 
-animated_images = {}
+# key: (serial_number, streamdeckKey.id)
 clock_threads = {}
+
+# key; (serial_number, streamdeckKey.number)
+animated_images = {}
 stop_animation = {}
 
 
@@ -96,10 +99,11 @@ def add_clock_thread(deck, model_streamdeckKey):
     :param model_streamdeckKey: stream deck key
     """
     if model_streamdeckKey.id not in clock_threads:
+        serial_number = model_streamdeckKey.streamdeck.serial_number
         thread = threading.Thread(target=key_clock, args=[
                                   deck, model_streamdeckKey])
         thread.start()
-        clock_threads[model_streamdeckKey.id] = thread
+        clock_threads[(serial_number, model_streamdeckKey.id)] = thread
     pass
 
 
@@ -110,8 +114,9 @@ def delete_clock_thread(model_streamdeckKey):
     :param model_streamdeckKey: stream deck key
     """
     if model_streamdeckKey.id in clock_threads:
-        thread = clock_threads[model_streamdeckKey.id]
-        del clock_threads[model_streamdeckKey.id]
+        serial_number = model_streamdeckKey.streamdeck.serial_number
+        thread = clock_threads[(serial_number, model_streamdeckKey.id)]
+        del clock_threads[(serial_number, model_streamdeckKey.id)]
         thread.join()
 
     pass
@@ -125,17 +130,18 @@ def key_clock(deck, model_streamdeckKey):
     :param model_streamdeckKey: stream deck key
     """
     key_id = model_streamdeckKey.id
+    serial_number = model_streamdeckKey.streamdeck.serial_number
     while(True):
         current_time = datetime.now().strftime("%H:%M")
         model_streamdeckKey.text = current_time
         update_key_image(deck, model_streamdeckKey, True)
 
         # exit while loop when the minute switches
-        while(key_id in clock_threads
+        while((serial_number, key_id) in clock_threads
               and datetime.now().strftime("%H:%M") == current_time):
             time.sleep(1)
 
-        if key_id not in clock_threads:
+        if (serial_number, key_id) not in clock_threads:
             break
 
 
@@ -163,6 +169,8 @@ def render_key_image(deck, model_streamdeckKey, image_object=False):
     if(not key_style["icon"]):
         key_style["icon"] = PILHelper.create_image(deck)
 
+    serial_number = model_streamdeckKey.streamdeck.serial_number
+
     try:
         icon = Image.open(key_style["icon"])
     except AttributeError:
@@ -176,15 +184,15 @@ def render_key_image(deck, model_streamdeckKey, image_object=False):
 
     if(not blank_image_flag and getattr(icon, "is_animated", False)):
         frames = create_animation_frames(deck, icon, key_style)
-        animated_images[key_style["name"]] = frames
+        animated_images[(serial_number, key_style["name"])] = frames
         return None
     else:
         global stop_animation
-        if key_style["name"] in animated_images:
-            stop_animation[key_style["name"]] = True
+        if (serial_number, key_style["name"]) in animated_images:
+            stop_animation[(serial_number, key_style["name"])] = True
             time.sleep(.5)
-            del stop_animation[key_style["name"]]
-            del animated_images[key_style["name"]]
+            del stop_animation[(serial_number, key_style["name"])]
+            del animated_images[(serial_number, key_style["name"])]
         image = PILHelper.create_scaled_image(
             deck, icon, margins=[0, 0, 0, 0])
         draw = ImageDraw.Draw(image)
@@ -267,7 +275,7 @@ def create_animation_frames(deck, image, key_style):
     return itertools.cycle(icon_frames)
 
 
-def animate(fps, deck, key_images, key_number):
+def animate(fps, deck, serial_number, key_images, key_number):
     """
     TAKEN AND MODIFIED FROM STREAM DECK LIBRARY EXAMPLES by Dean Camera
     Helper function that will run a periodic loop which updates the
@@ -293,14 +301,14 @@ def animate(fps, deck, key_images, key_number):
 
     # Periodic loop that will render every frame at the set FPS until
     # the StreamDeck device we're using is closed.
-    while not stop_animation[key_number]:
+    while not stop_animation[(serial_number, key_number)]:
         try:
             # Use a scoped-with on the deck to ensure we're the only
             # thread using it right now.
             with deck:
                 # Update the key images with the next animation frame.
                 try:
-                    deck.set_key_image(key_number, next(key_images[key_number]))
+                    deck.set_key_image(key_number, next(key_images[(serial_number, key_number)]))
                 except RuntimeError:
                     break
         except TransportError as err:
@@ -329,7 +337,7 @@ def animate(fps, deck, key_images, key_number):
             time.sleep(sleep_interval)
 
 
-def start_animated_images(deck, folder_id):
+def start_animated_images(deck, folder_id, serial_number):
     """
     Start threads of animated image in current folder
 
@@ -344,10 +352,10 @@ def start_animated_images(deck, folder_id):
         StreamdeckKey.objects.filter(folder=folder))
 
     for key in list_key:
-        if key.number in animated_images:
-            stop_animation[key.number] = False
+        if (serial_number, key.number) in animated_images:
+            stop_animation[(serial_number, key.number)] = False
             threading.Thread(target=animate, args=[
-                FRAMES_PER_SECOND, deck, animated_images, key.number]).start()
+                FRAMES_PER_SECOND, deck, serial_number, animated_images, key.number]).start()
 
 
 def create_full_deck_sized_image(deck, key_spacing, image_filename):
@@ -426,19 +434,24 @@ def crop_key_image_from_deck_sized_image(deck, image, key_spacing, key):
     return PILHelper.to_native_format(deck, key_image)
 
 
-def clear_image_threads():
+def clear_image_threads(serial_number):
     """
     Stops all running threads and clears all thread dictionaries
     """
     global stop_animation
 
-    stop_animation = stop_animation.fromkeys(stop_animation, True)
-    animated_images.clear()
+    stop_animation_keys = list(stop_animation.keys())
+    for key in stop_animation_keys:
+        if key[0] == serial_number:
+            stop_animation[key] = True
+            time.sleep(.5)
+            del stop_animation[key]
 
     global clock_threads
 
     clock_thread_keys = list(clock_threads.keys())
     for dict_key in clock_thread_keys:
-        clock_thread = clock_threads[dict_key]
-        del clock_threads[dict_key]
-        clock_thread.join()
+        if dict_key[0] == serial_number:
+            clock_thread = clock_threads[dict_key]
+            del clock_threads[dict_key]
+            clock_thread.join()
