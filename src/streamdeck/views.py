@@ -9,8 +9,7 @@ from .serializers import (
     StreamdeckKeyImageSerializer, HotkeysSerializer, StreamdeckImageSerializer,
     StreamdeckScreensaverSerializer)
 from .models import Streamdeck, StreamdeckKey, Folder, Command, Hotkeys
-from .streamdeck_comm.streamdeck_interface import (change_folder,
-                                                   delete_folders,
+from .streamdeck_comm.streamdeck_interface import (delete_folders,
                                                    update_key_behavior,
                                                    update_key_display,
                                                    update_brightness,
@@ -541,16 +540,3 @@ def create_folder(request, key_id):
             return HttpResponse("folder deleted succesfully", status=204)
         else:
             return HttpResponse("this stream deck key does not lead to a folder", status=404)
-
-
-@csrf_exempt
-def change_to_folder(request, id):
-
-    try:
-        Folder.objects.get(id=id)
-    except Folder.DoesNotExist:
-        return HttpResponse(f"Folder with id {id} could not be found", status=404)
-
-    if request.method == 'GET':
-        change_folder(id)
-        return HttpResponse(status=200)

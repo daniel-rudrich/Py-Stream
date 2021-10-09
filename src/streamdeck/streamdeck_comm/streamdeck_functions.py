@@ -3,17 +3,18 @@ import threading
 from StreamDeck.DeviceManager import DeviceManager
 from streamdeck.models import (
     Streamdeck, StreamdeckModel, StreamdeckKey, Folder)
-
+from functools import partial
 from .image_handling import (
     update_key_image, start_animated_images, clear_image_threads,
     create_full_deck_sized_image, crop_key_image_from_deck_sized_image)
 from .command_functions import check_for_active_command, run_key_command, clear_command_threads
 
-active_folder = 0
+# the dictionary keys are always the serial_number of the stream deck
+active_folder = {}
 decks = {}
-screensaver_thread = None
-stop_screensaver = False
-screensaver_current_time = 0
+screensaver_threads = {}
+stop_screensaver = {}
+screensaver_current_times = {}
 
 
 def check_deck_connection(model_streamdeck):
@@ -41,33 +42,33 @@ def run_commands(model_streamdeckKey):
     run_key_command(deck, model_streamdeckKey)
     # changes folder if this key is meant to
     if model_streamdeckKey.change_to_folder:
-        change_to_folder(model_streamdeckKey.change_to_folder.id)
+        change_to_folder(model_streamdeckKey.change_to_folder.id, model_streamdeckKey.streamdeck.serial_number)
 
 
-def change_to_folder(folder_id):
+def change_to_folder(folder_id, deck_serial_number):
     """
     Stop all threads of the old folder and load all the keys of the new active folder
 
     :param folder_id: id of folder
     """
+
     folder = Folder.objects.get(id=folder_id)
-    global active_folder
-    active_folder = folder_id
     keys = StreamdeckKey.objects.filter(folder=folder)
+
+    global active_folder
+    active_folder[deck_serial_number] = folder_id
 
     if not check_deck_connection(keys[0].streamdeck):
         pass
 
     # stop all threads of the current folder before changing
-    clear_image_threads()
+    clear_image_threads(deck_serial_number)
 
-    clear_command_threads()
-
-    streamdeck_serialnumber = keys[0].streamdeck.serial_number
+    clear_command_threads(deck_serial_number)
 
     active_streamdeck = Streamdeck.objects.filter(
-        serial_number=streamdeck_serialnumber)[0]
-    deck = decks[streamdeck_serialnumber]
+        serial_number=deck_serial_number)[0]
+    deck = decks[deck_serial_number]
 
     # load image that covers the whole deck if existing else
     # load images of all single stream deck keys
@@ -75,12 +76,12 @@ def change_to_folder(folder_id):
         # Load all keys onto the streamdeck
         for key in keys:
             update_key_image(deck, key, False)
-        start_animated_images(deck, folder_id)
+        start_animated_images(deck, folder_id, deck_serial_number)
     else:
         update_full_deck_image(deck, active_streamdeck.full_deck_image.name)
         pass
 
-    update_key_change_callback(keys[0].streamdeck.id, folder_id)
+    # update_key_change_callback(keys[0].streamdeck.id, folder_id)
 
 
 def update_key_change_callback(model_streamdeck_id, folder_id):
@@ -94,35 +95,45 @@ def update_key_change_callback(model_streamdeck_id, folder_id):
     # set global variables to currently active streamdeck and folder
     active_streamdeck = Streamdeck.objects.get(id=model_streamdeck_id)
     global active_folder
-    active_folder = folder_id
+    active_folder[active_streamdeck.serial_number] = folder_id
     deck = decks[active_streamdeck.serial_number]
     deck.set_key_callback(key_change_callback)
+
+
+def _key_change_callback(serial_number, deck, key, state):
+    """
+    Wrapper for the key_change_callback function which holds all functionalities
+    as the serialnumber can be used here
+    :param serial_number: serial number of stream deck
+    :param deck: stream deck needed for the stream deck library
+    :param key: number of pressed key
+    :param state: run command if true
+    """
+    reset_screensaver_time(serial_number)
+    list_key = get_active_keys(active_folder[serial_number])
+    if state:
+        run_commands(list_key[key])
 
 
 def key_change_callback(deck, key, state):
     """
     This method is called when a physical key is pressed
-
     :param deck: stream deck needed for the stream deck library
     :param key: number of pressed key
-    :param state: run command if true
+    :param state: state of key
+    """
+    pass
+
+
+def reset_screensaver_time(serial_number):
+    """
+    Sets the screensaver time back to 0 of stream deck
+
+    :param serial_number: serial number of stream deck
     """
 
-    reset_screensaver_time()
-
-    list_key = get_active_keys(active_folder)
-
-    if state:
-        run_commands(list_key[key])
-
-
-def reset_screensaver_time():
-    """
-    Sets the screensaver time back to 0
-    """
-
-    global screensaver_current_time
-    screensaver_current_time = 0
+    global screensaver_current_times
+    screensaver_current_times[serial_number] = 0
 
 
 def get_streamdecks():
@@ -229,9 +240,10 @@ def get_serial_number(deck):
     :params deck: stream deck
     :returns correct serial number of stream deck
     """
-    serialnumber = deck.get_serial_number()
-    serialnumber = serialnumber.replace("\x00", "").replace("\x01", "")
-    return serialnumber
+    with deck:
+        serialnumber = deck.get_serial_number()
+        serialnumber = serialnumber.replace("\x00", "").replace("\x01", "")
+        return serialnumber
 
 
 def key_in_folder(model_streamdeckKey):
@@ -240,8 +252,9 @@ def key_in_folder(model_streamdeckKey):
 
     :param model_streamdeckKey: stream deck key
     """
+    serial_number = model_streamdeckKey.streamdeck.serial_number
     global active_folder
-    return active_folder == model_streamdeckKey.folder.id
+    return active_folder[serial_number] == model_streamdeckKey.folder.id
 
 
 def check_connected_decks():
@@ -262,8 +275,10 @@ def check_connected_decks():
             # remove all "active" stream decks
             for deck in decks.items():
                 deck[1].close()
-            clear_command_threads()
-            clear_image_threads()
+                serial_number = get_serial_number(deck)
+                clear_image_threads(serial_number)
+                clear_command_threads(serial_number)
+
             decks.clear()
 
             # initialize all connected stream decks
@@ -282,19 +297,18 @@ def update_full_deck_image(deck, image_filename):
     """
 
     # load all key images if there is not a full sized image to be set
+    serial_number = get_serial_number(deck)
 
     if image_filename == "":
-        list_key = get_active_keys(active_folder)
+        list_key = get_active_keys(active_folder[serial_number])
         for key in list_key:
             update_key_image(deck, key, False)
-        start_animated_images(deck, active_folder)
+        start_animated_images(deck, active_folder[serial_number], serial_number)
     else:
         key_spacing = (36, 36)
         full_image = create_full_deck_sized_image(deck, key_spacing, image_filename)
 
-        clear_image_threads()
-
-        clear_command_threads()
+        clear_command_threads(serial_number)
 
         key_images = dict()
         for k in range(deck.key_count()):
@@ -316,29 +330,32 @@ def screensaver_function(deck, model_streamdeck):
     :param model_streamdeck: streamdeck object of the database
     """
     s_time = int(model_streamdeck.screensaver_time)
-    global screensaver_current_time
+    serial_number = model_streamdeck.serial_number
+
+    global screensaver_current_times
     global stop_screensaver
-    while not stop_screensaver:
+
+    while not stop_screensaver[serial_number]:
 
         # count idle time until the screensaver time is reached
-        while screensaver_current_time < s_time and not stop_screensaver:
-            screensaver_current_time = screensaver_current_time + 1
+        while screensaver_current_times[serial_number] < s_time and not stop_screensaver[serial_number]:
+            screensaver_current_times[serial_number] = screensaver_current_times[serial_number] + 1
             time.sleep(1)
 
-        if stop_screensaver:
+        if stop_screensaver[serial_number]:
             break
 
-        if check_for_active_command():
-            screensaver_current_time = 0
+        if check_for_active_command(serial_number):
+            screensaver_current_times = 0
             continue
         # stop animated images and clock images
-        clear_image_threads()
+        clear_image_threads(serial_number)
 
         # display screensaver image on the streamdeck
         update_full_deck_image(deck, model_streamdeck.screensaver_image.name)
 
         # stop the screensaver when the time is set to 0 again
-        while screensaver_current_time > 0 and not stop_screensaver:
+        while screensaver_current_times[serial_number] > 0 and not stop_screensaver[serial_number]:
             time.sleep(1)
 
         # load all key images onto the stream deck again and start the relevant
@@ -352,23 +369,40 @@ def reset_screensaver(model_streamdeck):
 
     :param model_streamdeck: stream deck from the database
     """
-    deck = decks[model_streamdeck.serial_number]
+    serial_number = model_streamdeck.serial_number
+    deck = decks[serial_number]
 
     global stop_screensaver
-    stop_screensaver = True
-    global screensaver_current_time
-    screensaver_current_time = 0
+    stop_screensaver[serial_number] = True
+    global screensaver_current_times
+    screensaver_current_times[serial_number] = 0
 
-    global screensaver_thread
+    global screensaver_threads
 
-    if(screensaver_thread is not None):
-        screensaver_thread.join()
+    if(screensaver_threads[serial_number] is not None):
+        screensaver_threads[serial_number].join()
 
-    stop_screensaver = False
+    stop_screensaver[serial_number] = False
     # start screensaver thread
-    screensaver_thread = threading.Thread(target=screensaver_function, args=[
+    screensaver_threads[serial_number] = threading.Thread(target=screensaver_function, args=[
         deck, model_streamdeck])
-    screensaver_thread.start()
+    screensaver_threads[serial_number].start()
+
+
+def init_screensaver(deck, streamdeck_model):
+    thread = threading.Thread(target=screensaver_function, args=[
+        deck, streamdeck_model])
+
+    serial_number = streamdeck_model.serial_number
+    global stop_screensaver
+    stop_screensaver[serial_number] = False
+
+    global screensaver_current_times
+    screensaver_current_times[serial_number] = 0
+
+    global screensaver_threads
+    screensaver_threads[serial_number] = thread
+    screensaver_threads[serial_number].start()
 
 
 def init_streamdeck(deck):
@@ -379,7 +413,6 @@ def init_streamdeck(deck):
     """
     deck.open()
     deck.reset()
-
     serial_number = get_serial_number(deck)
     decks[serial_number] = deck
     print("Opened '{}' device (serial number: '{}')".format(
@@ -409,11 +442,11 @@ def init_streamdeck(deck):
                 streamdeck=active_streamdeck
             )
             list_key.append(new_key)
-        active_folder = default_folder.id
+        active_folder[serial_number] = default_folder.id
     else:
         # Get all active keys
-        active_folder = active_streamdeck.default_folder.id
-        list_key = get_active_keys(active_folder)
+        active_folder[serial_number] = active_streamdeck.default_folder.id
+        list_key = get_active_keys(active_folder[serial_number])
 
     # load image that covers the whole deck if existing else
     # load images of all single stream deck keys
@@ -421,17 +454,13 @@ def init_streamdeck(deck):
         # Load all keys onto the streamdeck
         for key in list_key:
             update_key_image(deck, key, False)
-        start_animated_images(deck, active_folder)
+        start_animated_images(deck, active_folder[serial_number], serial_number)
     else:
         update_full_deck_image(deck, active_streamdeck.full_deck_image.name)
         pass
 
-    # start screensaver thread
-    thread = threading.Thread(target=screensaver_function, args=[
-        deck, active_streamdeck])
+    init_screensaver(deck, active_streamdeck)
 
-    global screensaver_thread
-    screensaver_thread = thread
-    screensaver_thread.start()
-
-    deck.set_key_callback(key_change_callback)
+    # a partial function is used so the serial number can be used in the callback function
+    # the serial number is needed to differentiate between multiple stream decks
+    deck.set_key_callback(partial(_key_change_callback, serial_number))
