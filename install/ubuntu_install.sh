@@ -19,28 +19,28 @@ EOF
 sudo udevadm control --reload-rules
 
 # Install virtualenv package
-sudo apt-get install virtualenv
+sudo apt-get install python3-venv
 
 # Create virtual environment
-virtualenv venv/
+python3 -m venv ../venv/
 
 # Activate virtual environment
-source venv/bin/activate
+source ../venv/bin/activate
 
 # Install required pip packages
-pip install -r requirements.txt
+pip install -r pip_requirements.txt
 
 # Install nodejs and npm for the GUI
 sudo apt install nodejs
 sudo apt install npm
 
 # Create empty sqlite database
-cd src
+cd ../src
 python manage.py migrate
 cd ..
 
 # Create static files of the GUI
-cd ui
+cd ../ui
 npm install
 npm run build
 cp -a dist/. ../src/frontend

@@ -26,6 +26,10 @@ All the communication to the stream deck is done with the [Python Elgato Stream 
 * Displaying an image over all keys
 * Built-in functions: time, stopwatch, clock display, intervall commands and screensaver
 	
+# Installation
+
+Installation descriptions can be found [here](https://daniel-rudrich.github.io/streamdeck-application/installation/)!
+
 # Credits
 
 ## Creater
