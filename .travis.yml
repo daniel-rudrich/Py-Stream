@@ -15,6 +15,7 @@ jobs:
       - docker images
       - docker tag streamdeck-application $DOCKER_USERNAME/streamdeck-application-demo
       - docker push $DOCKER_USERNAME/streamdeck-application-demo
+install: pip install flake8
 env:
   global:
   - secure: kbFpMMiGkoCNzCClOgrdHTs4dmkx20elVEHTsnMEnTIQzzbOVcMbSAcg9CQYnbff1886Aea1O3jjceKJddNZvWnBN4PqobKBGXWcyoRbKLVwogThIxZyZt9pvpan9PcQrxcgT3PkzBkwNTXvpfDeuiOM6I3pVm3wAwFlOQhfEhQNI10XJe8AWU3XxiBwT4o632rOc4uNSO8PbrIcnw6GNSaRyoScUC8BrCsr4rPuDIsE6UJfw9o2jCDh1voRylZ106tf0tUZInRDWYLfykvaTQA7aKjHzNAIMDOkz+JHfKi1iOuo5TnwoyYPZiniFwCc3FtdiEZzGM3vX0nGjCu2R5VV/Lzm/4V7FNtCOiZCztWg/gQl4MrNiN9C74znebcOiMuhrgJO0/nFFT3kT84hBxbfLtlPJS1rseXZb+KfsVJ1v0nfa7nhcbfXFPHJVI/tNRWfeb37WQrVbVsNNUIvl21Lf5C+N/FzUQAh0lsL5emtoKr+vNdTSKf2zb2HeDbG/qfXe8xmpc1K9a7iKkLlNGScjRgB0VNlQZv8Cc9TfASC3SksJvinc6QS1PfUjvSCnp3subG7EXrMGv/Lro4UfjXSYX5P9b/lWV5cEPz0oYl7frBv+XGWBx5ceO+NMrVfd7fHrk3fFwh280DGRqFN7a2c8dP00t7iTXELzafA4bs=
