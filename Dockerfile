@@ -34,7 +34,7 @@ WORKDIR /usr/local/streamdeck_application
 RUN apt-get -y install python3-pip
 
 # Install required pip packages
-RUN pip install -r install/pip_requirements.txt
+RUN pip install -r install/requirements.txt
 
 
 # Create empty sqlite database

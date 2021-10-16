@@ -28,7 +28,7 @@ python3 -m venv ../venv/
 source ../venv/bin/activate
 
 # Install required pip packages
-pip install -r pip_requirements.txt
+pip install -r requirements.txt
 
 # Install nodejs and npm for the GUI
 sudo apt install nodejs

@@ -48,7 +48,7 @@ To install the software and all its dependencies on **Ubuntu** (Tested with Ubun
     source ../venv/bin/activate
 
     # Install required pip packages
-    pip install -r pip_requirements.txt
+    pip install -r requirements.txt
 
     # Install nodejs and npm for the GUI
     sudo apt install nodejs
@@ -109,7 +109,7 @@ The software can also be run on a raspberry pi. This was tested with **Raspberry
     source ../venv/bin/activate
 
     # Install required pip packages
-    pip install -r pip_requirements.txt
+    pip install -r requirements.txt
 
     # Install nodejs and npm for the GUI
     sudo apt install nodejs
