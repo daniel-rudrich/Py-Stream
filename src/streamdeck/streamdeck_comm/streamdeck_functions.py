@@ -97,7 +97,7 @@ def update_key_change_callback(model_streamdeck_id, folder_id):
     global active_folder
     active_folder[active_streamdeck.serial_number] = folder_id
     deck = decks[active_streamdeck.serial_number]
-    deck.set_key_callback(key_change_callback)
+    deck.set_key_callback(partial(_key_change_callback, active_streamdeck.serial_number))
 
 
 def _key_change_callback(serial_number, deck, key, state):
@@ -309,6 +309,7 @@ def update_full_deck_image(deck, image_filename):
         full_image = create_full_deck_sized_image(deck, key_spacing, image_filename)
 
         clear_command_threads(serial_number)
+        clear_image_threads(serial_number)
 
         key_images = dict()
         for k in range(deck.key_count()):
@@ -346,7 +347,7 @@ def screensaver_function(deck, model_streamdeck):
             break
 
         if check_for_active_command(serial_number):
-            screensaver_current_times = 0
+            screensaver_current_times[serial_number] = 0
             continue
         # stop animated images and clock images
         clear_image_threads(serial_number)

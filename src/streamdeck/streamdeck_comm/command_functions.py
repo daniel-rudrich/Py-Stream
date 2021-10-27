@@ -84,7 +84,7 @@ def handle_stopwatch_command(deck, model_streamdeckKey):
     key_command = model_streamdeckKey.command
     serial_number = model_streamdeckKey.streamdeck.serial_number
 
-    if key_command.id not in stopwatch_threads:
+    if (key_command.id, serial_number) not in stopwatch_threads:
         thread = threading.Thread(target=run_stopwatch, args=[
             deck, model_streamdeckKey])
         thread.start()
@@ -107,7 +107,7 @@ def handle_timer_command(deck, model_streamdeckKey):
     key_command = model_streamdeckKey.command
     serial_number = model_streamdeckKey.streamdeck.serial_number
 
-    if key_command.id not in timer_threads:
+    if (key_command.id, serial_number) not in timer_threads:
         thread = threading.Thread(target=run_timer,
                                   args=[deck,
                                         model_streamdeckKey,
