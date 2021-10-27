@@ -35,6 +35,29 @@
         <b-button variant="success" size="sm" @click="saveChanges">Save</b-button>
       </b-col>
     </b-row>
+    <b-row v-if="payload.command_type === 'write'">
+      <b-col>
+        <b-button id="delete-button" variant="danger" size="sm" @click="deleteCommand">x</b-button>       
+      </b-col>
+      <b-col>
+          <p class ="command-type">{{ payload.command_type }}</p>
+      </b-col>
+      <b-col cols="2">
+        <div class="command-col">
+        <label>Command name</label>
+        <b-form-input v-model="payload.name" placeholder="Command name"></b-form-input>
+        </div>
+      </b-col>
+      <b-col  cols="2">
+        <div class="command-col">
+        <label>Text</label>
+        <b-form-input v-model="payload.command_string" placeholder="text"></b-form-input>
+        </div>
+      </b-col>
+      <b-col>
+        <b-button variant="success" size="sm" @click="saveChanges">Save</b-button>
+      </b-col>
+    </b-row>
     <b-row v-if="payload.command_type === 'hotkey'">
       <b-col>
         <b-button id="delete-button" variant="danger" size="sm" @click="deleteCommand">x</b-button>       
