@@ -62,7 +62,8 @@ class Command(models.Model):
         ("shell", "shell"),
         ("hotkey", "hotkey"),
         ("stopwatch", "stopwatch"),
-        ("timer", "timer")
+        ("timer", "timer"),
+        ("write", "write")
     )
 
     command_type = models.CharField(max_length=9,

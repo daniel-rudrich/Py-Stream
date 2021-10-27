@@ -88,15 +88,17 @@
         {value: 'shell', text: '(ba)sh'},
         {value: 'hotkey', text: 'Hotkey'},
         {value: 'timer', text: 'Timer'},
-        {value: 'stopwatch', text: 'Stopwatch'}
+        {value: 'stopwatch', text: 'Stopwatch'},
+        {value: 'write', text: 'WriteText'}
       ]"></b-form-select>
       <br>
       <br>
       <p>Command name:</p>
       <b-form-input v-model="newCommandName" placeholder="Enter command name (optional)"></b-form-input>
       <br>
-      <p v-show="newCommandType === 'shell'">Command string</p>
-      <b-form-input v-show="newCommandType === 'shell'" v-model="newCommandCommand" placeholder="Enter command"></b-form-input>
+      <p v-show="newCommandType === 'shell' ">Command string</p>
+      <p v-show="newCommandType === 'write' ">Text</p>
+      <b-form-input v-show="newCommandType === 'shell' || newCommandType === 'write'" v-model="newCommandCommand" placeholder="Enter command"></b-form-input>
       <br v-show="newCommandType === 'shell'">
       <p v-show="newCommandType === 'shell'">Shell timer value; set -1 if command should not be executed in a time intervall (in seconds)</p>
       <b-form-input v-show="newCommandType === 'shell'" v-model="newShellTimer" type="number" placeholder="Seconds"></b-form-input>
@@ -138,7 +140,7 @@ export default {
       newImage: null,
       newCommandType: 'shell',
       newCommandName: '',
-      newCommandCommand: 'echo New',
+      newCommandCommand: '',
       newCommandKeybind: '',
       newCommandDirectory: '.',
       newCommandTimer: 5,
@@ -224,6 +226,8 @@ export default {
           newCmd.hotkeys = [{"key1":{"key":"Control","location":1}},{"key2":{"key":"1","location":0}}]
         } else if(newCmd.command_type === 'timer') {
           newCmd.time_value = parseInt(this.newCommandTimer)
+        } else if(newCmd.command_type === 'write'){
+          newCmd.command_string = this.newCommandCommand
         }
         console.log(newCmd)
         await axios.put('key/' + this.payload.id + '/command', newCmd)

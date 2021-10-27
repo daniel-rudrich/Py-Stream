@@ -31,9 +31,11 @@ def run_key_command(deck, model_streamdeckKey):
                 hotkey_function(key_command.hotkeys)
         elif key_command.command_type == 'stopwatch':
             handle_stopwatch_command(deck, model_streamdeckKey)
-
         elif key_command.command_type == 'timer':
             handle_timer_command(deck, model_streamdeckKey)
+        elif key_command.command_type == 'write':
+            if platform.uname() != "raspberrypi":
+                write_command_function(model_streamdeckKey)
         key_command = key_command.following_command
 
 
@@ -119,6 +121,22 @@ def handle_timer_command(deck, model_streamdeckKey):
         thread = timer_threads[(key_command.id, serial_number)]
         del timer_threads[(key_command.id, serial_number)]
         thread.join()
+
+
+def write_command_function(model_streamdeckKey):
+    """
+    Writes text of command where the current cursor is positioned
+
+    :param deck: active stream deck
+    :param model_streamdeckKey: stream deck key with timer command
+    """
+
+    command = model_streamdeckKey.command
+    text = command.command_string
+
+    from pynput.keyboard import Controller
+    keyboard = Controller()
+    keyboard.type(text)
 
 
 def run_shell_interval(deck, model_streamdeckKey, interval):
