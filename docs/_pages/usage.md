@@ -428,7 +428,7 @@ Responses
 > | http code     | content-type                      | response                                                            |
 > |---------------|-----------------------------------|---------------------------------------------------------------------|
 > | `200`         | `application/json`                | None                                                                |
-> | `403`         | `text/html; charset=utf-8`        | `This stream deck key already leads to a folder!`                   |
+> | `403`         | `text/html; charset=utf-8`        | `This stream deck key already leads to a folder.`                   |
 > | `404`         | `text/html; charset=utf-8`        | `Stream deck key with id {id} not found`                            |
 
 Example cURL

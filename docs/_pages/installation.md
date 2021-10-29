@@ -118,7 +118,6 @@ The software can also be run on a raspberry pi. This was tested with **Raspberry
     # Create empty sqlite database
     cd ../src
     python manage.py migrate
-    cd ..
 
     # Create static files of the GUI
     cd ../ui

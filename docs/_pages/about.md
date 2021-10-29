@@ -6,7 +6,7 @@ toc: true
 
 # Author Information
 
-This project is part of my master thesis in computer science. Therefore, till approximately November 2021 I will be working constantly and with my best efforts on this project. After that my contribution to this project will decline but I will do my best to make this software as stable and user friendly as possible till then!
+This project is part of my master thesis in computer science. Therefore, till approximately November 2021 I will be working constantly and with my best efforts on this project. After that my contribution to this project will decline but I will do my best to make this software as stable and user friendly as possible till then.
 
 ~ Daniel Rudrich
 
@@ -144,7 +144,7 @@ https://www.contributor-covenant.org/translations.
 
 ## Introduction
 
-Thank you for considering to contribute to this project! As this project is currently completely maintained by one person it's far from perfect and may contain several flaws obvious to more experienced developers. Every kind of contribution is welcome! 
+Thank you for considering to contribute to this project. As this project is currently completely maintained by one person it's far from perfect and may contain several flaws obvious to more experienced developers. Every kind of contribution is welcome. 
 
 Before contributing make sure to read the [code of conduct](../codeofconduct).
 
@@ -165,7 +165,7 @@ Before contributing make sure to read the [code of conduct](../codeofconduct).
 * Check the [Issue board](https://github.com/daniel-rudrich/streamdeck-application/issues) as maybe the feature was already requested
 * Open a new issue using the feature request issue template
 
-Thanks for all your effort!
+Thanks for all your effort.
 
 # License
 

@@ -384,15 +384,15 @@ def reset_screensaver(model_streamdeck):
         screensaver_threads[serial_number].join()
 
     stop_screensaver[serial_number] = False
-    # start screensaver thread
-    screensaver_threads[serial_number] = threading.Thread(target=screensaver_function, args=[
-        deck, model_streamdeck])
-    screensaver_threads[serial_number].start()
+
+    # only start screensaver when time > 0
+    if int(model_streamdeck.screensaver_time) > 0:
+        screensaver_threads[serial_number] = threading.Thread(target=screensaver_function, args=[
+            deck, model_streamdeck])
+        screensaver_threads[serial_number].start()
 
 
 def init_screensaver(deck, streamdeck_model):
-    thread = threading.Thread(target=screensaver_function, args=[
-        deck, streamdeck_model])
 
     serial_number = streamdeck_model.serial_number
     global stop_screensaver
@@ -402,8 +402,14 @@ def init_screensaver(deck, streamdeck_model):
     screensaver_current_times[serial_number] = 0
 
     global screensaver_threads
-    screensaver_threads[serial_number] = thread
-    screensaver_threads[serial_number].start()
+    if int(streamdeck_model.screensaver_time) > 0:
+        thread = threading.Thread(target=screensaver_function, args=[
+            deck, streamdeck_model])
+
+        screensaver_threads[serial_number] = thread
+        screensaver_threads[serial_number].start()
+    else:
+        screensaver_threads[serial_number] = None
 
 
 def init_streamdeck(deck):

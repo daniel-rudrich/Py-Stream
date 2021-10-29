@@ -101,4 +101,4 @@ class Streamdeck(models.Model):
         upload_to=get_image_path_streamdeck, blank=True, null=True)
     screensaver_image = models.FileField(
         upload_to=get_image_path_screensaver, blank=True, null=True, default=DEFAULT_IMAGE)
-    screensaver_time = models.IntegerField(default=60)
+    screensaver_time = models.IntegerField(default=0)

@@ -5,7 +5,7 @@
       <b-row>
         <b-col cols="1">
           <deck-settings 
-              :streamdeckid="this.activeDeck"
+              :streamdeckid="this.activeDeck" :key="this.key"
               v-on:folder-changed="$emit('folder-changed')">
           </deck-settings>
         </b-col>
@@ -31,7 +31,10 @@
       <b-col/>
     </b-row>
     <br>
-    <div v-if="keys.length > 0">
+    <div style="text-align: left">
+      <span> Stream Deck Keys </span>
+    </div>
+    <div v-if="keys.length > 0" id="keys">
       <div
         class="row justify-content-center"
         v-for="row in $store.getters.deckRows"
@@ -80,6 +83,7 @@ export default {
       activeDeck: -1,
       brightness: 0,
       waitTime: 500,
+      key: 0,
     }
   },
   computed: {
@@ -119,11 +123,11 @@ export default {
           this.$store.commit('selectKey', this.keys[0].id)
         }
       }
-      
     },
     changeActiveDeck() {
       this.$store.commit('activeDeck', this.activeDeck)
       this.loadFolder()
+      this.key = this.key + 1
       console.log("Active deck changed")
     },
     waitToSave(){
@@ -153,8 +157,14 @@ export default {
   #streamdeckSelect{
     background-color: #212121;
     color: white;
-    border: none;
     font-size: 25px;
+    border: 3px solid black;
+    box-shadow: 0px 0px 4px 0px #444;
+  }
+  #keys{
+    border: 3px solid black;
+    box-shadow: 0px 0px 4px 0px #444;
+    padding-top: 15px;
   }
   .custom-select{
     background: #212121 url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='4' height='5' viewBox='0 0 4 5'%3e%3cpath fill='white' d='M2 0L0 2h4zm0 5L0 3h4z'/%3e%3c/svg%3e") no-repeat right .75rem center/8px 10px !important;

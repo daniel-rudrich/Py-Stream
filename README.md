@@ -1,9 +1,9 @@
 # Linux Stream Deck Application
 
-This is an application for the Elgato Stream Deck which functionalities should be comparable to the officially provided Software of Elgato. The key difference is: this software is working under Linux and is fully open-source! Furthermore the GUI is provided via a one-page website which means the stream deck is configurable from other devices in the same network which the stream deck is not directly connected to via USB.
-The GUI communicates with the backend via a REST API, so if you don't like it feel free to build a new one using the REST API!
+This is an application for the Elgato Stream Deck which functionalities should be comparable to the officially provided Software of Elgato. The key difference is: this software is working under Linux and is fully open-source. Furthermore the GUI is provided via a one-page website which means the stream deck is configurable from other devices in the same network which the stream deck is not directly connected to via USB.
+The GUI communicates with the backend via a REST API, so if you don't like it feel free to build a new one using the REST API.
 
-All the communication to the stream deck is done with the [Python Elgato Stream Deck Library](https://github.com/abcminiuser/python-elgato-streamdeck)! 
+All the communication to the stream deck is done with the [Python Elgato Stream Deck Library](https://github.com/abcminiuser/python-elgato-streamdeck). 
 
 -----------------------------------------------------------------------------
 ## Installation
@@ -15,7 +15,7 @@ There are two ways to install and use this software:
 
 ### Linux
 
-To install the software and all its dependencies on **linux** (Ubuntu) the [install.sh](./install.sh) script can be run:
+To install the software and all its dependencies on **linux** (Ubuntu) the [install.sh](install/ubuntu_install.sh) script can be run:
 
     # Ensure system is up to date, upgrade all out of date packages
     sudo apt update && sudo apt dist-upgrade -y
@@ -110,7 +110,7 @@ If you don't want to or can't use the GUI you can use the REST API. See the [doc
 -----------------------------------------------------------------------------
 ## Additional Information
 
-This project is part of my master thesis in computer science. Therefore, till approximately November 2021 I will be working constantly and with my best efforts on this project. After that my contribution to this project will decline but I will do my best to make this software as stable and user friendly as possible till then!
+This project is part of my master thesis in computer science. Therefore, till approximately November 2021 I will be working constantly and with my best efforts on this project. After that my contribution to this project will decline but I will do my best to make this software as stable and user friendly as possible till then.
 
 -----------------------------------------------------------------------------
 ## Contributing

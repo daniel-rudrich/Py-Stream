@@ -2,7 +2,6 @@
     <div>
       <b-button variant="primary" id="upload-trigger-deck" v-b-modal.deck-settings><b-icon icon="pencil-square"></b-icon></b-button>
       <b-modal
-        static="true"
         id="deck-settings"
         title="Streamdeck Settings"
         ok-title="Save"
@@ -55,8 +54,6 @@ export default {
     const active = this.$store.getters.activeDeck
     this.deckname = active.name
     this.screensaverTime = active.screensaver_time
-  },
-  computed: {
   },
   methods: {
     handleScreensaverUpload(){

@@ -49,7 +49,7 @@ def streamdeck_detail(request, id):
         streamdeck.brightness = data.get("brightness", streamdeck.brightness)
         streamdeck.screensaver_time = data.get("screensaver_time", streamdeck.screensaver_time)
 
-        if int(streamdeck.screensaver_time) > MAX_SCREENSAVER_TIME or int(streamdeck.screensaver_time) <= 0:
+        if int(streamdeck.screensaver_time) > MAX_SCREENSAVER_TIME:
             streamdeck.screensaver_time = 60
 
         streamdeck.save()

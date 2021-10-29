@@ -2,69 +2,80 @@
   <div v-if="payload">
     <b-row>
       <b-col>
-        <h4>
-          <div class="container">
-            <buttonImage :payload="payload"></buttonImage>
-            <button type="button" class="close" id="remove-image" aria-label="Close" @click="removeImage">
-              <span aria-hidden="true">×</span>
-            </button>
-            <imageUpload 
-              :keyid="payload.id"
-              v-on:folder-changed="$emit('folder-changed')">
-            </imageUpload>
-          </div>
-        </h4>
-        <p v-show="payload.change_to_folder != null">(folder)</p>
+        <div style="text-align: left">
+          <span> Set/Delete Key Image </span>
+        </div>
+        <div id="image-format">
+          <h4>
+            <div class="container" style="margin-top: 8px;">
+              <buttonImage :payload="payload"></buttonImage>
+              <button type="button" class="close" id="remove-image" aria-label="Close" @click="removeImage">
+                <span aria-hidden="true">×</span>
+              </button>
+              <imageUpload 
+                :keyid="payload.id"
+                v-on:folder-changed="$emit('folder-changed')">
+              </imageUpload>
+            </div>
+          </h4>
+          <p v-show="payload.change_to_folder != null">(folder)</p>
+        </div>
       </b-col>
     
     <!-- Text and clock key configuration-->
-      <b-col id="text-format">
-        <b-row>
-          <b-form-input v-model="payload.text" v-on:change="waitToSave" placeholder="Enter key text" maxlength="10"/>
-        </b-row>
-        <br>
-        <b-row>
-          <b-col>
-            <b-form-checkbox
-              v-model="payload.clock"
-              :value="true"
-              :unchecked-value="false"
-              v-on:change="saveChanges"
-            >
-              Clock
-            </b-form-checkbox>
-            <br>
-            <b-button variant="primary" @click="addFolder" v-show="payload.change_to_folder === null">Add folder</b-button>
-            <b-button variant="primary" @click="deleteFolder" v-show="payload.change_to_folder != null">Delete folder</b-button>
-          </b-col>
-          <b-col>
-            <b-row>
-              <b-col>
-                <b-form-spinbutton id="sb-inline" v-model="payload.text_size" :min="1" :max="20" v-on:change="waitToSave"></b-form-spinbutton>
-              </b-col>
-              <b-col>
-                <v-input-colorpicker  v-model="payload.text_color" v-on:change="saveChanges" style="height: 38px;"/>
-              </b-col>
-            </b-row>
-            <br>
-            <b-row>
-              <b-col>
-                <b-button-group size="sm" style="margin-right: 10px;">
-                  <b-button class="text-button" v-bind:class="{'set-key': payload.text_bold}" @click="setTextStyle('bold')"><b>B</b></b-button>
-                  <b-button class="text-button" v-bind:class="{'set-key': payload.text_italic}" @click="setTextStyle('italic')"><i>I</i></b-button>
-                  <b-button class="text-button" v-bind:class="{'set-key': payload.text_underlined}" @click="setTextStyle('underlined')"><u>U</u></b-button>
-               </b-button-group>
-              </b-col>
-              <b-col>
-                <b-button-group size="sm">
-                  <b-button class="text-button" v-bind:class="[payload.text_position === 'top' ? 'set-key':'']" @click="setTextPosition('top')"><b-icon icon="align-top"></b-icon></b-button>
-                  <b-button class="text-button" v-bind:class="[payload.text_position === 'center' ? 'set-key':'']" @click="setTextPosition('center')"><b-icon icon="align-center"></b-icon></b-button>
-                  <b-button class="text-button" v-bind:class="[payload.text_position === 'bottom' ? 'set-key':'']" @click="setTextPosition('bottom')"><b-icon icon="align-bottom"></b-icon></b-button>
+
+      <b-col >
+        <div style="text-align: left">
+          <span> Text Formatting Options </span>
+        </div>
+        <div id="text-format">
+          <b-row style="margin-right: 10px; margin-left:10px">
+            <b-form-input v-model="payload.text" v-on:change="waitToSave" placeholder="Enter key text" maxlength="10"/>
+          </b-row>
+          <br>
+          <b-row>
+            <b-col>
+              <b-form-checkbox
+                v-model="payload.clock"
+                :value="true"
+                :unchecked-value="false"
+                v-on:change="saveChanges"
+              >
+                Clock
+              </b-form-checkbox>
+              <br>
+              <b-button variant="primary" @click="addFolder" v-show="payload.change_to_folder === null">Add folder</b-button>
+              <b-button variant="primary" @click="deleteFolder" v-show="payload.change_to_folder != null">Delete folder</b-button>
+            </b-col>
+            <b-col>
+              <b-row>
+                <b-col>
+                  <b-form-spinbutton id="sb-inline" v-model="payload.text_size" :min="1" :max="20" v-on:change="waitToSave"></b-form-spinbutton>
+                </b-col>
+                <b-col>
+                  <v-input-colorpicker  v-model="payload.text_color" v-on:change="saveChanges" style="height: 38px;"/>
+                </b-col>
+              </b-row>
+              <br>
+              <b-row>
+                <b-col>
+                  <b-button-group size="sm" style="margin-right: 10px;">
+                    <b-button class="text-button" v-bind:class="{'set-key': payload.text_bold}" @click="setTextStyle('bold')"><b>B</b></b-button>
+                    <b-button class="text-button" v-bind:class="{'set-key': payload.text_italic}" @click="setTextStyle('italic')"><i>I</i></b-button>
+                    <b-button class="text-button" v-bind:class="{'set-key': payload.text_underlined}" @click="setTextStyle('underlined')"><u>U</u></b-button>
                 </b-button-group>
-              </b-col>
-            </b-row>
-          </b-col>
-        </b-row>
+                </b-col>
+                <b-col>
+                  <b-button-group size="sm">
+                    <b-button class="text-button" v-bind:class="[payload.text_position === 'top' ? 'set-key':'']" @click="setTextPosition('top')"><b-icon icon="align-top"></b-icon></b-button>
+                    <b-button class="text-button" v-bind:class="[payload.text_position === 'center' ? 'set-key':'']" @click="setTextPosition('center')"><b-icon icon="align-center"></b-icon></b-button>
+                    <b-button class="text-button" v-bind:class="[payload.text_position === 'bottom' ? 'set-key':'']" @click="setTextPosition('bottom')"><b-icon icon="align-bottom"></b-icon></b-button>
+                  </b-button-group>
+                </b-col>
+              </b-row>
+            </b-col>
+          </b-row>
+        </div>
       </b-col>
     </b-row>
     <br>
@@ -272,10 +283,16 @@ export default {
   
   #text-format{
     border: 3px solid black;
+    box-shadow: 0px 0px 4px 0px #444;
     padding-top: 10px;
     padding-bottom: 10px;
-    box-shadow: 0px 0px 4px 0px #444
   }
+
+  #image-format{
+    border: 3px solid black;
+    box-shadow: 0px 0px 4px 0px #444;
+  }
+
   .text-button{
     background-color: #313131;
     border-color: black;

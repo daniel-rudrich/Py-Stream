@@ -37,7 +37,6 @@ sudo apt install npm
 # Create empty sqlite database
 cd ../src
 python manage.py migrate
-cd ..
 
 # Create static files of the GUI
 cd ../ui
