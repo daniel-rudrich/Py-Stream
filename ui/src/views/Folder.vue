@@ -149,8 +149,8 @@ export default {
     "$route.params.folder"() {
       this.loadFolder()
     },
-},
-  
+  },
+
 }
 </script>
 <style scoped>

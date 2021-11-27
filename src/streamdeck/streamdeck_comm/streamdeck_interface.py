@@ -92,13 +92,14 @@ def update_key_behavior(streamdeckKey):
         streamdeckKey.streamdeck.id, streamdeckKey.folder.id)
 
 
-def change_folder(folder_id, deck_serial_number):
+def change_folder(folder_id, serial_number):
     """
     Updates streamdeck when changing folder
 
     :param folder_id: id of folder
+    :param serial_number: serial number of active stream deck
     """
-    change_to_folder(folder_id, deck_serial_number)
+    change_to_folder(folder_id, serial_number)
 
 
 def delete_folders(folder):
@@ -114,7 +115,7 @@ def update_brightness(streamdeck):
     """
     Update streamdeck brightness
 
-    :param stream deck
+    :param streamdeck: active stream deck
     """
     reset_screensaver_time(streamdeck.serial_number)
     update_streamdeck(streamdeck)
@@ -124,7 +125,7 @@ def refresh_screensaver(streamdeck):
     """
     Refresh the screensaver after changing the screensaver trigger time
 
-    :param stream deck
+    :param streamdeck: stream deck which should be modified
     """
     reset_screensaver(streamdeck)
 
@@ -133,6 +134,6 @@ def check_connection(streamdeck):
     """
     Check for streamdeck connection
 
-    :param streamdeck: stream deck
+    :param streamdeck: streamdeck which should be checked
     """
     return check_deck_connection(streamdeck)

@@ -127,8 +127,7 @@ def write_command_function(model_streamdeckKey):
     """
     Writes text of command where the current cursor is positioned
 
-    :param deck: active stream deck
-    :param model_streamdeckKey: stream deck key with timer command
+    :param model_streamdeckKey: stream deck key with write command
     """
 
     command = model_streamdeckKey.command
@@ -324,6 +323,7 @@ def check_for_active_command(serial_number):
     """
     Checks wether there is an active command thread or not
 
+    :param serial_number: serial number of active stream deck
     :returns: bool
     """
 
@@ -348,6 +348,8 @@ def check_for_active_command(serial_number):
 def clear_command_threads(serial_number):
     """
     Stops all running threads and clears all thread dictionaries
+
+    :param serial_number: serial number of active stream deck
     """
     global stopwatch_threads
 

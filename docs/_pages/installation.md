@@ -16,7 +16,7 @@ There are two ways to install and use this software:
 
 ### Ubuntu
 
-To install the software and all its dependencies on **Ubuntu** (Tested with Ubuntu 20.04.3 LTS) the [install.sh](https://github.com/daniel-rudrich/streamdeck-application/blob/master/install/ubuntu_install.sh) script can be run:
+To install the software and all its dependencies on **Ubuntu** (Tested with Ubuntu 20.04.3 LTS) the [install.sh](https://github.com/daniel-rudrich/py-stream/blob/master/install/ubuntu_install.sh) script can be run:
 
     #!/bin/bash
 
@@ -143,9 +143,9 @@ The software can also run under **Windows**. The installation of the HIDPI backe
 
 First of all you need to install docker on your system see [the official docs](https://docs.docker.com/get-docker/) for installation guides.
 
-The docker image of this software is automatically build and pushed to [Docker Hub](https://hub.docker.com/repository/docker/speksify/streamdeck-application) via the Travis CI and can be pulled with the following command:
+The docker image of this software is automatically build and pushed to [Docker Hub](https://hub.docker.com/repository/docker/speksify/py-stream) via the Travis CI and can be pulled with the following command:
 
-`sudo docker pull speksify/streamdeck-application`
+`sudo docker pull speksify/py-stream`
 
 You can also manually build the docker image from the docker file:
 
@@ -161,6 +161,6 @@ Create a volume so the configuration of all keys can be saved persistent on the 
 
 Then, the docker image can be run:
 
-`Sudo docker run -t -i -p 8000:8000 --privileged -v /dev/bus/usb:/dev/bus/usb  -v streamdeck-db:/usr/local/streamdeck-application/src -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=unix$DISPLAY streamdeck-application`
+`Sudo docker run -t -i -p 8000:8000 --privileged -v /dev/bus/usb:/dev/bus/usb  -v streamdeck-db:/usr/local/py-stream/src -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=unix$DISPLAY py-stream`
 
 **Unfortunately the docker image is not working under windows due to the fact that usb devices cannot be passed through to docker on windows systems. See [this issue](https://github.com/docker/for-win/issues/3926) in the docker repository for reference.**

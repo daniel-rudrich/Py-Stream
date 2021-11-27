@@ -67,7 +67,6 @@ def update_key_image(deck, model_streamdeckKey, clock):
     :param deck: active stream deck
     :param model_streamdeckKey: stream deck key
     :param clock: if false, remove clock from stream deck key
-    :param text_color: color of displayed text in stream deck key
     """
 
     # handle keys with clock
@@ -145,16 +144,15 @@ def key_clock(deck, model_streamdeckKey):
             break
 
 
-def render_key_image(deck, model_streamdeckKey, image_object=False):
+def render_key_image(deck, model_streamdeckKey, is_base64=False):
     """
     Generates a custom tile with run-time generated text and custom image via the
-    PIL module. Adapted from stream deck library examples
+    PIL module.
 
     :param deck: active stream deck
     :param model_streamdeckKey: stream deck key
-    :param image_object: if true method returns Image object instead of memoryview
+    :param is_base64: if true method returns base64 string instead of memoryview
 
-    :rtype: memoryview
     :returns: rendered image for the stream deck key
     """
 
@@ -214,7 +212,7 @@ def render_key_image(deck, model_streamdeckKey, image_object=False):
             ly = ly + 5
             draw.line((lx - width/2, ly, lx + width/2, ly), fill=key_style["text_color"])
 
-        if image_object:
+        if is_base64:
             # this is used to display the image in a browser
             buf = BytesIO()
             image.save(buf, format='JPEG')
@@ -233,8 +231,7 @@ def create_animation_frames(deck, image, key_style):
 
     :param deck: active stream deck
     :param image: image which needs to be animated
-    :param label_text: text of stream deck key
-    :param font_filename: filename of font file
+    :param key_style: key image and formatting informations gathered from get_key_style method
     :returns Return an infinite cycle generator that returns the next animation frame each time it is called.
     """
 
@@ -282,8 +279,10 @@ def animate(fps, deck, serial_number, key_images, key_number):
     images on each Key
 
     :param fps: fps of animated image
+    :param serial_number: serial number of active stream deck
     :param deck: active stream deck
     :param key_images: images of key which will be looped
+    :param key_number: key number of stream deck key ranging from 0 to number of keys of stream deck
     """
 
     # Convert frames per second to frame time in seconds.
@@ -342,6 +341,7 @@ def start_animated_images(deck, folder_id, serial_number):
     Start threads of animated image in current folder
 
     :param deck: active stream deck
+    :param serial_number: serial number of active stream deck
     :param folder_id: id of folder
     """
     global animated_images
@@ -437,6 +437,8 @@ def crop_key_image_from_deck_sized_image(deck, image, key_spacing, key):
 def clear_image_threads(serial_number):
     """
     Stops all running threads and clears all thread dictionaries
+
+    :param serial_number: serial number of active stream deck
     """
     global stop_animation
 

@@ -3,7 +3,7 @@
 # To modify the layout, see https://jekyllrb.com/docs/themes/#overriding-theme-defaults
 
 layout: single
-title: Linux Stream Deck Application
+title: Py Stream
 permalink: /
 header:
   image: /assets/images/landing.png
@@ -17,6 +17,7 @@ All the communication to the stream deck is done with the [Python Elgato Stream 
 # Key Features
 
 * Compatible with Linux
++ Multi Stream Deck functionality
 * Displaying and uploading costum images onto the stream deck
 * Rest Api and Gui to configure the stream deck
 * Software runs Django server so the GUI and REST API are accessible through the local network if needed
@@ -28,17 +29,17 @@ All the communication to the stream deck is done with the [Python Elgato Stream 
 	
 # Installation
 
-Installation descriptions can be found [here](https://daniel-rudrich.github.io/streamdeck-application/installation/).
+Installation descriptions can be found [here](https://daniel-rudrich.github.io/py-stream/installation/).
 
 # Credits
 
-## Creater
+## Creator
 
 Daniel Rudrich
 
 * https://daniel-rudrich.github.io
 
-Other:
+Others:
 
 * [Stream Deck Library](https://github.com/abcminiuser/python-elgato-streamdeck)
 * [Django](https://www.djangoproject.com/)

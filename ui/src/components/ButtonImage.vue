@@ -1,10 +1,16 @@
 <template>
   <div v-if="payload && this.original_image != 'None'">
     <div v-if="this.animated">
-      <img :src="this.original_image" style="height: 80px; border-radius: 13px;">
+      <img :src="this.original_image" style="height: 80px; border-radius: 13px;"
+      :style="[$store.getters.selected !== this.payload.id ?
+          {} :
+          {margin: '-4px'}]">
     </div>
     <div v-else>
-      <img :src="'data:image/jpeg;base64,' + this.original_image" style="height: 80px; border-radius: 13px;">
+      <img :src="'data:image/jpeg;base64,' + this.original_image" style="height: 80px; border-radius: 13px;"
+      :style="[$store.getters.selected !== this.payload.id ?
+          {} :
+          {margin: '-4px'}]">
     </div>
   </div>
 </template>

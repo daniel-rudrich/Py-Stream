@@ -11,10 +11,10 @@ jobs:
     - stage: build docker image
       script:
       - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-      - docker build -t streamdeck-application .
+      - docker build -t py-stream .
       - docker images
-      - docker tag streamdeck-application $DOCKER_USERNAME/streamdeck-application-demo
-      - docker push $DOCKER_USERNAME/streamdeck-application-demo
+      - docker tag py-stream $DOCKER_USERNAME/py-stream
+      - docker push $DOCKER_USERNAME/py-stream
 install: pip install flake8
 env:
   global:

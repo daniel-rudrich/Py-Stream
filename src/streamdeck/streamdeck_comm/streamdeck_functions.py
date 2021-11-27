@@ -45,30 +45,31 @@ def run_commands(model_streamdeckKey):
         change_to_folder(model_streamdeckKey.change_to_folder.id, model_streamdeckKey.streamdeck.serial_number)
 
 
-def change_to_folder(folder_id, deck_serial_number):
+def change_to_folder(folder_id, serial_number):
     """
     Stop all threads of the old folder and load all the keys of the new active folder
 
     :param folder_id: id of folder
+    :param serial_number: serial number of active stream deck
     """
 
     folder = Folder.objects.get(id=folder_id)
     keys = StreamdeckKey.objects.filter(folder=folder)
 
     global active_folder
-    active_folder[deck_serial_number] = folder_id
+    active_folder[serial_number] = folder_id
 
     if not check_deck_connection(keys[0].streamdeck):
         pass
 
     # stop all threads of the current folder before changing
-    clear_image_threads(deck_serial_number)
+    clear_image_threads(serial_number)
 
-    clear_command_threads(deck_serial_number)
+    clear_command_threads(serial_number)
 
     active_streamdeck = Streamdeck.objects.filter(
-        serial_number=deck_serial_number)[0]
-    deck = decks[deck_serial_number]
+        serial_number=serial_number)[0]
+    deck = decks[serial_number]
 
     # load image that covers the whole deck if existing else
     # load images of all single stream deck keys
@@ -76,7 +77,7 @@ def change_to_folder(folder_id, deck_serial_number):
         # Load all keys onto the streamdeck
         for key in keys:
             update_key_image(deck, key, False)
-        start_animated_images(deck, folder_id, deck_serial_number)
+        start_animated_images(deck, folder_id, serial_number)
     else:
         update_full_deck_image(deck, active_streamdeck.full_deck_image.name)
         pass
@@ -157,17 +158,17 @@ def get_active_keys(folder_id):
     return list_key
 
 
-def get_deck(streamdeck_serialnumber):
+def get_deck(serialnumber):
     """
     Return deck of stream deck key
 
-    :param model_streamdeckKey: stream deck key to find stream deck
+    :param serialnumber: serial number of active stream deck
     :returns stream deck or None if there is no active stream deck corresponding to the key
     """
     global decks
-    key = streamdeck_serialnumber
-    if key in decks:
-        return decks[key]
+    dict_key = serialnumber
+    if dict_key in decks:
+        return decks[dict_key]
     else:
         return None
 

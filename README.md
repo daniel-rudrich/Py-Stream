@@ -1,4 +1,4 @@
-# Linux Stream Deck Application
+# Py Stream
 
 This is an application for the Elgato Stream Deck which functionalities should be comparable to the officially provided Software of Elgato. The key difference is: this software is working under Linux and is fully open-source. Furthermore the GUI is provided via a one-page website which means the stream deck is configurable from other devices in the same network which the stream deck is not directly connected to via USB.
 The GUI communicates with the backend via a REST API, so if you don't like it feel free to build a new one using the REST API.
@@ -71,9 +71,9 @@ The software can also run under **windows**. The installation of the HIDPI backe
 
 First of all you need to install docker on your system see [the official docs](https://docs.docker.com/get-docker/) for installation guides.
 
-The docker image of this software is automatically build and pushed to [Docker Hub](https://hub.docker.com/repository/docker/speksify/streamdeck-application) via the Travis CI and can be pulled with the following command:
+The docker image of this software is automatically build and pushed to [Docker Hub](https://hub.docker.com/repository/docker/speksify/py-stream) via the Travis CI and can be pulled with the following command:
 
-`sudo docker pull speksify/streamdeck-application`
+`sudo docker pull speksify/py-stream`
 
 You can also manually build the docker image from the docker file:
 
@@ -89,7 +89,7 @@ Create a volume so the configuration of all keys can be saved persistent on the 
 
 Then, the docker image can be run:
 
-`Sudo docker run -t -i -p 8000:8000 --privileged -v /dev/bus/usb:/dev/bus/usb  -v streamdeck-db:/usr/local/streamdeck-application/src -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=unix$DISPLAY streamdeck-application`
+`Sudo docker run -t -i -p 8000:8000 --privileged -v /dev/bus/usb:/dev/bus/usb  -v streamdeck-db:/usr/local/py-stream/src -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=unix$DISPLAY py-stream`
 
 **Unfortunately the docker image is not working under windows due to the fact that usb devices cannot be passed through to docker on windows systems. See [this issue](https://github.com/docker/for-win/issues/3926) in the docker repository for reference.**
 

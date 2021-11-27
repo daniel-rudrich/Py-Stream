@@ -23,11 +23,11 @@ RUN apt-get -y install udev
 RUN echo 'SUBSYSTEMS=="usb", ATTRS{idVendor}=="0fd9", GROUP="users", TAG+="uaccess"' >> /etc/udev/rules.d/10-streamdeck.rules
 
 # copy all files into docker
-COPY . /usr/local/streamdeck_application
+COPY . /usr/local/py-stream
 
 #COPY ./10-streamdeck.rules /etc/udev/rules.d/
 
-WORKDIR /usr/local/streamdeck_application
+WORKDIR /usr/local/py-stream
 
 
 # Install pip
@@ -46,12 +46,12 @@ RUN apt -y install nodejs
 RUN apt -y install npm
 
 # Create static files of the GUI
-WORKDIR /usr/local/streamdeck_application/ui
+WORKDIR /usr/local/py-stream/ui
 RUN npm install
 RUN npm run build
 RUN cp -a dist/. ../src/frontend
 
-WORKDIR /usr/local/streamdeck_application/src
+WORKDIR /usr/local/py-stream/src
 
 EXPOSE 8000
 CMD ["python3","manage.py", "runserver", "0.0.0.0:8000", "--noreload"]

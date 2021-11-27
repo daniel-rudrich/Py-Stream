@@ -16,7 +16,7 @@ Before contributing make sure to read the [code of conduct](CODE_OF_CONDUCT.md).
 ## Did you find a bug?
 
 * Ensure you use the latest version of the software
-* Check the [Issue board](https://github.com/daniel-rudrich/streamdeck-application/issues) as maybe the bug was already reported
+* Check the [Issue board](https://github.com/daniel-rudrich/py-stream/issues) as maybe the bug was already reported
 * If the bug is not tracked yet: open a new issue using the bug issue template
 
 ## Did you write a patch that fixes a bug?
@@ -27,7 +27,7 @@ Before contributing make sure to read the [code of conduct](CODE_OF_CONDUCT.md).
 
 ## Would you like to request a feature?
 
-* Check the [Issue board](https://github.com/daniel-rudrich/streamdeck-application/issues) as maybe the feature was already requested
+* Check the [Issue board](https://github.com/daniel-rudrich/py-stream/issues) as maybe the feature was already requested
 * Open a new issue using the feature request issue template
 
 Thanks for all your effort.
