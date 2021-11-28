@@ -25,8 +25,8 @@ search: true
 
 #github stuff
 url: https://daniel-rudrich.github.io/
-baseurl: /py-stream
-repository: daniel-rudrich/py-stream
+baseurl: /Py-Stream
+repository: daniel-rudrich/Py-Stream
 
 # Build settings
 markdown: kramdown
@@ -76,7 +76,7 @@ footer:
   links:
     - label: "GitHub"
       icon: "fab fa-fw fa-github"
-      url: "https://github.com/daniel-rudrich/py-stream"
+      url: "https://github.com/daniel-rudrich/Py-Stream"
 
 defaults:
   # _pages
