@@ -5,7 +5,7 @@ source venv/bin/activate
 
 # Start Django server
 cd src
-if [$1 -eq "network" ]
+if [ $# -gt 0 ] && [ $1 -eq "network" ]
     then
         python manage.py runserver 0.0.0.0:8000
 else

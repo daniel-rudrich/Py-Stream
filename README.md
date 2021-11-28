@@ -87,9 +87,9 @@ Create a volume so the configuration of all keys can be saved persistent on the 
 
 `docker volume create streamdeck-db`
 
-Then, the docker image can be run:
+The following command can be executed in order to run the docker image:
 
-`Sudo docker run -t -i -p 8000:8000 --privileged -v /dev/bus/usb:/dev/bus/usb  -v streamdeck-db:/usr/local/py-stream/src -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=unix$DISPLAY py-stream`
+`Sudo docker run -t -i -p 8000:8000 --privileged -v /dev/bus/usb:/dev/bus/usb  -v streamdeck-db:/usr/local/py-stream/src -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=unix$DISPLAY speksify/py-stream`
 
 **Unfortunately the docker image is not working under windows due to the fact that usb devices cannot be passed through to docker on windows systems. See [this issue](https://github.com/docker/for-win/issues/3926) in the docker repository for reference.**
 
