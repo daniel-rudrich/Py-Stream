@@ -5,7 +5,8 @@ ENV PYTHONBUFFERED 1
 
 RUN apt-get update && \
     apt dist-upgrade -y &&\
-    apt-get -y install sudo 
+    apt-get -y install sudo &&\
+    apt-get install -y apt-transport-https
 
 RUN apt-get -y install python3-dev
 
@@ -20,7 +21,7 @@ RUN apt-get -y install udev
 
 # Install microsoft fonts
 RUN echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | sudo debconf-set-selections
-RUN apt install ttf-mscorefonts-installer
+RUN apt install -y ttf-mscorefonts-installer
 RUN fc-cache -f
 
 # Add udev rule to allow all users non-root acces to the stream deck device
