@@ -18,14 +18,16 @@ RUN apt-get -y install libpangocairo-1.0-0
 # Install udev
 RUN apt-get -y install udev
 
+# Install microsoft fonts
+RUN echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | sudo debconf-set-selections
+RUN apt install ttf-mscorefonts-installer
+RUN fc-cache -f
 
 # Add udev rule to allow all users non-root acces to the stream deck device
 RUN echo 'SUBSYSTEMS=="usb", ATTRS{idVendor}=="0fd9", GROUP="users", TAG+="uaccess"' >> /etc/udev/rules.d/10-streamdeck.rules
 
 # copy all files into docker
 COPY . /usr/local/py-stream
-
-#COPY ./10-streamdeck.rules /etc/udev/rules.d/
 
 WORKDIR /usr/local/py-stream
 

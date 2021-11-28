@@ -27,6 +27,7 @@ sudo udevadm control --reload-rules
 sudo apt-get install python3-venv
 
 # Install microsoft fonts
+sudo echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | sudo debconf-set-selections
 sudo apt install ttf-mscorefonts-installer
 sudo fc-cache -f
 
